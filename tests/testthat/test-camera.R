@@ -32,9 +32,10 @@ test_that("pan_camera works", {
 
   expect_true("layoutAttrs" %in% names(p$x))
 
-  expect_equal(p$x$layoutAttrs[[1]]$scene$camera ,
-               list(eye = list(x = 0, y = 0, z = -2.5),
-                    up = list(x = 0, y = 1, z = 0))
+  expect_equal(
+     p$x$layoutAttrs[[1]]$scene$camera ,
+      list(eye = list(x = 0, y = 0, z = -2.5),
+             up = list(x = 0, y = 1, z = 0))
   )
 
 
