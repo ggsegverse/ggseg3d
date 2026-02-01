@@ -12,7 +12,7 @@ add_glassbrain(
 )
 }
 \arguments{
-\item{p}{plotly object}
+\item{p}{ggseg3d widget object}
 
 \item{hemisphere}{string. hemisphere to plot ("left" or "right")}
 
@@ -21,7 +21,7 @@ add_glassbrain(
 \item{opacity}{numeric. transparency of the glass brain (0-1 float)}
 }
 \value{
-plotly object with glass brain tri-surface mesh
+ggseg3d widget object with glass brain tri-surface mesh
 }
 \description{
 Adds a translucent brain on top of a ggseg3d plot
@@ -29,7 +29,7 @@ to create a point of reference, particularly
 important for sub-cortical plots.
 }
 \examples{
-library(dplyr)
-ggseg3d(atlas="aseg_3d") \%>\%
+
+ggseg3d(atlas = "aseg_3d") |>
    add_glassbrain("left")
 }

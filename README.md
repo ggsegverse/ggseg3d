@@ -73,17 +73,15 @@ vignette("ggseg3d")
 ```
 
 ``` r
-p <- ggseg3d(atlas=dk_3d) %>% 
-  remove_axes() %>% 
+p <- ggseg3d(atlas=dk_3d) |>
   pan_camera("right lateral")
 ```
 
 ![](man/img/README-dk_3d-plot.png)<!-- -->
 
 ``` r
-p <- ggseg3d(atlas=aseg_3d) %>% 
-  add_glassbrain() %>% 
-  remove_axes() %>% 
+p <- ggseg3d(atlas=aseg_3d) |>
+  add_glassbrain() |>
   pan_camera("right lateral")
 ```
 

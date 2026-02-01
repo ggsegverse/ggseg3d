@@ -36,8 +36,10 @@
 #' class(new_atlas)
 #' @seealso [tibble()], [as_tibble()], [tribble()], [print.tbl()], [glimpse()]
 as_ggseg3d_atlas <- function(x, return = FALSE) {
+  if (!is.data.frame(x)) {
+    cli::cli_abort("{.arg x} must be a data.frame, not {.obj_type_friendly {x}}.")
+  }
 
-  stopifnot(is.data.frame(x))
   ret <- TRUE
   if("ggseg_3d" %in% names(x)) x <- unnest(x, cols = c(ggseg_3d))
 
@@ -47,10 +49,10 @@ as_ggseg3d_atlas <- function(x, return = FALSE) {
     miss <- stats::na.omit(necessaries[!miss])
 
     if(!return){
-      stop(paste0("There are missing necessary columns in the data.frame for it to be a ggseg3d_atlas: '",
-                  paste0(as.character(miss), "'", collapse=" '"),
-                  call.=FALSE)
-      )
+      cli::cli_abort(c(
+        "Missing necessary columns for a {.cls ggseg3d_atlas}:",
+        "x" = "Missing: {.field {miss}}"
+      ))
     }else{
       ret <- FALSE
     }

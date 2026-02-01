@@ -1,6 +1,7 @@
 #' Plot 3D brain parcellations
 #'
-#' \code{ggseg3d} plots and returns a plotly mesh3d object.
+#' \code{ggseg3d} creates and returns an interactive Three.js brain mesh visualization.
+#'
 #' @author Athanasia Mowinckel and Didac Piñeiro
 #'
 #' @param .data A data.frame to use for plot aesthetics. Must include a
@@ -18,8 +19,10 @@
 #' @param na.colour String. Either name, hex of RGB for colour of NA in colour.
 #' @param na.alpha Numeric. A number between 0 and 1 to control transparency of NA-regions.
 #' @param show.legend Logical. Toggle legend if colour is numeric.
-#' @param options.legend list of layout changes to colour bar
-#' @param ... additional arguments to \code{\link[plotly]{add_trace}}
+#' @param camera String or list. Camera position preset or custom position.
+#' @param background String. Background color (hex or named color).
+#' @param width Numeric. Widget width in pixels.
+#' @param height Numeric. Widget height in pixels.
 #'
 #' \strong{Available surfaces:}
 #' \itemize{
@@ -28,12 +31,28 @@
 #' \item `white:` white matter surface
 #'  }
 #'
-#' @return a plotly tri-surface mesh plot
+#' \strong{Available camera presets:}
+#' \itemize{
+#' \item `left lateral` or `left_lateral`
+#' \item `left medial` or `left_medial`
+#' \item `right lateral` or `right_lateral`
+#' \item `right medial` or `right_medial`
+#' \item `left superior` or `left_superior`
+#' \item `right superior` or `right_superior`
+#' \item `left inferior` or `left_inferior`
+#' \item `right inferior` or `right_inferior`
+#' \item `left anterior` or `left_anterior`
+#' \item `right anterior` or `right_anterior`
+#' \item `left posterior` or `left_posterior`
+#' \item `right posterior` or `right_posterior`
+#' }
 #'
-#' @importFrom dplyr filter full_join select distinct summarise
-#' @importFrom plotly plot_ly add_trace layout
+#' @return an htmlwidget object for interactive 3D brain visualization
+#'
+#' @importFrom dplyr filter full_join select distinct summarise mutate
 #' @importFrom scales colour_ramp brewer_pal rescale gradient_n_pal
-#' @importFrom tidyr unite_
+#' @importFrom tidyr unite
+#' @importFrom htmlwidgets createWidget sizingPolicy
 #'
 #' @examples
 #' ggseg3d()
@@ -41,102 +60,163 @@
 #' ggseg3d(surface = "inflated")
 #' ggseg3d(show.legend = FALSE)
 #'
-#' @seealso \code{\link[plotly]{plot_ly}}, \code{\link[plotly]{add_trace}}, \code{\link[plotly]{layout}}, the plotly package
-#'
 #' @export
-ggseg3d <- function(.data=NULL, atlas="dk_3d",
-                    surface = "LCBC", hemisphere = c("right","subcort"),
+ggseg3d <- function(.data = NULL, atlas = "dk_3d",
+                    surface = "LCBC", hemisphere = c("right", "subcort"),
                     label = "region", text = NULL, colour = "colour",
                     palette = NULL, na.colour = "darkgrey", na.alpha = 1,
-                    show.legend = TRUE, options.legend = NULL, ...) {
+                    show.legend = TRUE, camera = "right lateral",
+                    background = "#ffffff",
+                    width = NULL, height = NULL) {
 
+  atlas3d <- get_atlas(atlas, surface = surface, hemisphere = hemisphere)
 
-  # Grab the atlas, even if it has been provided as character string
-  atlas3d = get_atlas(atlas,
-                      surface = surface,
-                      hemisphere = hemisphere)
-
-  # If data has been supplied, merge it
-  if(!is.null(.data)){
+  if (!is.null(.data)) {
     atlas3d <- data_merge(.data, atlas3d)
   }
 
   pal.colours <- get_palette(palette)
 
-  # If colour column is numeric, calculate the gradient
-  if(is.numeric(unlist(atlas3d[,colour]))){
+  is_numeric_colour <- is.numeric(unlist(atlas3d[, colour]))
 
-    if(is.null(names(palette))){
-      pal.colours$values <- seq(min(atlas3d[,colour], na.rm = TRUE),
-                                max(atlas3d[,colour], na.rm = TRUE),
-                                length.out = nrow(pal.colours))
+  if (is_numeric_colour) {
+    data_min <- min(atlas3d[, colour], na.rm = TRUE)
+    data_max <- max(atlas3d[, colour], na.rm = TRUE)
+
+    if (data_min == data_max) {
+      atlas3d$new_col <- pal.colours$orig[1]
+      fill <- "new_col"
+    } else {
+      if (is.null(names(palette))) {
+        pal.colours$values <- seq(data_min, data_max, length.out = nrow(pal.colours))
+      }
+      atlas3d$new_col <- gradient_n_pal(pal.colours$orig, pal.colours$values, "Lab")(
+        unlist(atlas3d[, colour]))
+      fill <- "new_col"
     }
-
-    atlas3d$new_col = gradient_n_pal(pal.colours$orig, pal.colours$values,"Lab")(
-      unlist(atlas3d[,colour]))
-    fill = "new_col"
-
-  }else{
-    fill = colour
+  } else {
+    fill <- colour
   }
 
-  # initiate plot
-  p = plotly::plot_ly()
+  meshes <- list()
+  for (tt in seq_len(nrow(atlas3d))) {
+    col <- rep(unlist(atlas3d[tt, fill]), nrow(atlas3d$mesh[[tt]]$faces))
+    col <- ifelse(is.na(col), na.colour, col)
+    col <- unname(vapply(col, function(c) {
+      if (grepl("^#", c)) c else col2hex(c)
+    }, character(1)))
 
-  # add one trace per file inputed
-  for(tt in 1:nrow(atlas3d)){
+    op <- unname(ifelse(is.na(unlist(atlas3d[tt, fill])), na.alpha, 1))
 
-    col = rep(unlist(atlas3d[tt, fill]), nrow(atlas3d$mesh[[tt]]$faces))
-
-    col = ifelse(is.na(col), na.colour, col)
-
-    op = ifelse(is.na(unlist(atlas3d[tt, fill])), na.alpha, 1)
-
-    txt = if(is.null(text)){
-      text
-    }else{
+    hover_text <- if (is.null(text)) {
+      NULL
+    } else {
       paste0(text, ": ", unlist(atlas3d[tt, text]))
     }
 
-    p = plotly::add_trace(p,
-                          x = atlas3d$mesh[[tt]]$vertices$x,
-                          y = atlas3d$mesh[[tt]]$vertices$y,
-                          z = atlas3d$mesh[[tt]]$vertices$z,
-
-                          i = atlas3d$mesh[[tt]]$faces$i-1,
-                          j = atlas3d$mesh[[tt]]$faces$j-1,
-                          k = atlas3d$mesh[[tt]]$faces$k-1,
-
-                          facecolor = col,
-                          type = "mesh3d",
-                          text = txt,
-                          showscale = FALSE,
-                          opacity = op,
-                          name = unlist(atlas3d[tt, label]),
-                          ...
+    meshes[[tt]] <- list(
+      name = as.character(unlist(atlas3d[tt, label])),
+      vertices = list(
+        x = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$x)),
+        y = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$y)),
+        z = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$z))
+      ),
+      faces = list(
+        i = unname(as.integer(atlas3d$mesh[[tt]]$faces$i - 1)),
+        j = unname(as.integer(atlas3d$mesh[[tt]]$faces$j - 1)),
+        k = unname(as.integer(atlas3d$mesh[[tt]]$faces$k - 1))
+      ),
+      colors = col,
+      colorMode = "facecolor",
+      opacity = op,
+      hoverText = hover_text
     )
   }
 
-  # work around to get legend
-  if(show.legend & is.numeric(unlist(atlas3d[,colour]))){
+  legend_data <- NULL
+  if (show.legend) {
+    if (is_numeric_colour && data_min != data_max) {
+      if (!is.null(names(palette))) {
+        bp_min <- min(pal.colours$values)
+        bp_max <- max(pal.colours$values)
+        legend_data <- list(
+          type = "continuous",
+          title = colour,
+          min = bp_min,
+          max = bp_max,
+          colors = unname(sapply(pal.colours$orig, col2hex)),
+          breakpoints = unname(pal.colours$values)
+        )
+      } else {
+        colorbar_values <- seq(data_min, data_max, length.out = 10)
+        colorbar_colors <- gradient_n_pal(pal.colours$orig, pal.colours$values, "Lab")(colorbar_values)
 
-    dt_leg <- dplyr::mutate(pal.colours,
-                            x = 0, y = 0, z = 0)
+        legend_data <- list(
+          type = "continuous",
+          title = colour,
+          min = data_min,
+          max = data_max,
+          colors = unname(colorbar_colors),
+          values = unname(colorbar_values)
+        )
+      }
+    } else if (!is_numeric_colour) {
+      unique_values <- unique(unlist(atlas3d[, colour]))
+      unique_values <- unique_values[!is.na(unique_values)]
+      unique_labels <- unique(unlist(atlas3d[, label]))
+      unique_labels <- unique_labels[!is.na(unique_labels)]
 
-    p <- plotly::add_trace(p, data = dt_leg,
-                          x = ~ x, y = ~ y, z = ~ z,
+      if (length(unique_values) <= 50) {
+        color_label_map <- stats::setNames(
+          as.character(unlist(atlas3d[, colour])),
+          as.character(unlist(atlas3d[, label]))
+        )
+        color_label_map <- color_label_map[!is.na(names(color_label_map))]
+        color_label_map <- color_label_map[!duplicated(names(color_label_map))]
 
-                          intensity =  ~ values,
-                          colorscale =  unname(dt_leg[,c("norm", "hex")]),
-                          type = "mesh3d",
-                          colorbar = options.legend
-    )
+        legend_data <- list(
+          type = "discrete",
+          title = label,
+          labels = unname(names(color_label_map)),
+          colors = unname(color_label_map)
+        )
+      }
+    }
   }
 
-  p
+  options <- list(
+    camera = camera,
+    showLegend = show.legend,
+    backgroundColor = background
+  )
+
+  x <- list(
+    meshes = meshes,
+    options = options,
+    colorbar = legend_data
+  )
+
+  htmlwidgets::createWidget(
+    name = "ggseg3d",
+    x = x,
+    width = width,
+    height = height,
+    package = "ggseg3d",
+    sizingPolicy = htmlwidgets::sizingPolicy(
+      defaultWidth = 600,
+      defaultHeight = 500,
+      viewer.defaultHeight = 500,
+      viewer.defaultWidth = 600,
+      browser.defaultHeight = 500,
+      browser.defaultWidth = 600,
+      knitr.defaultWidth = 600,
+      knitr.defaultHeight = 500,
+      padding = 0,
+      browser.fill = TRUE
+    )
+  )
 }
 
-## quiets concerns of R CMD check
-if(getRversion() >= "2.15.1"){
+if (getRversion() >= "2.15.1") {
   utils::globalVariables(c("tt", "surf", "mesh", "new_col"))
 }

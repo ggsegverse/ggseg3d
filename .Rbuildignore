@@ -18,3 +18,7 @@ vignettes
 ^\.github$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
+.claude/
+^node_modules$
+^package\.json$
+^package-lock\.json$

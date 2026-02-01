@@ -1,10 +1,10 @@
 library(tidyverse)
 
 # DKT ----
-dkt <- dkt %>%
-  unnest(ggseg) %>%
+dkt <- dkt |>
+  unnest(ggseg) |>
   select(-.pos)
- # mutate(.pos = list(x = 1))
+# mutate(.pos = list(x = 1))
 
 # for(i in 1:nrow(dkt)){
 #   dkt$.pos[[i]] = list(
@@ -27,18 +27,17 @@ usethis::use_data(dkt, internal = FALSE, overwrite = TRUE)
 
 
 # aseg ----
-aseg <- aseg %>%
-  unnest(ggseg) %>%
+aseg <- aseg |>
+  unnest(ggseg) |>
   mutate(.pos = list(x = 1))
 
-for(i in 1:nrow(aseg)){
+for (i in 1:nrow(aseg)) {
   aseg$.pos[[i]] = list(
-    dispersed = list(x = list(breaks = c(9.2, 11.4),
-                              labels = c("left","right")),
-                     y = list(breaks = NULL,
-                              labels = NULL),
-                     labs = list(x = "hemisphere",
-                                 y = NULL))
+    dispersed = list(
+      x = list(breaks = c(9.2, 11.4), labels = c("left", "right")),
+      y = list(breaks = NULL, labels = NULL),
+      labs = list(x = "hemisphere", y = NULL)
+    )
   )
 }
 aseg <- as_ggseg_atlas(aseg)

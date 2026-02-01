@@ -1,35 +1,36 @@
 Package: ggseg3d
 Title: Tri-Surface Mesh Plots for Brain Atlases
-Version: 1.6.3
-Authors@R: c(person("Athanasia Mo", "Mowinckel", 
-                    email = "a.m.mowinckel@psykologi.uio.no", 
+Version: 2.0.0
+Authors@R: c(person("Athanasia Mo", "Mowinckel",
+                    email = "a.m.mowinckel@psykologi.uio.no",
                     role = c("aut", "cre"),
                     comment = c(ORCID = "0000-0002-5756-0223")),
-            person("Didac", "Vidal-Piñeiro", 
-                    email = "d.v.pineiro@psykologi.uio.no", 
+            person("Didac", "Vidal-Piñeiro",
+                    email = "d.v.pineiro@psykologi.uio.no",
                     role = c("aut"),
                     comment = c(ORCID = "0000-0001-9997-9156")))
-Description: Mainly contains a plotting function ggseg3d(), 
-    and data of two standard brain atlases (Desikan-Killiany and aseg). 
+Description: Mainly contains a plotting function ggseg3d(),
+    and data of two standard brain atlases (Desikan-Killiany and aseg).
     By far, the largest bit of the package is the data for each of the atlases.
     The functions and data enable users to plot tri-surface mesh plots of
     brain atlases, and customise these by projecting colours onto the brain
-    segments based on values in their own data sets. Functions are wrappers
-    for 'plotly'. Mowinckel & Vidal-Piñeiro (2020)
+    segments based on values in their own data sets. Uses 'Three.js' for
+    WebGL-based 3D rendering via 'htmlwidgets'. Mowinckel & Vidal-Piñeiro (2020)
     <doi:10.1177/2515245920928009>.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.1.1
-Depends: R (>= 2.10)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.1)
 LazyData: true
 LazyDataCompression: xz
-Imports: 
+Imports:
+    cli,
     dplyr,
-    plotly,
-    magrittr,
+    htmlwidgets,
+    rlang,
     scales,
     tidyr,
-    utils,
+    webshot2
 Suggests:
     knitr,
     rmarkdown,
@@ -37,6 +38,7 @@ Suggests:
     testthat (>= 2.1.0),
     devtools,
     processx,
+    shiny,
     spelling
 URL: https://github.com/ggseg/ggseg3d/
 BugReports: https://github.com/ggseg/ggseg3d/issues/

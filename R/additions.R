@@ -4,136 +4,181 @@
 #' to create a point of reference, particularly
 #' important for sub-cortical plots.
 #'
-#' @param p plotly object
+#' @param p ggseg3d widget object
 #' @param hemisphere string. hemisphere to plot ("left" or "right")
 #' @param colour string. colour to give the glass brain
 #' @param opacity numeric. transparency of the glass brain (0-1 float)
 #'
-#' @return plotly object with glass brain tri-surface mesh
+#' @return ggseg3d widget object with glass brain tri-surface mesh
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' ggseg3d(atlas="aseg_3d") %>%
+#'
+#' ggseg3d(atlas = "aseg_3d") |>
 #'    add_glassbrain("left")
-add_glassbrain <- function(p,
-                           hemisphere = c("left", "right"),
-                           colour = "#cecece",
-                           opacity=.3){
+add_glassbrain <- function(
+  p,
+  hemisphere = c("left", "right"),
+  colour = "#cecece",
+  opacity = 0.3
+) {
+  check_ggseg3d(p)
 
-  cortex <- dplyr::filter(cortex_3d,
-                          hemi %in% hemisphere)
+  cortex <- dplyr::filter(cortex_3d, hemi %in% hemisphere)
   cortex <- tidyr::unnest(cortex, ggseg_3d)
 
-  colour <- if(grepl("^#", colour)){
+  colour <- if (grepl("^#", colour)) {
     colour
-  }else{
+  } else {
     col2hex(colour)
   }
 
-  # add one trace per file inputed
-  for(tt in 1:nrow(cortex)){
+  new_meshes <- list()
+  for (tt in seq_len(nrow(cortex))) {
+    n_faces <- length(cortex$mesh[[tt]]$it[1, ])
+    col <- rep(colour, n_faces)
 
-    col = rep(colour, length(cortex$mesh[[tt]]$it[1,]))
-
-    p = plotly::add_trace(
-      p,
-      x = cortex$mesh[[tt]]$vb["xpts",],
-      y = cortex$mesh[[tt]]$vb["ypts",],
-      z = cortex$mesh[[tt]]$vb["zpts",],
-
-      i = cortex$mesh[[tt]]$it[1,]-1,
-      j = cortex$mesh[[tt]]$it[2,]-1,
-      k = cortex$mesh[[tt]]$it[3,]-1,
-
-      facecolor = col,
-      type = "mesh3d",
-      showscale = FALSE,
+    new_meshes[[tt]] <- list(
       name = "cerebral cortex",
-      opacity = opacity
+      vertices = list(
+        x = unname(as.numeric(cortex$mesh[[tt]]$vb["xpts", ])),
+        y = unname(as.numeric(cortex$mesh[[tt]]$vb["ypts", ])),
+        z = unname(as.numeric(cortex$mesh[[tt]]$vb["zpts", ]))
+      ),
+      faces = list(
+        i = unname(as.integer(cortex$mesh[[tt]]$it[1, ] - 1)),
+        j = unname(as.integer(cortex$mesh[[tt]]$it[2, ] - 1)),
+        k = unname(as.integer(cortex$mesh[[tt]]$it[3, ] - 1))
+      ),
+      colors = unname(col),
+      colorMode = "facecolor",
+      opacity = opacity,
+      hoverText = NULL
     )
   }
 
+  p$x$meshes <- c(p$x$meshes, new_meshes)
   p
 }
 
 #' Pan camera position of ggseg3d plot
 #'
-#' The default position for plotly
-#' mesh plots are not satisfying for
-#' brain plots. This convenience function
-#' can pan the camera to lateral or medial
-#' view, or to custom made views if you are
-#' plotly savvy.
+#' Sets the camera position for a ggseg3d widget
+#' to standard anatomical views or custom positions.
 #'
-#' @param p plotly object
-#' @param camera string or list.
-#' @param aspectratio camera aspect ratio
+#' @param p ggseg3d widget object
+#' @param camera string or list. Camera position preset name or custom eye position.
 #'
-#' @return plotly object
+#' \strong{Available camera presets:}
+#' \itemize{
+#' \item `left lateral` or `left_lateral`
+#' \item `left medial` or `left_medial`
+#' \item `right lateral` or `right_lateral`
+#' \item `right medial` or `right_medial`
+#' \item `left superior` or `left_superior`
+#' \item `right superior` or `right_superior`
+#' \item `left inferior` or `left_inferior`
+#' \item `right inferior` or `right_inferior`
+#' \item `left anterior` or `left_anterior`
+#' \item `right anterior` or `right_anterior`
+#' \item `left posterior` or `left_posterior`
+#' \item `right posterior` or `right_posterior`
+#' }
+#'
+#' @return ggseg3d widget object with updated camera
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' ggseg3d() %>%
+#'
+#' ggseg3d() |>
 #'    pan_camera("right lateral")
-pan_camera <- function(p, camera, aspectratio = 1){
-
-  stopifnot(is.character(camera)|is.list(camera))
-
-  views = if(class(camera) != "list"){
-    camera <- match.arg(camera, c("left lateral", "left medial",
-                                  "right lateral", "right medial"))
-    switch(camera,
-           "left lateral" = list(eye = list(x = -2.5, y = 0, z = 0)),
-           "left medial" = list(eye = list(x = 2, y = 0, z = 0)),
-           "right lateral" = list(eye = list(x = 2, y = 0, z = 0)),
-           "right medial" = list(eye = list(x = -2.5, y = 0, z = 0))
+pan_camera <- function(p, camera) {
+  check_ggseg3d(p)
+  if (!is.character(camera) && !is.list(camera)) {
+    cli::cli_abort(
+      "{.arg camera} must be a character string or list, not {.obj_type_friendly {camera}}."
     )
-  }else{
-    camera
   }
 
-  # create final plotly plot
-  plotly::layout(p,
-                 scene = list(camera = views,
-                              aspectratio = aspectratio)
-  )
+  p$x$options$camera <- camera
+  p
 }
 
 
-#' Remove axis information from ggseg3d plot
+#' Set background color of ggseg3d plot
 #'
-#' When publishing data visualisation in 3d mesh plots
-#' in general the axes are not important, at least
-#' they are not for ggseg3d, where the axis values
-#' are arbitrary.
+#' Changes the background color of a ggseg3d widget.
 #'
-#' @param p plotly object
+#' @param p ggseg3d widget object
+#' @param colour string. Background color (hex or named color)
 #'
-#' @return plotly object without axes
+#' @return ggseg3d widget object with updated background
 #' @export
 #'
 #' @examples
-#' library(magrittr)
-#' ggseg3d() %>%
-#'    remove_axes()
-remove_axes <- function(p){
-  ax <- list(
-    title = "",
-    zeroline = FALSE,
-    showline = FALSE,
-    showticklabels = FALSE,
-    showgrid = FALSE,
-    showbackground = FALSE
-  )
+#'
+#' ggseg3d() |>
+#'    set_background("black")
+set_background <- function(p, colour = "#ffffff") {
+  check_ggseg3d(p)
 
-  plotly::layout(p,
-                 scene = list(
-                   xaxis=ax,
-                   yaxis=ax,
-                   zaxis=ax,
-                   plot_bgcolor='transparent',
-                   paper_bgcolor='transparent'))
+  if (!grepl("^#", colour)) {
+    colour <- col2hex(colour)
+  }
+
+  p$x$options$backgroundColor <- colour
+  p
 }
 
+
+#' Save ggseg3d widget as image
+#'
+#' Takes a screenshot of a ggseg3d widget and saves it as a PNG image.
+#' Requires a Chrome-based browser to be installed.
+#'
+#' @param p ggseg3d widget object
+#' @param file string. Output file path (should end in .png)
+#' @param width numeric. Image width in pixels (default: 600)
+#' @param height numeric. Image height in pixels (default: 500)
+#' @param delay numeric. Seconds to wait for widget to render before capture (default: 1)
+#' @param zoom numeric. Zoom factor for higher resolution (default: 2)
+#' @param ... Additional arguments passed to webshot2::webshot
+#'
+#' @return The file path (invisibly)
+#' @export
+#' @importFrom webshot2 webshot
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |>
+#'   pan_camera("left lateral") |>
+#'   snapshot_brain("brain.png")
+#' }
+snapshot_brain <- function(
+  p,
+  file,
+  width = 600,
+  height = 500,
+  delay = 1,
+  zoom = 2,
+  ...
+) {
+  check_ggseg3d(p)
+
+  tmpfile <- tempfile(fileext = ".html")
+  on.exit(unlink(tmpfile), add = TRUE)
+
+  htmlwidgets::saveWidget(p, tmpfile, selfcontained = TRUE)
+
+  webshot2::webshot(
+    url = tmpfile,
+    file = file,
+    vwidth = width,
+    vheight = height,
+    delay = delay,
+    zoom = zoom,
+    ...
+  )
+
+  invisible(file)
+}

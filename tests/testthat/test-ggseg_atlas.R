@@ -10,7 +10,7 @@ tt$mesh[[1]] = list(it=array(0, dim=3),vb=array(0, dim=3))
 test_that("check that ggseg3d_atlas is correct", {
 
   expect_error(as_ggseg3d_atlas(tt[,-1]),
-               "missing necessary columns")
+               "Missing")
   expect_error(as_ggseg3d_atlas(),
                "is missing, with no default")
 

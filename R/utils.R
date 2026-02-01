@@ -1,4 +1,10 @@
 
+check_ggseg3d <- function(p, arg = rlang::caller_arg(p), call = rlang::caller_env()) {
+  if (!inherits(p, "ggseg3d")) {
+    cli::cli_abort("{.arg {arg}} must be a {.cls ggseg3d} widget, not {.obj_type_friendly {p}}.", call = call)
+  }
+}
+
 data_merge <- function(.data, atlas3d){
 
   # Find columns they have in common
@@ -12,13 +18,12 @@ data_merge <- function(.data, atlas3d){
   errs <- dplyr::filter(atlas3d, unlist(lapply(atlas3d$mesh, is.null)))
   errs <- dplyr::select(errs, !!cols)
   errs <- dplyr::distinct(errs)
-  errs <- tidyr::unite_(errs, "tt", cols, sep = " - ")
+
+  errs <- tidyr::unite(errs, "tt", dplyr::all_of(cols), sep = " - ")
   errs <- dplyr::summarise(errs, value = paste0(tt, collapse = ", "))
 
   if(errs != ""){
-    warning(paste("Some data is not merged properly into the atlas. Check for spelling mistakes in:",
-                  errs$value))
-
+    cli::cli_warn("Some data is not merged properly into the atlas. Check for spelling mistakes in: {errs$value}")
     atlas3d = dplyr::filter(atlas3d ,
                             !unlist(lapply(atlas3d$mesh, is.null)))
   }
@@ -46,15 +51,15 @@ get_atlas <- function(atlas, surface, hemisphere){
   }
 
   if(!any(grepl("3d", atlas3d$atlas))){
-    stop(paste0("This is not a 3d atlas, did you mean ", atlas3d$atlas[1], "_3d?"))
+    cli::cli_abort("This is not a 3d atlas, did you mean {.val {paste0(atlas3d$atlas[1], '_3d')}}?")
   }
 
   if(!any(atlas3d$surf %in% surface)){
-    stop(paste0("There is no surface '",surface,"' in this atlas." ))
+    cli::cli_abort("There is no surface {.val {surface}} in this atlas.")
   }
 
   if(!any(atlas3d$hemi %in% hemisphere)){
-    stop(paste0("There is no data for the ",hemisphere," hemisphere in this atlas." ))
+    cli::cli_abort("There is no data for the {.val {hemisphere}} hemisphere in this atlas.")
   }
 
 
@@ -71,7 +76,7 @@ get_atlas <- function(atlas, surface, hemisphere){
 get_palette <- function(palette){
 
   if(is.null(palette)){
-    palette = c("skyblue", "dodgerblue")
+    palette = c("#440154", "#21918c", "#fde725")
   }
 
   if(!is.null(names(palette))){

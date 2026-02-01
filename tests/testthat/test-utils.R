@@ -20,11 +20,11 @@ test_that("get_palette works", {
   )
 
   expect_equal(get_palette(NULL),
-               structure(list(values = c(0, 1),
-                              norm = c(0, 1),
-                              orig = c("skyblue", "dodgerblue"),
-                              hex = c("#87CEEB", "#1E90FF")),
-                         row.names = c(NA, -2L),
+               structure(list(values = c(0, 0.5, 1),
+                              norm = c(0, 0.5, 1),
+                              orig = c("#440154", "#21918c", "#fde725"),
+                              hex = c("#440154", "#21918C", "#FDE725")),
+                         row.names = c(NA, -3L),
                          class = "data.frame")
   )
 
