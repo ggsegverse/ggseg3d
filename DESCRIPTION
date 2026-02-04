@@ -20,13 +20,14 @@ Description: Mainly contains a plotting function ggseg3d(),
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.3
-Depends: R (>= 4.1)
-LazyData: true
-LazyDataCompression: xz
+Depends:
+    R (>= 4.1)
 Imports:
     cli,
     dplyr,
+    ggseg.formats,
     htmlwidgets,
+    lifecycle,
     rlang,
     scales,
     tidyr,
@@ -37,9 +38,11 @@ Suggests:
     covr,
     testthat (>= 2.1.0),
     devtools,
+    ggsegExtra,
+    lintr,
     processx,
     shiny,
     spelling
-URL: https://github.com/ggseg/ggseg3d/
-BugReports: https://github.com/ggseg/ggseg3d/issues/
+URL: https://github.com/ggseg/ggseg3d/, https://github.com/ggseg/ggseg3d
+BugReports: https://github.com/ggseg/ggseg3d/issues
 Language: en-US
