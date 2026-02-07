@@ -1,6 +1,9 @@
 Athanasia
 Brainder
+centerline
+chainable
 CMD
+Colormap
 Colours
 Desikan
 Fischl
@@ -20,9 +23,12 @@ annot
 aparc
 aseg
 behaviour
+colorbar
 colorlut
 colour
 colourbar
+coloured
+colouring
 colours
 customise
 datlas
@@ -47,6 +53,8 @@ mimmick
 parcellations
 pial
 plotly
+png
+rds
 readr
 rh
 segmentations
@@ -57,8 +65,10 @@ tibble
 tibbles
 tidyr
 tidyverse
+tractography
 tri
 tribble
 visualisation
 visualise
+webshot
 www

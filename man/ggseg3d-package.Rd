@@ -16,12 +16,16 @@ This package contains data from various brain parcellations,
 with convenient functions to inspect the results directly on
 a brain-plot using interactive 3D mesh visualizations powered
 by Three.js via htmlwidgets.
+
+The package uses `brain_atlas` objects from ggseg.formats
+that contain 3D vertex mappings.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/ggseg/ggseg3d/}
-  \item Report bugs at \url{https://github.com/ggseg/ggseg3d/issues/}
+  \item \url{https://github.com/ggseg/ggseg3d}
+  \item Report bugs at \url{https://github.com/ggseg/ggseg3d/issues}
 }
 
 }

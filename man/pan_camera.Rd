@@ -9,7 +9,8 @@ pan_camera(p, camera)
 \arguments{
 \item{p}{ggseg3d widget object}
 
-\item{camera}{string or list. Camera position preset name or custom eye position.
+\item{camera}{string or list. Camera position preset name or custom eye
+  position.
 
 \strong{Available camera presets:}
 \itemize{
@@ -35,7 +36,8 @@ Sets the camera position for a ggseg3d widget
 to standard anatomical views or custom positions.
 }
 \examples{
-
+\dontrun{
 ggseg3d() |>
-   pan_camera("right lateral")
+  pan_camera("right lateral")
+}
 }

@@ -6,23 +6,19 @@
 \usage{
 get_brain_mesh(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "white", "pial"),
-  subject = "fsaverage5"
+  surface = c("inflated", "semi-inflated", "white", "pial")
 )
 }
 \arguments{
 \item{hemisphere}{"lh" or "rh"}
 
-\item{surface}{Surface type: "inflated", "white", "pial"}
-
-\item{subject}{FreeSurfer subject (default "fsaverage5")}
+\item{surface}{Surface type: "inflated", "semi-inflated", "white", "pial"}
 }
 \value{
-list with vertices (data.frame with x, y, z) and faces (data.frame with i, j, k),
-        or NULL if mesh not found
+list with vertices (data.frame with x, y, z) and faces
+  (data.frame with i, j, k), or NULL if mesh not found
 }
 \description{
-Retrieves a brain surface mesh for the specified hemisphere and surface type.
-If no mesh is found, returns NULL with a message.
+Retrieves a brain surface mesh for the specified hemisphere and surface type
+from the internal brain_meshes data.
 }
-\keyword{internal}

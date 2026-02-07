@@ -33,7 +33,10 @@ HTMLWidgets.widget({
         renderer = new BrainMeshRenderer(container, {
           backgroundColor: options.backgroundColor || '#ffffff',
           antialias: true,
-          enableDamping: true
+          enableDamping: true,
+          flatShading: options.flatShading || false,
+          orthographic: options.orthographic || false,
+          frustumSize: options.frustumSize || null
         });
 
         if (x.meshes && x.meshes.length > 0) {
@@ -46,13 +49,18 @@ HTMLWidgets.widget({
               colors: meshData.colors,
               colorMode: meshData.colorMode || 'facecolor',
               opacity: meshData.opacity !== undefined ? meshData.opacity : 1.0,
-              hoverText: meshData.hoverText || null
+              hoverText: meshData.hoverText || null,
+              vertexLabels: meshData.vertexLabels || null
             });
           }
         }
 
         if (options.camera) {
           renderer.setCamera(options.camera);
+        }
+
+        if (options.orthographic && options.autoFit) {
+          renderer.fitToMeshes();
         }
 
         tooltip = new TooltipManager(container);

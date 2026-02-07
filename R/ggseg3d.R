@@ -1,28 +1,51 @@
 #' Plot 3D brain parcellations
 #'
-#' \code{ggseg3d} creates and returns an interactive Three.js brain mesh visualization.
+#' `ggseg3d` creates and returns an interactive Three.js brain mesh
+#' visualization.
 #'
 #' @author Athanasia Mowinckel and Didac Piñeiro
 #'
 #' @param .data A data.frame to use for plot aesthetics. Must include a
-#' column called "region" corresponding to regions.
-#' @param atlas Either a string with the name of a 3d atlas to use.
-#' @param hemisphere String. Hemisphere to plot. Either "left" or "right"[default],
-#' can also be "subcort".
-#' @param surface String. Which surface to plot. Either "pial","white", or "inflated"[default]
-#' @param label String. Quoted name of column in atlas/data that should be used to name traces
-#' @param text String. Quoted name of column in atlas/data that should be added as extra
-#' information in the hover text.
-#' @param colour String. Quoted name of column from which colour should be supplied
-#' @param palette String. Vector of colour names or HEX colours. Can also be a named
-#' numeric vector, with colours as names, and breakpoint for that colour as the value
-#' @param na.colour String. Either name, hex of RGB for colour of NA in colour.
-#' @param na.alpha Numeric. A number between 0 and 1 to control transparency of NA-regions.
-#' @param show.legend Logical. Toggle legend if colour is numeric.
-#' @param camera String or list. Camera position preset or custom position.
-#' @param background String. Background color (hex or named color).
-#' @param width Numeric. Widget width in pixels.
-#' @param height Numeric. Widget height in pixels.
+#'   column called "region" corresponding to regions.
+#' @param atlas Either a string with the name of a 3d atlas to use, or a
+#'   `brain_atlas` object containing 3D vertex mappings.
+#' @param hemisphere String. Hemisphere to plot. Either "left" or
+#'   "right"
+#'
+#'
+#' , can also be "subcort".
+#' @param surface String. Which surface to plot. Either "pial", "white",
+#'
+#'
+#'
+#'   or "inflated"
+#'
+#'
+#' .
+#' @param label String. Quoted name of column in atlas/data that should
+#'   be used to name traces
+#' @param text String. Quoted name of column in atlas/data that should be
+#'   added as extra information in the hover text.
+#' @param colour String. Quoted name of column from which colour should
+#'   be supplied
+#' @param palette String. Vector of colour names or HEX colours. Can also
+#'   be a named numeric vector, with colours as names, and breakpoint for
+#'   that colour as the value
+#' @param na_colour String. Either name, hex of RGB for colour of NA in
+#'   colour.
+#' @param na_alpha Numeric. A number between 0 and 1 to control
+#'   transparency of NA-regions.
+#' @param edge_by String. Column name to use for computing region boundary
+#'   edges. If provided, edges are drawn between regions with different
+#'
+#'
+#'   values in this column, allowing edge boundaries independent of display
+#'   colours. When set, edges are displayed by default (black, width 1).
+#'   Use [set_edges()] to customise appearance.
+#' @param tract_color String. How to colour tract atlases: "palette"
+#'   (default, use atlas palette) or "orientation" (direction-based RGB
+#'   where R=left-right, G=anterior-posterior, B=superior-inferior).
+#'   Only applies to tract atlases.
 #'
 #' \strong{Available surfaces:}
 #' \itemize{
@@ -31,192 +54,154 @@
 #' \item `white:` white matter surface
 #'  }
 #'
-#' \strong{Available camera presets:}
-#' \itemize{
-#' \item `left lateral` or `left_lateral`
-#' \item `left medial` or `left_medial`
-#' \item `right lateral` or `right_lateral`
-#' \item `right medial` or `right_medial`
-#' \item `left superior` or `left_superior`
-#' \item `right superior` or `right_superior`
-#' \item `left inferior` or `left_inferior`
-#' \item `right inferior` or `right_inferior`
-#' \item `left anterior` or `left_anterior`
-#' \item `right anterior` or `right_anterior`
-#' \item `left posterior` or `left_posterior`
-#' \item `right posterior` or `right_posterior`
-#' }
-#'
 #' @return an htmlwidget object for interactive 3D brain visualization
+#'
+#' @seealso [pan_camera()] for camera position, [set_background()] for
+#'   background colour, [set_legend()] for legend visibility
 #'
 #' @importFrom dplyr filter full_join select distinct summarise mutate
 #' @importFrom scales colour_ramp brewer_pal rescale gradient_n_pal
 #' @importFrom tidyr unite
 #' @importFrom htmlwidgets createWidget sizingPolicy
+#' @importFrom lifecycle deprecate_warn
+#' @importFrom rlang %||%
 #'
 #' @examples
+#' \dontrun{
 #' ggseg3d()
-#' ggseg3d(hemisphere = "left")
-#' ggseg3d(surface = "inflated")
-#' ggseg3d(show.legend = FALSE)
+#' ggseg3d(hemisphere = "left") |> pan_camera("left lateral")
+#' ggseg3d() |> set_legend(FALSE)
+#' ggseg3d() |> set_background("black")
+#' }
 #'
 #' @export
-ggseg3d <- function(.data = NULL, atlas = "dk_3d",
-                    surface = "LCBC", hemisphere = c("right", "subcort"),
-                    label = "region", text = NULL, colour = "colour",
-                    palette = NULL, na.colour = "darkgrey", na.alpha = 1,
-                    show.legend = TRUE, camera = "right lateral",
-                    background = "#ffffff",
-                    width = NULL, height = NULL) {
+ggseg3d <- function(
+    .data = NULL,
+    atlas = "dk",
+    surface = "LCBC",
+    hemisphere = c("right", "subcort"),
+    label = "region",
+    text = NULL,
+    colour = "colour",
+    palette = NULL,
+    na_colour = "darkgrey",
+    na_alpha = 1,
+    edge_by = NULL,
+    tract_color = c("palette", "orientation")) {
+  tract_color <- match.arg(tract_color)
+  atlas_obj <- if (is.character(atlas)) get(atlas) else atlas
 
-  atlas3d <- get_atlas(atlas, surface = surface, hemisphere = hemisphere)
-
-  if (!is.null(.data)) {
-    atlas3d <- data_merge(.data, atlas3d)
+  if (!is_unified_atlas(atlas_obj)) {
+    cli::cli_abort(c(
+      "Atlas must be a {.cls brain_atlas} object with 3D data.",
+      "i" = "Use atlases from {.pkg ggseg.formats}.",
+      "i" = "Create atlases with {.fn ggsegExtra::make_brain_atlas}."
+    ))
   }
 
-  pal.colours <- get_palette(palette)
+  unified_surface <- if (surface == "LCBC") "inflated" else surface
 
-  is_numeric_colour <- is.numeric(unlist(atlas3d[, colour]))
-
-  if (is_numeric_colour) {
-    data_min <- min(atlas3d[, colour], na.rm = TRUE)
-    data_max <- max(atlas3d[, colour], na.rm = TRUE)
-
-    if (data_min == data_max) {
-      atlas3d$new_col <- pal.colours$orig[1]
-      fill <- "new_col"
-    } else {
-      if (is.null(names(palette))) {
-        pal.colours$values <- seq(data_min, data_max, length.out = nrow(pal.colours))
-      }
-      atlas3d$new_col <- gradient_n_pal(pal.colours$orig, pal.colours$values, "Lab")(
-        unlist(atlas3d[, colour]))
-      fill <- "new_col"
-    }
-  } else {
-    fill <- colour
-  }
-
-  meshes <- list()
-  for (tt in seq_len(nrow(atlas3d))) {
-    col <- rep(unlist(atlas3d[tt, fill]), nrow(atlas3d$mesh[[tt]]$faces))
-    col <- ifelse(is.na(col), na.colour, col)
-    col <- unname(vapply(col, function(c) {
-      if (grepl("^#", c)) c else col2hex(c)
-    }, character(1)))
-
-    op <- unname(ifelse(is.na(unlist(atlas3d[tt, fill])), na.alpha, 1))
-
-    hover_text <- if (is.null(text)) {
-      NULL
-    } else {
-      paste0(text, ": ", unlist(atlas3d[tt, text]))
-    }
-
-    meshes[[tt]] <- list(
-      name = as.character(unlist(atlas3d[tt, label])),
-      vertices = list(
-        x = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$x)),
-        y = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$y)),
-        z = unname(as.numeric(atlas3d$mesh[[tt]]$vertices$z))
-      ),
-      faces = list(
-        i = unname(as.integer(atlas3d$mesh[[tt]]$faces$i - 1)),
-        j = unname(as.integer(atlas3d$mesh[[tt]]$faces$j - 1)),
-        k = unname(as.integer(atlas3d$mesh[[tt]]$faces$k - 1))
-      ),
-      colors = col,
-      colorMode = "facecolor",
-      opacity = op,
-      hoverText = hover_text
-    )
-  }
-
-  legend_data <- NULL
-  if (show.legend) {
-    if (is_numeric_colour && data_min != data_max) {
-      if (!is.null(names(palette))) {
-        bp_min <- min(pal.colours$values)
-        bp_max <- max(pal.colours$values)
-        legend_data <- list(
-          type = "continuous",
-          title = colour,
-          min = bp_min,
-          max = bp_max,
-          colors = unname(sapply(pal.colours$orig, col2hex)),
-          breakpoints = unname(pal.colours$values)
-        )
-      } else {
-        colorbar_values <- seq(data_min, data_max, length.out = 10)
-        colorbar_colors <- gradient_n_pal(pal.colours$orig, pal.colours$values, "Lab")(colorbar_values)
-
-        legend_data <- list(
-          type = "continuous",
-          title = colour,
-          min = data_min,
-          max = data_max,
-          colors = unname(colorbar_colors),
-          values = unname(colorbar_values)
-        )
-      }
-    } else if (!is_numeric_colour) {
-      unique_values <- unique(unlist(atlas3d[, colour]))
-      unique_values <- unique_values[!is.na(unique_values)]
-      unique_labels <- unique(unlist(atlas3d[, label]))
-      unique_labels <- unique_labels[!is.na(unique_labels)]
-
-      if (length(unique_values) <= 50) {
-        color_label_map <- stats::setNames(
-          as.character(unlist(atlas3d[, colour])),
-          as.character(unlist(atlas3d[, label]))
-        )
-        color_label_map <- color_label_map[!is.na(names(color_label_map))]
-        color_label_map <- color_label_map[!duplicated(names(color_label_map))]
-
-        legend_data <- list(
-          type = "discrete",
-          title = label,
-          labels = unname(names(color_label_map)),
-          colors = unname(color_label_map)
-        )
-      }
-    }
-  }
-
-  options <- list(
-    camera = camera,
-    showLegend = show.legend,
-    backgroundColor = background
-  )
-
-  x <- list(
-    meshes = meshes,
-    options = options,
-    colorbar = legend_data
-  )
-
-  htmlwidgets::createWidget(
-    name = "ggseg3d",
-    x = x,
-    width = width,
-    height = height,
-    package = "ggseg3d",
-    sizingPolicy = htmlwidgets::sizingPolicy(
-      defaultWidth = 600,
-      defaultHeight = 500,
-      viewer.defaultHeight = 500,
-      viewer.defaultWidth = 600,
-      browser.defaultHeight = 500,
-      browser.defaultWidth = 600,
-      knitr.defaultWidth = 600,
-      knitr.defaultHeight = 500,
-      padding = 0,
-      browser.fill = TRUE
-    )
+  render_brain_atlas(
+    .data = .data,
+    atlas = atlas_obj,
+    surface = unified_surface,
+    hemisphere = hemisphere,
+    label = label,
+    text = text,
+    colour = colour,
+    palette = palette,
+    na_colour = na_colour,
+    na_alpha = na_alpha,
+    edge_by = edge_by,
+    tract_color = tract_color
   )
 }
 
-if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c("tt", "surf", "mesh", "new_col"))
+
+#' Render brain_atlas in 3D
+#'
+#' Internal function for rendering brain_atlas objects that contain
+#' vertex mappings or per-region meshes. Uses vertex-based coloring for
+#' cortical atlases on shared brain meshes, or face-based coloring for
+#' subcortical/tract atlases with per-region mesh data.
+#'
+#' @inheritParams ggseg3d
+#' @return an htmlwidget object
+#' @importFrom rlang .data
+#' @keywords internal
+render_brain_atlas <- function(
+    .data = NULL,
+    atlas,
+    surface = "inflated",
+    hemisphere = c("right", "left"),
+    label = "region",
+    text = NULL,
+    colour = "colour",
+    palette = NULL,
+    na_colour = "darkgrey",
+    na_alpha = 1,
+    edge_by = NULL,
+    tract_color = "palette") {
+  is_mesh_based <- is_mesh_atlas(atlas)
+  atlas_type <- atlas$type %||% "cortical"
+
+  if (is_mesh_based && atlas_type %in% c("subcortical", "tract")) {
+    hemisphere <- "subcort"
+  }
+
+  color_by <- if (atlas_type == "tract" && tract_color == "orientation") {
+    "orientation"
+  } else {
+    "colour"
+  }
+
+  if (is_mesh_based) {
+    atlas_data <- prepare_mesh_atlas_data(atlas, .data)
+  } else {
+    atlas_data <- prepare_atlas_data(atlas, .data)
+  }
+
+  colour_result <- apply_colour_palette(
+    atlas_data, colour, palette, na_colour
+  )
+  atlas_data <- colour_result$data
+  fill <- colour_result$fill
+  pal_colours <- colour_result$palette
+
+  atlas_meshes <- if (is_mesh_based) {
+    if (!is.null(atlas$data$meshes)) atlas$data$meshes else atlas$meshes
+  } else {
+    NULL
+  }
+
+  atlas_centerlines <- if (!is.null(atlas$data$centerlines)) {
+    list(
+      centerlines = atlas$data$centerlines,
+      tube_radius = atlas$data$tube_radius %||% 5,
+      tube_segments = atlas$data$tube_segments %||% 8
+    )
+  } else {
+    NULL
+  }
+
+  meshes <- build_meshes(
+    atlas_data, hemisphere, surface, na_colour, edge_by,
+    atlas_meshes, atlas_type, color_by, atlas_centerlines
+  )
+
+  # nolint start: object_usage_linter
+  legend_data <- build_legend_data(
+    is_numeric = colour_result$is_numeric,
+    data_min = colour_result$data_min,
+    data_max = colour_result$data_max,
+    palette = palette,
+    pal_colours = pal_colours,
+    colour_col = colour,
+    label_col = label,
+    fill_col = fill,
+    data = atlas_data
+  )
+  # nolint end
+
+  create_ggseg3d_widget(meshes, legend_data)
 }

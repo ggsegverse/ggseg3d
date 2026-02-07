@@ -17,8 +17,12 @@
 #' @importFrom htmlwidgets shinyWidgetOutput shinyRenderWidget
 #'
 #' @export
+# nolint start: object_name_linter
 ggseg3dOutput <- function(outputId, width = "100%", height = "400px") {
-  htmlwidgets::shinyWidgetOutput(outputId, "ggseg3d", width, height, package = "ggseg3d")
+  htmlwidgets::shinyWidgetOutput(
+    outputId, "ggseg3d", width, height,
+    package = "ggseg3d"
+  )
 }
 
 #' @rdname ggseg3d-shiny
@@ -63,3 +67,4 @@ updateGgseg3dBackground <- function(session, outputId, colour) {
   }
   session$sendCustomMessage(paste0("ggseg3d-background-", outputId), colour)
 }
+# nolint end

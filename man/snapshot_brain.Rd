@@ -15,7 +15,8 @@ snapshot_brain(p, file, width = 600, height = 500, delay = 1, zoom = 2, ...)
 
 \item{height}{numeric. Image height in pixels (default: 500)}
 
-\item{delay}{numeric. Seconds to wait for widget to render before capture (default: 1)}
+\item{delay}{numeric. Seconds to wait for widget to render before capture
+(default: 1)}
 
 \item{zoom}{numeric. Zoom factor for higher resolution (default: 2)}
 

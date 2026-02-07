@@ -18,7 +18,8 @@ ggseg3d widget object with updated background
 Changes the background color of a ggseg3d widget.
 }
 \examples{
-
+\dontrun{
 ggseg3d() |>
-   set_background("black")
+  set_background("black")
+}
 }

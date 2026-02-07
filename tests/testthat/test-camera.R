@@ -29,10 +29,7 @@ test_that("pan_camera works", {
   )
 })
 
-test_that("camera parameter in ggseg3d works", {
-  p <- ggseg3d(camera = "left lateral")
-  expect_equal(p$x$options$camera, "left lateral")
-
-  p <- ggseg3d(camera = "superior")
-  expect_equal(p$x$options$camera, "superior")
+test_that("default camera is right lateral", {
+  p <- ggseg3d()
+  expect_equal(p$x$options$camera, "right lateral")
 })

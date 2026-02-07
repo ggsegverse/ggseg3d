@@ -1,5 +1,53 @@
-destination: docs
-url: https://lcbc-uio.github.io/ggseg3d/
+url: https://ggseg.github.io/ggseg3d/
+
 template:
-  params:
-    bootswatch: cerulean
+  bootstrap: 5
+
+articles:
+  - title: Getting Started
+    navbar: ~
+    contents:
+      - ggseg3d
+
+  - title: Advanced Usage
+    contents:
+      - unified-atlases
+      - shiny
+
+reference:
+  - title: Plotting
+    desc: Core 3D visualization function
+    contents:
+      - ggseg3d
+
+  - title: Widget Customization
+    desc: Pipe-friendly functions to modify the 3D widget
+    contents:
+      - pan_camera
+      - set_background
+      - set_edges
+      - set_legend
+      - set_dimensions
+      - set_flat_shading
+      - set_orthographic
+      - add_glassbrain
+      - snapshot_brain
+
+  - title: Mesh Utilities
+    desc: Work with brain surface meshes
+    contents:
+      - get_brain_mesh
+
+  - title: Shiny
+    desc: Shiny integration
+    contents:
+      - ggseg3dOutput
+      - renderGgseg3d
+      - updateGgseg3dCamera
+      - updateGgseg3dBackground
+
+  - title: Data
+    desc: Built-in atlases
+    contents:
+      - dk
+      - aseg

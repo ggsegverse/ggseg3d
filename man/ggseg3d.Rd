@@ -6,92 +6,99 @@
 \usage{
 ggseg3d(
   .data = NULL,
-  atlas = "dk_3d",
+  atlas = "dk",
   surface = "LCBC",
   hemisphere = c("right", "subcort"),
   label = "region",
   text = NULL,
   colour = "colour",
   palette = NULL,
-  na.colour = "darkgrey",
-  na.alpha = 1,
-  show.legend = TRUE,
-  camera = "right lateral",
-  background = "#ffffff",
-  width = NULL,
-  height = NULL
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  edge_by = NULL,
+  tract_color = c("palette", "orientation")
 )
 }
 \arguments{
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{atlas}{Either a string with the name of a 3d atlas to use.}
+\item{atlas}{Either a string with the name of a 3d atlas to use, or a
+`brain_atlas` object containing 3D vertex mappings.}
 
-\item{surface}{String. Which surface to plot. Either "pial","white", or "inflated"[default]}
+\item{surface}{String. Which surface to plot. Either "pial", "white",
 
-\item{hemisphere}{String. Hemisphere to plot. Either "left" or "right"[default],
-can also be "subcort".}
 
-\item{label}{String. Quoted name of column in atlas/data that should be used to name traces}
 
-\item{text}{String. Quoted name of column in atlas/data that should be added as extra
-information in the hover text.}
+  or "inflated"
 
-\item{colour}{String. Quoted name of column from which colour should be supplied}
 
-\item{palette}{String. Vector of colour names or HEX colours. Can also be a named
-numeric vector, with colours as names, and breakpoint for that colour as the value}
+.}
 
-\item{na.colour}{String. Either name, hex of RGB for colour of NA in colour.}
+\item{hemisphere}{String. Hemisphere to plot. Either "left" or
+  "right"
 
-\item{na.alpha}{Numeric. A number between 0 and 1 to control transparency of NA-regions.}
 
-\item{show.legend}{Logical. Toggle legend if colour is numeric.}
+, can also be "subcort".}
 
-\item{camera}{String or list. Camera position preset or custom position.}
+\item{label}{String. Quoted name of column in atlas/data that should
+be used to name traces}
 
-\item{background}{String. Background color (hex or named color).}
+\item{text}{String. Quoted name of column in atlas/data that should be
+added as extra information in the hover text.}
 
-\item{width}{Numeric. Widget width in pixels.}
+\item{colour}{String. Quoted name of column from which colour should
+be supplied}
 
-\item{height}{Numeric. Widget height in pixels.
+\item{palette}{String. Vector of colour names or HEX colours. Can also
+be a named numeric vector, with colours as names, and breakpoint for
+that colour as the value}
+
+\item{na_colour}{String. Either name, hex of RGB for colour of NA in
+colour.}
+
+\item{na_alpha}{Numeric. A number between 0 and 1 to control
+transparency of NA-regions.}
+
+\item{edge_by}{String. Column name to use for computing region boundary
+  edges. If provided, edges are drawn between regions with different
+
+
+  values in this column, allowing edge boundaries independent of display
+  colours. When set, edges are displayed by default (black, width 1).
+  Use [set_edges()] to customise appearance.}
+
+\item{tract_color}{String. How to colour tract atlases: "palette"
+  (default, use atlas palette) or "orientation" (direction-based RGB
+  where R=left-right, G=anterior-posterior, B=superior-inferior).
+  Only applies to tract atlases.
 
 \strong{Available surfaces:}
 \itemize{
 \item `inflated:` Fully inflated surface
 \item `semi-inflated:` Semi-inflated surface
 \item `white:` white matter surface
- }
-
-\strong{Available camera presets:}
-\itemize{
-\item `left lateral` or `left_lateral`
-\item `left medial` or `left_medial`
-\item `right lateral` or `right_lateral`
-\item `right medial` or `right_medial`
-\item `left superior` or `left_superior`
-\item `right superior` or `right_superior`
-\item `left inferior` or `left_inferior`
-\item `right inferior` or `right_inferior`
-\item `left anterior` or `left_anterior`
-\item `right anterior` or `right_anterior`
-\item `left posterior` or `left_posterior`
-\item `right posterior` or `right_posterior`
-}}
+ }}
 }
 \value{
 an htmlwidget object for interactive 3D brain visualization
 }
 \description{
-\code{ggseg3d} creates and returns an interactive Three.js brain mesh visualization.
+`ggseg3d` creates and returns an interactive Three.js brain mesh
+visualization.
 }
 \examples{
+\dontrun{
 ggseg3d()
-ggseg3d(hemisphere = "left")
-ggseg3d(surface = "inflated")
-ggseg3d(show.legend = FALSE)
+ggseg3d(hemisphere = "left") |> pan_camera("left lateral")
+ggseg3d() |> set_legend(FALSE)
+ggseg3d() |> set_background("black")
+}
 
+}
+\seealso{
+[pan_camera()] for camera position, [set_background()] for
+  background colour, [set_legend()] for legend visibility
 }
 \author{
 Athanasia Mowinckel and Didac Piñeiro

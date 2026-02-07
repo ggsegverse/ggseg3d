@@ -21,11 +21,11 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.3
 Depends:
-    R (>= 4.1)
+    R (>= 4.1),
+    ggseg.formats
 Imports:
     cli,
     dplyr,
-    ggseg.formats,
     htmlwidgets,
     lifecycle,
     rlang,

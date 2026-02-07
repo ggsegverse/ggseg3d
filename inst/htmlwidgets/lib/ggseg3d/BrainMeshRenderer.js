@@ -35,7 +35,9 @@
         backgroundColor: 0xffffff,
         enableDamping: true,
         dampingFactor: 0.05,
-        antialias: true
+        antialias: true,
+        flatShading: false,
+        orthographic: false
       }, options);
 
       this.meshes = [];
@@ -59,7 +61,20 @@
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(this.options.backgroundColor);
 
-      this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+      if (this.options.orthographic) {
+        const frustumSize = this.options.frustumSize || 220;
+        const aspect = width / height;
+        this.camera = new THREE.OrthographicCamera(
+          -frustumSize * aspect / 2,
+          frustumSize * aspect / 2,
+          frustumSize / 2,
+          -frustumSize / 2,
+          1,
+          1000
+        );
+      } else {
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+      }
       this.camera.up.set(0, 0, 1);
       this.camera.position.set(350, 0, 0);
       this.camera.lookAt(0, 0, 0);
@@ -110,7 +125,8 @@
     }
 
     addMesh(meshData) {
-      const { vertices, faces, colors, colorMode, opacity, name, hoverText } = meshData;
+      const { vertices, faces, colors, colorMode, opacity, name, hoverText,
+              edgeColor, edgeWidth, boundaryEdges, vertexLabels } = meshData;
 
       let geometry;
       let material;
@@ -123,20 +139,75 @@
 
       geometry.computeVertexNormals();
 
-      material = new THREE.MeshPhongMaterial({
-        vertexColors: true,
-        side: THREE.DoubleSide,
-        transparent: opacity < 1,
-        opacity: opacity
-      });
+      if (this.options.flatShading) {
+        material = new THREE.MeshBasicMaterial({
+          vertexColors: true,
+          side: THREE.DoubleSide,
+          transparent: opacity < 1,
+          opacity: opacity
+        });
+      } else {
+        material = new THREE.MeshPhongMaterial({
+          vertexColors: true,
+          side: THREE.DoubleSide,
+          transparent: opacity < 1,
+          opacity: opacity
+        });
+      }
 
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.userData = { name, hoverText, originalColors: colors };
+      mesh.userData = { name, hoverText, originalColors: colors, vertexLabels };
       this.scene.add(mesh);
       this.meshes.push(mesh);
       this.meshData.push(meshData);
 
+      if (edgeColor && colorMode === 'facecolor') {
+        this._addMeshEdges(mesh, geometry, edgeColor, edgeWidth || 1);
+      }
+
+      if (edgeColor && boundaryEdges && boundaryEdges.length > 0) {
+        this._addBoundaryEdges(vertices, boundaryEdges, edgeColor, edgeWidth || 1);
+      }
+
       return mesh;
+    }
+
+    _addMeshEdges(mesh, geometry, edgeColor, edgeWidth) {
+      const edges = new THREE.EdgesGeometry(geometry, 15);
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: new THREE.Color(edgeColor),
+        linewidth: edgeWidth
+      });
+      const wireframe = new THREE.LineSegments(edges, lineMaterial);
+      mesh.add(wireframe);
+    }
+
+    _addBoundaryEdges(vertices, boundaryEdges, edgeColor, edgeWidth) {
+      const positions = new Float32Array(boundaryEdges.length * 6);
+
+      for (let i = 0; i < boundaryEdges.length; i++) {
+        const v1 = boundaryEdges[i][0];
+        const v2 = boundaryEdges[i][1];
+
+        positions[i * 6] = vertices.x[v1];
+        positions[i * 6 + 1] = vertices.y[v1];
+        positions[i * 6 + 2] = vertices.z[v1];
+        positions[i * 6 + 3] = vertices.x[v2];
+        positions[i * 6 + 4] = vertices.y[v2];
+        positions[i * 6 + 5] = vertices.z[v2];
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const material = new THREE.LineBasicMaterial({
+        color: new THREE.Color(edgeColor),
+        linewidth: edgeWidth
+      });
+
+      const lines = new THREE.LineSegments(geometry, material);
+      this.scene.add(lines);
+      this.meshes.push(lines);
     }
 
     _createIndexedGeometry(vertices, faces, colors) {
@@ -229,6 +300,37 @@
       this.scene.background = new THREE.Color(color);
     }
 
+    fitToMeshes(padding = 1.1) {
+      if (this.meshes.length === 0) return;
+
+      const box = new THREE.Box3();
+      for (const mesh of this.meshes) {
+        box.expandByObject(mesh);
+      }
+
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z) * padding;
+
+      if (this.camera.isOrthographicCamera) {
+        const width = this.container.clientWidth || 400;
+        const height = this.container.clientHeight || 400;
+        const aspect = width / height;
+
+        this.camera.left = -maxDim * aspect / 2;
+        this.camera.right = maxDim * aspect / 2;
+        this.camera.top = maxDim / 2;
+        this.camera.bottom = -maxDim / 2;
+        this.camera.updateProjectionMatrix();
+      }
+
+      this.controls.target.copy(center);
+      this.controls.update();
+    }
+
     clearMeshes() {
       for (const mesh of this.meshes) {
         this.scene.remove(mesh);
@@ -248,7 +350,23 @@
       const intersects = this.raycaster.intersectObjects(this.meshes);
 
       if (intersects.length > 0) {
-        return intersects[0].object;
+        const intersect = intersects[0];
+        const mesh = intersect.object;
+
+        if (mesh.userData.vertexLabels && intersect.face) {
+          const vertexIndex = intersect.face.a;
+          const label = mesh.userData.vertexLabels[vertexIndex];
+          if (label) {
+            return {
+              userData: {
+                name: label,
+                hoverText: mesh.userData.hoverText
+              }
+            };
+          }
+        }
+
+        return mesh;
       }
       return null;
     }

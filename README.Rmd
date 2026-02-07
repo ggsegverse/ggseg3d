@@ -19,11 +19,11 @@ if (!require("processx")) {
 
 # ggseg3d <img src='man/figures/logo.png' align="right" height="138.5" /> 
 <!-- badges: start -->
-[![Coverage status](https://codecov.io/gh/ggseg/ggseg3d/branch/master/graph/badge.svg)](https://codecov.io/gh/ggseg/ggseg3d)
+[![Coverage status](https://codecov.io/gh/ggseg/ggseg3d/branch/main/graph/badge.svg)](https://codecov.io/gh/ggseg/ggseg3d)
 [![CRAN status](https://www.r-pkg.org/badges/version/ggseg3d)](https://CRAN.R-project.org/package=ggseg3d)
-[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg?color=blue)](https://r-pkg.org/pkg/ggseg)
-[![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/LCBC-UiO/ggseg3d/workflows/R-CMD-check/badge.svg)](https://github.com/LCBC-UiO/ggseg3d/actions)
+[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue)](https://r-pkg.org/pkg/ggseg3d)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![R-CMD-check](https://github.com/ggseg/ggseg3d/workflows/R-CMD-check/badge.svg)](https://github.com/ggseg/ggseg3d/actions)
 <!-- badges: end -->
 
 This package mainly contains a plotting function `ggseg3d` and data.frames of different brain atlases for plotting.
@@ -35,8 +35,8 @@ This package aims to make it possible to plot results directly through R.
 ## Atlases
 There are currently four atlases available in the package:  
 
-1. `dk_3d` - Desikan-Killiany atlas (aparc).   
-2. `aseg_3d` - Automatic sub-cortical segmentation.  
+1. `dk` - Desikan-Killiany atlas (aparc).   
+2. `aseg` - Automatic sub-cortical segmentation.  
 
 
 If you want to create your own custom atlas or discover other compatible atlases, please see the companion package [ggsegExtra](https://ggseg.github.io/ggsegExtra/).
@@ -86,7 +86,7 @@ vignette("ggseg3d")
 ```
 
 ```{r results='hide'}
-p <- ggseg3d(atlas = dk_3d) |>
+p <- ggseg3d(atlas = dk) |>
   pan_camera("right lateral")
 ``
 `
@@ -97,13 +97,13 @@ p <- p |>
                   font = list(color = 'darkgrey',
                               family = 'sans serif',
                               size = 50)) 
-plotly::orca(p, "man/img/README-dk_3d-plot.png")
-knitr::include_graphics("man/img/README-dk_3d-plot.png")
+plotly::orca(p, "man/img/README-dk-plot.png")
+knitr::include_graphics("man/img/README-dk-plot.png")
 ```
 
 
 ```{r results = 'hide'}
-p <- ggseg3d(atlas=aseg_3d) |>
+p <- ggseg3d(atlas=aseg) |>
   add_glassbrain() |>
   pan_camera("right lateral")
 `
@@ -116,8 +116,8 @@ p <- p |>
     showarrow = FALSE,
     font = list(color = 'darkgrey', family = 'sans serif', size = 50)
   )
-plotly::orca(p, "man/img/README-aseg_3d-plot.png")
-knitr::include_graphics("man/img/README-aseg_3d-plot.png")
+plotly::orca(p, "man/img/README-aseg-plot.png")
+knitr::include_graphics("man/img/README-aseg-plot.png")
 ```
 
 ### Report bugs or requests  
