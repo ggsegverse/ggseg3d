@@ -46,7 +46,8 @@ is_unified_atlas <- function(atlas) {
 #'
 #' @param atlas An atlas object to check
 #' @return Logical indicating if this atlas uses mesh-based rendering
-#' @export
+#' @noRd
+#' @keywords internal
 is_mesh_atlas <- function(atlas) {
   if (!inherits(atlas, "brain_atlas")) {
     return(FALSE)
@@ -61,19 +62,6 @@ is_mesh_atlas <- function(atlas) {
   !is.null(atlas$meshes) && !is.null(atlas$core)
 }
 
-
-#' Check if atlas is a tract atlas
-#'
-#' @param atlas An atlas object to check
-#' @return Logical indicating if this is a tract atlas
-#' @export
-is_tract_atlas <- function(atlas) {
-  if (!inherits(atlas, "brain_atlas")) {
-    return(FALSE)
-  }
-
-  atlas$type == "tract"
-}
 
 
 #' Prepare atlas data

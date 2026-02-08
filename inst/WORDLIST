@@ -15,6 +15,7 @@ Rayshader
 Repositions
 Rodrigues
 Subcortical
+TRACULA
 UI
 WebGL
 aparc
@@ -61,6 +62,7 @@ subcort
 subcortical
 tmesh
 tractography
+tracula
 uncoloured
 visualise
 walkthrough

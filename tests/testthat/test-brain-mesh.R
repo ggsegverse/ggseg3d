@@ -40,12 +40,6 @@ test_that("is_mesh_atlas identifies mesh-based atlases", {
   expect_false(is_mesh_atlas(NULL))
 })
 
-test_that("is_tract_atlas identifies tract atlases", {
-  expect_false(is_tract_atlas(dk))
-  expect_false(is_tract_atlas(aseg))
-  expect_false(is_tract_atlas(list()))
-  expect_false(is_tract_atlas(NULL))
-})
 
 test_that("vertices_to_colors creates correct color vector", {
   atlas_data <- data.frame(

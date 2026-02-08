@@ -123,7 +123,8 @@ vertices_to_labels <- function(
 #' @param na_group Value for vertices not in any region
 #'
 #' @return Character vector of group values, one per mesh vertex
-#' @export
+#' @noRd
+#' @keywords internal
 vertices_to_groups <- function(
   atlas_data,
   n_vertices,
