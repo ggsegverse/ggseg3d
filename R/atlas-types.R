@@ -99,6 +99,8 @@ prepare_atlas_data <- function(atlas, .data) {
 
   if (!is.null(atlas$palette)) {
     atlas_data$colour <- atlas$palette[atlas_data$label]
+  } else {
+    atlas_data$colour <- NA_character_
   }
 
   if (!is.null(.data)) {
@@ -138,6 +140,8 @@ prepare_mesh_atlas_data <- function(atlas, .data) {
 
   if (!is.null(atlas$palette)) {
     atlas_data$colour <- atlas$palette[atlas_data$label]
+  } else {
+    atlas_data$colour <- NA_character_
   }
 
   if (!is.null(.data)) {
