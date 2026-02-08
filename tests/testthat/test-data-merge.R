@@ -1,4 +1,4 @@
-test_that("data_merge_unified joins data correctly", {
+test_that("merge_atlas_data joins data correctly", {
   atlas_data <- data.frame(
     label = c("a", "b", "c"),
     region = c("region a", "region b", "region c"),
@@ -12,14 +12,14 @@ test_that("data_merge_unified joins data correctly", {
     stringsAsFactors = FALSE
   )
 
-  result <- data_merge_unified(user_data, atlas_data)
+  result <- merge_atlas_data(user_data, atlas_data)
 
   expect_true("value" %in% names(result))
   expect_equal(result$value[result$label == "a"], 10)
   expect_true(is.na(result$value[result$label == "c"]))
 })
 
-test_that("data_merge_unified errors on no common columns", {
+test_that("merge_atlas_data errors on no common columns", {
   atlas_data <- data.frame(
     label = c("a"),
     stringsAsFactors = FALSE
@@ -31,12 +31,12 @@ test_that("data_merge_unified errors on no common columns", {
   )
 
   expect_error(
-    data_merge_unified(user_data, atlas_data),
+    merge_atlas_data(user_data, atlas_data),
     "No common columns"
   )
 })
 
-test_that("data_merge_unified warns on unmatched rows", {
+test_that("merge_atlas_data warns on unmatched rows", {
   atlas_data <- data.frame(
     label = c("a", "b"),
     stringsAsFactors = FALSE
@@ -49,12 +49,12 @@ test_that("data_merge_unified warns on unmatched rows", {
   )
 
   expect_warning(
-    result <- data_merge_unified(user_data, atlas_data),
+    result <- merge_atlas_data(user_data, atlas_data),
     "did not match"
   )
 })
 
-test_that("data_merge_unified joins on multiple common columns", {
+test_that("merge_atlas_data joins on multiple common columns", {
   atlas_data <- data.frame(
     label = c("a", "b", "a"),
     hemi = c("left", "left", "right"),
@@ -69,7 +69,7 @@ test_that("data_merge_unified joins on multiple common columns", {
     stringsAsFactors = FALSE
   )
 
-  result <- data_merge_unified(user_data, atlas_data)
+  result <- merge_atlas_data(user_data, atlas_data)
 
   expect_equal(result$value[result$label == "a" & result$hemi == "left"], 100)
   expect_equal(result$value[result$label == "a" & result$hemi == "right"], 200)

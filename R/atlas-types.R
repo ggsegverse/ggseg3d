@@ -93,8 +93,10 @@ prepare_atlas_data <- function(atlas, .data) {
     atlas$vertices
   }
   atlas_data <- dplyr::left_join(
-    vertices, atlas$core,
-    by = "label", relationship = "many-to-many"
+    vertices,
+    atlas$core,
+    by = "label",
+    relationship = "many-to-many"
   )
 
   if (!is.null(atlas$palette)) {
@@ -134,8 +136,10 @@ prepare_mesh_atlas_data <- function(atlas, .data) {
   }
 
   atlas_data <- dplyr::left_join(
-    base_data, atlas$core,
-    by = "label", relationship = "many-to-many"
+    base_data,
+    atlas$core,
+    by = "label",
+    relationship = "many-to-many"
   )
 
   if (!is.null(atlas$palette)) {
@@ -167,7 +171,9 @@ data_merge_mesh <- function(.data, atlas_data) {
   }
 
   dplyr::left_join(
-    atlas_data, .data,
-    by = join_cols, relationship = "many-to-many"
+    atlas_data,
+    .data,
+    by = join_cols,
+    relationship = "many-to-many"
   )
 }

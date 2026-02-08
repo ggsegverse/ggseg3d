@@ -17,18 +17,23 @@
 #' @return List with legend specification or NULL
 #' @keywords internal
 build_legend_data <- function(
-    is_numeric,
-    data_min,
-    data_max,
-    palette,
-    pal_colours,
-    colour_col,
-    label_col,
-    fill_col,
-    data) {
+  is_numeric,
+  data_min,
+  data_max,
+  palette,
+  pal_colours,
+  colour_col,
+  label_col,
+  fill_col,
+  data
+) {
   if (is_numeric && !is.na(data_min) && data_min != data_max) {
     return(build_continuous_legend(
-      palette, pal_colours, colour_col, data_min, data_max
+      palette,
+      pal_colours,
+      colour_col,
+      data_min,
+      data_max
     ))
   }
 
@@ -53,11 +58,12 @@ build_legend_data <- function(
 #' @return List with continuous legend specification
 #' @keywords internal
 build_continuous_legend <- function(
-    palette,
-    pal_colours,
-    colour_col,
-    data_min,
-    data_max) {
+  palette,
+  pal_colours,
+  colour_col,
+  data_min,
+  data_max
+) {
   if (!is.null(names(palette))) {
     list(
       type = "continuous",
@@ -70,7 +76,9 @@ build_continuous_legend <- function(
   } else {
     colorbar_values <- seq(data_min, data_max, length.out = 10)
     colorbar_colors <- scales::gradient_n_pal(
-      pal_colours$orig, pal_colours$values, "Lab"
+      pal_colours$orig,
+      pal_colours$values,
+      "Lab"
     )(colorbar_values)
 
     list(

@@ -76,18 +76,19 @@
 #'
 #' @export
 ggseg3d <- function(
-    .data = NULL,
-    atlas = "dk",
-    surface = "LCBC",
-    hemisphere = c("right", "subcort"),
-    label = "region",
-    text = NULL,
-    colour = "colour",
-    palette = NULL,
-    na_colour = "darkgrey",
-    na_alpha = 1,
-    edge_by = NULL,
-    tract_color = c("palette", "orientation")) {
+  .data = NULL,
+  atlas = "dk",
+  surface = "LCBC",
+  hemisphere = c("right", "subcort"),
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  edge_by = NULL,
+  tract_color = c("palette", "orientation")
+) {
   tract_color <- match.arg(tract_color)
   atlas_obj <- if (is.character(atlas)) get(atlas) else atlas
 
@@ -130,18 +131,62 @@ ggseg3d <- function(
 #' @importFrom rlang .data
 #' @keywords internal
 render_brain_atlas <- function(
-    .data = NULL,
-    atlas,
-    surface = "inflated",
-    hemisphere = c("right", "left"),
-    label = "region",
-    text = NULL,
-    colour = "colour",
-    palette = NULL,
-    na_colour = "darkgrey",
-    na_alpha = 1,
-    edge_by = NULL,
-    tract_color = "palette") {
+  .data = NULL,
+  atlas,
+  surface = "inflated",
+  hemisphere = c("right", "left"),
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  edge_by = NULL,
+  tract_color = "palette"
+) {
+  prepared <- prepare_brain_meshes(
+    .data = .data,
+    atlas = atlas,
+    surface = surface,
+    hemisphere = hemisphere,
+    label = label,
+    text = text,
+    colour = colour,
+    palette = palette,
+    na_colour = na_colour,
+    na_alpha = na_alpha,
+    edge_by = edge_by,
+    tract_color = tract_color
+  )
+
+  create_ggseg3d_widget(prepared$meshes, prepared$legend_data)
+}
+
+
+#' Prepare brain meshes and legend data
+#'
+#' Shared pipeline that builds mesh data structures and legend data from
+#' a brain_atlas. Used by both [render_brain_atlas()] for htmlwidget output
+#' and [ggsegray()] for rgl/rayshader output.
+#'
+#' @inheritParams ggseg3d
+#' @return List with `meshes` (list of mesh entries) and `legend_data`
+#' @importFrom rlang .data
+#' @keywords internal
+prepare_brain_meshes <- function(
+  .data = NULL,
+  atlas,
+  surface = "inflated",
+  hemisphere = c("right", "left"),
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  edge_by = NULL,
+  tract_color = "palette"
+) {
   is_mesh_based <- is_mesh_atlas(atlas)
   atlas_type <- atlas$type %||% "cortical"
 
@@ -162,7 +207,10 @@ render_brain_atlas <- function(
   }
 
   colour_result <- apply_colour_palette(
-    atlas_data, colour, palette, na_colour
+    atlas_data,
+    colour,
+    palette,
+    na_colour
   )
   atlas_data <- colour_result$data
   fill <- colour_result$fill
@@ -185,8 +233,15 @@ render_brain_atlas <- function(
   }
 
   meshes <- build_meshes(
-    atlas_data, hemisphere, surface, na_colour, edge_by,
-    atlas_meshes, atlas_type, color_by, atlas_centerlines
+    atlas_data,
+    hemisphere,
+    surface,
+    na_colour,
+    edge_by,
+    atlas_meshes,
+    atlas_type,
+    color_by,
+    atlas_centerlines
   )
 
   # nolint start: object_usage_linter
@@ -203,5 +258,5 @@ render_brain_atlas <- function(
   )
   # nolint end
 
-  create_ggseg3d_widget(meshes, legend_data)
+  list(meshes = meshes, legend_data = legend_data)
 }

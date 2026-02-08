@@ -13,7 +13,7 @@ add_glassbrain(
 )
 }
 \arguments{
-\item{p}{ggseg3d widget object}
+\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
 
 \item{hemisphere}{Character vector. Hemispheres to add: "left", "right",
 or both.}
@@ -25,20 +25,21 @@ or both.}
 \item{opacity}{Numeric. Transparency of the glass brain (0-1).}
 }
 \value{
-ggseg3d widget object with glass brain tri-surface mesh
+The input object (modified), for piping.
 }
 \description{
 Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
 Particularly useful for subcortical and tract visualizations where spatial
-context helps interpretation.
+context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
+rgl (`ggsegray`) objects.
 }
 \examples{
 \dontrun{
-ggseg3d(atlas = my_tract_atlas, hemisphere = "subcort") |>
-  add_glassbrain() |>
-  pan_camera("left lateral")
-
 ggseg3d(atlas = aseg) |>
   add_glassbrain("left", opacity = 0.2)
+
+ggsegray(atlas = aseg) |>
+  add_glassbrain(opacity = 0.15) |>
+  pan_camera("right lateral")
 }
 }

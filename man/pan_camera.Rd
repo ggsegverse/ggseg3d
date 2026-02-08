@@ -7,10 +7,10 @@
 pan_camera(p, camera)
 }
 \arguments{
-\item{p}{ggseg3d widget object}
+\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
 
-\item{camera}{string or list. Camera position preset name or custom eye
-  position.
+\item{camera}{string, list, or numeric vector. Camera position preset
+  name, custom eye position list, or `c(x, y, z)` for rgl.
 
 \strong{Available camera presets:}
 \itemize{
@@ -29,15 +29,17 @@ pan_camera(p, camera)
 }}
 }
 \value{
-ggseg3d widget object with updated camera
+The input object (modified), for piping.
 }
 \description{
-Sets the camera position for a ggseg3d widget
+Sets the camera position for a ggseg3d widget or ggsegray rgl scene
 to standard anatomical views or custom positions.
 }
 \examples{
 \dontrun{
-ggseg3d() |>
-  pan_camera("right lateral")
+ggseg3d() |> pan_camera("right lateral")
+
+ggsegray(atlas = dk, hemisphere = "left") |>
+  pan_camera("left lateral")
 }
 }

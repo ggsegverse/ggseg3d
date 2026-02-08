@@ -46,7 +46,9 @@ test_that("find_boundary_edges deduplicates shared edges", {
   edges <- find_boundary_edges(faces, vertex_colors)
 
   edge_keys <- vapply(
-    edges, function(e) paste(sort(e), collapse = "-"), character(1)
+    edges,
+    function(e) paste(sort(e), collapse = "-"),
+    character(1)
   )
   expect_equal(length(edge_keys), length(unique(edge_keys)))
 })

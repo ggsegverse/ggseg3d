@@ -1,4 +1,4 @@
-test_that("prepare_unified_atlas_data extracts vertices and joins core", {
+test_that("prepare_atlas_data extracts vertices and joins core", {
   vertices_data <- data.frame(
     label = c("bankssts", "caudalanteriorcingulate"),
     stringsAsFactors = FALSE
@@ -19,7 +19,7 @@ test_that("prepare_unified_atlas_data extracts vertices and joins core", {
     class = "brain_atlas"
   )
 
-  result <- prepare_unified_atlas_data(atlas, NULL)
+  result <- prepare_atlas_data(atlas, NULL)
 
   expect_true("label" %in% names(result))
   expect_true("region" %in% names(result))
@@ -29,7 +29,7 @@ test_that("prepare_unified_atlas_data extracts vertices and joins core", {
   expect_equal(result$colour[result$label == "bankssts"], "#FF0000")
 })
 
-test_that("prepare_unified_atlas_data works with data component", {
+test_that("prepare_atlas_data works with data component", {
   vertices_data <- data.frame(
     label = c("a", "b"),
     stringsAsFactors = FALSE
@@ -53,13 +53,13 @@ test_that("prepare_unified_atlas_data works with data component", {
     class = "brain_atlas"
   )
 
-  result <- prepare_unified_atlas_data(atlas, NULL)
+  result <- prepare_atlas_data(atlas, NULL)
 
   expect_equal(nrow(result), 2)
   expect_true("vertices" %in% names(result))
 })
 
-test_that("prepare_unified_atlas_data merges user data", {
+test_that("prepare_atlas_data merges user data", {
   vertices_data <- data.frame(
     label = c("a", "b"),
     stringsAsFactors = FALSE
@@ -86,7 +86,7 @@ test_that("prepare_unified_atlas_data merges user data", {
     stringsAsFactors = FALSE
   )
 
-  result <- prepare_unified_atlas_data(atlas, user_data)
+  result <- prepare_atlas_data(atlas, user_data)
 
   expect_true("my_value" %in% names(result))
   expect_equal(result$my_value[result$label == "a"], 10)

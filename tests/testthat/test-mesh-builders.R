@@ -144,7 +144,9 @@ test_that("build_tract_meshes creates vertex-colored meshes", {
   atlas_data$mesh <- list(
     list(
       vertices = data.frame(
-        x = c(0, 1, 2, 3), y = c(0, 1, 2, 3), z = c(0, 1, 2, 3)
+        x = c(0, 1, 2, 3),
+        y = c(0, 1, 2, 3),
+        z = c(0, 1, 2, 3)
       ),
       faces = data.frame(i = c(1, 2), j = c(2, 3), k = c(3, 4))
     )
@@ -191,11 +193,18 @@ test_that("tangents_to_colors computes direction-based colors", {
       n_centerline_points = 3,
       tangents = matrix(
         c(
-          1, 0, 0,
-          0, 1, 0,
-          0, 0, 1
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ),
-        nrow = 3, byrow = TRUE
+        nrow = 3,
+        byrow = TRUE
       )
     )
   )
@@ -218,10 +227,15 @@ test_that("tangents_to_colors handles mixed directions", {
       n_centerline_points = 2,
       tangents = matrix(
         c(
-          1, 1, 0,
-          0, 1, 1
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
         ),
-        nrow = 2, byrow = TRUE
+        nrow = 2,
+        byrow = TRUE
       )
     )
   )

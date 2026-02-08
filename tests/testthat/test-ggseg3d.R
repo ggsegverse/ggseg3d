@@ -15,8 +15,12 @@ test_that("Check that ggseg3d is working", {
   expect_warning(
     ggseg3d(
       .data = data.frame(
-        region = c("transverse tempral", "insula",
-                   "precentral", "superior parietal"),
+        region = c(
+          "transverse tempral",
+          "insula",
+          "precentral",
+          "superior parietal"
+        ),
         p = sample(seq(0, .5, .001), 4),
         stringsAsFactors = FALSE
       ),
@@ -24,22 +28,30 @@ test_that("Check that ggseg3d is working", {
     )
   )
 
-  someData <- data.frame(
-    region = c("transverse temporal", "insula",
-               "precentral", "superior parietal"),
+  some_data <- data.frame(
+    region = c(
+      "transverse temporal",
+      "insula",
+      "precentral",
+      "superior parietal"
+    ),
     p = sample(seq(0, .5, .001), 4),
     stringsAsFactors = FALSE
   )
 
   p <- ggseg3d(
-    .data = someData,
-    colour = "p", text = "p", palette = c("black", "white")
+    .data = some_data,
+    colour = "p",
+    text = "p",
+    palette = c("black", "white")
   )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 
   p <- ggseg3d(
-    .data = someData,
-    colour = "p", text = "p", palette = c("black", "white")
+    .data = some_data,
+    colour = "p",
+    text = "p",
+    palette = c("black", "white")
   )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
   expect_true(!is.null(p$x$colorbar))
@@ -71,15 +83,19 @@ test_that("ggseg3d with inflated surface", {
 })
 
 test_that("ggseg3d handles edge_by parameter", {
-  someData <- data.frame(
-    region = c("transverse temporal", "insula",
-               "precentral", "superior parietal"),
+  some_data <- data.frame(
+    region = c(
+      "transverse temporal",
+      "insula",
+      "precentral",
+      "superior parietal"
+    ),
     lobe = c("temporal", "insular", "frontal", "parietal"),
     stringsAsFactors = FALSE
   )
 
   p <- ggseg3d(
-    .data = someData,
+    .data = some_data,
     hemisphere = "left",
     edge_by = "lobe"
   )
@@ -92,14 +108,14 @@ test_that("ggseg3d default colorbar is present", {
 })
 
 test_that("ggseg3d with custom palette", {
-  someData <- data.frame(
+  some_data <- data.frame(
     region = c("transverse temporal", "insula"),
     p = c(0.1, 0.9),
     stringsAsFactors = FALSE
   )
 
   p <- ggseg3d(
-    .data = someData,
+    .data = some_data,
     hemisphere = "left",
     colour = "p",
     palette = c("blue" = 0, "white" = 0.5, "red" = 1)
@@ -138,4 +154,94 @@ test_that("ggseg3d with aseg mesh atlas", {
   p <- ggseg3d(atlas = aseg, hemisphere = "subcort")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
   expect_true(length(p$x$meshes) > 0)
+})
+
+test_that("ggseg3d errors on invalid atlas object", {
+  expect_error(ggseg3d(atlas = list()), "brain_atlas")
+  expect_error(ggseg3d(atlas = data.frame()), "brain_atlas")
+})
+
+test_that("prepare_brain_meshes handles atlas with centerlines", {
+  atlas_data <- data.frame(
+    label = "tract_a",
+    stringsAsFactors = FALSE
+  )
+
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+  tangents <- matrix(
+    c(1, 0, 0, 1, 0, 0, 1, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+
+  cl_data <- data.frame(label = "tract_a", stringsAsFactors = FALSE)
+  cl_data$points <- list(centerline)
+  cl_data$tangents <- list(tangents)
+
+  atlas <- structure(
+    list(
+      core = data.frame(
+        label = "tract_a",
+        region = "tract a",
+        hemi = "subcort",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(
+          centerlines = cl_data,
+          tube_radius = 1,
+          tube_segments = 4
+        ),
+        class = "brain_atlas_data"
+      ),
+      type = "tract",
+      palette = c("tract_a" = "#FF0000")
+    ),
+    class = "brain_atlas"
+  )
+
+  prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")
+
+  expect_type(prepared, "list")
+  expect_true(length(prepared$meshes) > 0)
+})
+
+test_that("prepare_brain_meshes handles atlas$data$meshes path", {
+  meshes_data <- data.frame(
+    label = "Left-Caudate",
+    stringsAsFactors = FALSE
+  )
+  meshes_data$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      core = data.frame(
+        label = "Left-Caudate",
+        region = "caudate",
+        hemi = "subcort",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(meshes = meshes_data),
+        class = "brain_atlas_data"
+      ),
+      type = "subcortical",
+      palette = c("Left-Caudate" = "#FF0000")
+    ),
+    class = "brain_atlas"
+  )
+
+  prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")
+
+  expect_type(prepared, "list")
+  expect_true(length(prepared$meshes) > 0)
 })

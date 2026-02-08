@@ -7,19 +7,20 @@
 set_background(p, colour = "#ffffff")
 }
 \arguments{
-\item{p}{ggseg3d widget object}
+\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
 
 \item{colour}{string. Background color (hex or named color)}
 }
 \value{
-ggseg3d widget object with updated background
+The input object (modified), for piping.
 }
 \description{
-Changes the background color of a ggseg3d widget.
+Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 }
 \examples{
 \dontrun{
-ggseg3d() |>
-  set_background("black")
+ggseg3d() |> set_background("black")
+
+ggsegray(atlas = dk) |> set_background("black")
 }
 }

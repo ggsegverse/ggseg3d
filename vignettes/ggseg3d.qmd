@@ -1,13 +1,14 @@
 ---
 title: "3D brain visualization with ggseg3d"
-output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{3D brain visualization with ggseg3d}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| label: setup
+#| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
   fig.width = 7,
@@ -22,6 +23,7 @@ Version 2.0 rebuilt the package on Three.js, replacing the previous Plotly backe
 This brings faster rendering, a pipe-friendly API, and unified brain atlases that work with both ggseg and ggseg3d.
 
 ```{r}
+#| label: load-packages
 library(ggseg3d)
 library(dplyr)
 ```
@@ -30,7 +32,9 @@ library(dplyr)
 
 Call `ggseg3d()` without arguments to plot the Desikan-Killiany atlas:
 
-```{r basic}
+```{r}
+#| label: basic
+#| fig-cap: "Default Desikan-Killiany atlas rendered with ggseg3d."
 ggseg3d()
 ```
 
@@ -46,6 +50,8 @@ Hover over regions to see their names.
 Use `pan_camera()` to set the viewing angle:
 
 ```{r}
+#| label: camera-preset
+#| fig-cap: "Left lateral view of the Desikan-Killiany atlas."
 ggseg3d() |>
   pan_camera("left lateral")
 ```
@@ -60,7 +66,9 @@ Available presets:
 
 For custom positions, pass a list:
 
-```{r, eval=FALSE}
+```{r}
+#| label: camera-custom
+#| eval: false
 ggseg3d() |>
   pan_camera(list(eye = list(x = -200, y = 100, z = 100)))
 ```
@@ -71,6 +79,8 @@ Provide data with a `region` or `label` column matching the atlas.
 Map it to `colour` for the fill and optionally `text` for hover info:
 
 ```{r}
+#| label: plot-data
+#| fig-cap: "Brain regions coloured by p-value."
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
@@ -84,7 +94,9 @@ ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
 
 Pass colours as a vector:
 
-```{r, eval=FALSE}
+```{r}
+#| label: palette-vector
+#| eval: false
 ggseg3d(
   .data = some_data,
   atlas = dk,
@@ -96,6 +108,8 @@ ggseg3d(
 Or use a named vector to control breakpoints:
 
 ```{r}
+#| label: palette-named
+#| fig-cap: "Custom green-white-red palette with breakpoints at 0, 0.05, and 1."
 ggseg3d(
   .data = some_data,
   atlas = dk,
@@ -112,6 +126,8 @@ This lets the colour bar extend beyond your data range.
 Change the background with `set_background()`:
 
 ```{r}
+#| label: background
+#| fig-cap: "Brain atlas with a black background."
 ggseg3d() |>
   set_background("black")
 ```
@@ -121,24 +137,28 @@ ggseg3d() |>
 Add outlines around regions with `set_edges()`:
 
 ```{r}
+#| label: edges
+#| fig-cap: "Left hemisphere with black region boundary edges."
 ggseg3d(hemisphere = "left") |>
   set_edges("black") |>
   pan_camera("left lateral")
 ```
 
-### Edge boundaries with edge.by
+### Edge boundaries with edge_by
 
 By default, edges appear between regions with different colours.
-Use `edge.by` to define boundaries based on a different column:
+Use `edge_by` to define boundaries based on a different column:
 
-```{r, eval=FALSE}
+```{r}
+#| label: edge-by
+#| eval: false
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.2, 0.4, 0.3, 0.5),
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", edge.by = "lobe") |>
+ggseg3d(.data = some_data, atlas = dk, colour = "p", edge_by = "lobe") |>
   set_edges("white", width = 1) |>
   set_background("black")
 ```
@@ -150,6 +170,8 @@ Regions in the same lobe won't have edges between them.
 For subcortical atlases, reduce opacity of uncoloured regions and add a glass brain:
 
 ```{r}
+#| label: subcortical
+#| fig-cap: "Subcortical structures with a translucent glass brain overlay."
 some_data <- tibble(
   region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
@@ -160,7 +182,7 @@ ggseg3d(
   atlas = aseg,
   colour = "p",
   text = "p",
-  na.alpha = .5
+  na_alpha = .5
 ) |>
   add_glassbrain()
 ```
@@ -171,7 +193,9 @@ The glass brain adds a translucent cortical surface for anatomical context.
 
 Use `snapshot_brain()` to save static images:
 
-```{r, eval=FALSE}
+```{r}
+#| label: snapshot
+#| eval: false
 ggseg3d() |>
   pan_camera("left lateral") |>
   snapshot_brain("brain_lateral.png")
@@ -183,7 +207,9 @@ This requires Chrome or Chromium.
 
 For journal figures, increase resolution:
 
-```{r, eval=FALSE}
+```{r}
+#| label: snapshot-hires
+#| eval: false
 ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
   pan_camera("left lateral") |>
   set_background("white") |>
@@ -204,7 +230,9 @@ ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
 
 Save individual views and combine them:
 
-```{r, eval=FALSE}
+```{r}
+#| label: multi-panel
+#| eval: false
 library(magick)
 
 base_plot <- ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
@@ -237,7 +265,9 @@ image_write(combined, "figure1_all_views.png")
 
 Hide the legend:
 
-```{r, eval=FALSE}
+```{r}
+#| label: legend
+#| eval: false
 ggseg3d() |>
   set_legend(FALSE)
 ```
@@ -246,7 +276,9 @@ ggseg3d() |>
 
 Set explicit width and height:
 
-```{r, eval=FALSE}
+```{r}
+#| label: dimensions
+#| eval: false
 ggseg3d() |>
   set_dimensions(width = 800, height = 600)
 ```
@@ -255,7 +287,9 @@ ggseg3d() |>
 
 Disable lighting for exact colour reproduction:
 
-```{r, eval=FALSE}
+```{r}
+#| label: flat-shading
+#| eval: false
 ggseg3d() |>
   set_flat_shading()
 ```
@@ -266,7 +300,9 @@ This is useful when creating atlases or when you need colours to match exactly.
 
 Switch from perspective to orthographic projection:
 
-```{r, eval=FALSE}
+```{r}
+#| label: orthographic
+#| eval: false
 ggseg3d() |>
   set_orthographic()
 ```
@@ -278,7 +314,9 @@ Regions appear the same size regardless of distance from the camera.
 The `brain_atlas` class works with both ggseg and ggseg3d.
 Use the same atlas object for both:
 
-```{r, eval=FALSE}
+```{r}
+#| label: same-atlas
+#| eval: false
 library(ggseg)
 
 plot(dk)
@@ -286,12 +324,53 @@ plot(dk)
 ggseg3d(atlas = dk)
 ```
 
+## Ray-traced rendering with rayshader
+
+The interactive WebGL viewer is great for exploration, but sometimes you need a publication-quality render with realistic lighting and shadows.
+`ggsegray()` takes the same atlas pipeline and outputs to rgl instead of htmlwidgets.
+From there, rayshader's path tracer can produce ray-traced images directly.
+
+```{r}
+#| label: rgl-basic
+#| eval: false
+ggsegray(atlas = dk, hemisphere = "left") |>
+  pan_camera("left lateral")
+```
+
+The same pipe functions --- `pan_camera()`, `add_glassbrain()`, `set_background()` --- work with both the htmlwidget and rgl backends.
+Once the rgl scene looks right, capture it with `rgl::snapshot3d()` or hand it off to rayshader's path tracer:
+
+```{r}
+#| label: rgl-raytrace
+#| eval: false
+ggsegray(
+  .data = some_data,
+  atlas = dk,
+  colour = "p",
+  hemisphere = "left"
+) |>
+  pan_camera("left lateral") |>
+  set_background("white")
+
+rayshader::render_highquality(
+  filename = "brain_raytraced.png",
+  samples = 256,
+  width = 1200,
+  height = 900
+)
+rgl::close3d()
+```
+
+See `vignette("rayshader", package = "ggseg3d")` for the full walkthrough --- lighting, materials, depth of field, and camera animation.
+
 ## Finding atlases
 
 ggseg3d ships with `dk` (cortical) and `aseg` (subcortical).
 Many more are available through the [ggseg r-universe](https://ggseg.r-universe.dev):
 
-```{r, eval=FALSE}
+```{r}
+#| label: install-atlases
+#| eval: false
 install.packages("ggsegYeo2011", repos = "https://ggseg.r-universe.dev")
 ```
 

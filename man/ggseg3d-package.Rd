@@ -23,8 +23,8 @@ that contain 3D vertex mappings.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/ggseg/ggseg3d/}
   \item \url{https://github.com/ggseg/ggseg3d}
+  \item \url{https://ggseg.github.io/ggseg3d/}
   \item Report bugs at \url{https://github.com/ggseg/ggseg3d/issues}
 }
 

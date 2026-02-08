@@ -56,7 +56,9 @@ test_that("vertices_to_colors creates correct color vector", {
   atlas_data$vertices <- list(c(0, 1, 2), c(3, 4))
 
   colors <- vertices_to_colors(
-    atlas_data, n_vertices = 6, na_colour = "#CCCCCC"
+    atlas_data,
+    n_vertices = 6,
+    na_colour = "#CCCCCC"
   )
 
   expect_length(colors, 6)
@@ -74,7 +76,9 @@ test_that("vertices_to_colors handles NA colours", {
   atlas_data$vertices <- list(c(0, 1), c(2, 3))
 
   colors <- vertices_to_colors(
-    atlas_data, n_vertices = 5, na_colour = "#AAAAAA"
+    atlas_data,
+    n_vertices = 5,
+    na_colour = "#AAAAAA"
   )
 
   expect_equal(colors[1:2], rep("#FF0000", 2))
@@ -116,11 +120,11 @@ test_that("get_brain_mesh returns inflated surfaces", {
   expect_true(!is.null(rh))
 })
 
-test_that("get_brain_mesh warns for unavailable surfaces", {
-  expect_warning(
-    get_brain_mesh(hemisphere = "lh", surface = "white"),
-    "not available"
-  )
+test_that("get_brain_mesh returns white surface", {
+  mesh <- get_brain_mesh(hemisphere = "lh", surface = "white")
+  expect_true(!is.null(mesh))
+  expect_true("vertices" %in% names(mesh))
+  expect_true("faces" %in% names(mesh))
 })
 
 test_that("vertices_to_colors handles empty vertices", {
@@ -132,7 +136,9 @@ test_that("vertices_to_colors handles empty vertices", {
   atlas_data$vertices <- list(integer(0))
 
   colors <- vertices_to_colors(
-    atlas_data, n_vertices = 5, na_colour = "#CCCCCC"
+    atlas_data,
+    n_vertices = 5,
+    na_colour = "#CCCCCC"
   )
 
   expect_equal(colors, rep("#CCCCCC", 5))
@@ -147,7 +153,9 @@ test_that("vertices_to_colors handles out-of-bounds indices", {
   atlas_data$vertices <- list(c(-1, 0, 100))
 
   colors <- vertices_to_colors(
-    atlas_data, n_vertices = 5, na_colour = "#CCCCCC"
+    atlas_data,
+    n_vertices = 5,
+    na_colour = "#CCCCCC"
   )
 
   expect_equal(colors[1], "#FF0000")
@@ -226,4 +234,196 @@ test_that("is_mesh_atlas detects atlas with direct meshes", {
   atlas$meshes$mesh <- list(list())
 
   expect_true(is_mesh_atlas(atlas))
+})
+
+test_that("is_unified_atlas detects direct vertices", {
+  atlas <- structure(
+    list(
+      core = data.frame(label = "a", region = "r", hemi = "left"),
+      vertices = data.frame(label = "a")
+    ),
+    class = "brain_atlas"
+  )
+  atlas$vertices$vertices <- list(1:10)
+
+  expect_true(is_unified_atlas(atlas))
+})
+
+test_that("is_unified_atlas detects direct meshes", {
+  atlas <- structure(
+    list(
+      core = data.frame(label = "a", region = "r", hemi = "subcort"),
+      meshes = data.frame(label = "a")
+    ),
+    class = "brain_atlas"
+  )
+
+  expect_true(is_unified_atlas(atlas))
+})
+
+test_that("cross_product computes correct cross products", {
+  expect_equal(cross_product(c(1, 0, 0), c(0, 1, 0)), c(0, 0, 1))
+  expect_equal(cross_product(c(0, 1, 0), c(0, 0, 1)), c(1, 0, 0))
+  expect_equal(cross_product(c(1, 0, 0), c(1, 0, 0)), c(0, 0, 0))
+})
+
+test_that("rotate_vector rotates correctly", {
+  rotated <- rotate_vector(c(1, 0, 0), c(0, 0, 1), pi / 2)
+  expect_equal(rotated[1], 0, tolerance = 1e-10)
+  expect_equal(rotated[2], 1, tolerance = 1e-10)
+  expect_equal(rotated[3], 0, tolerance = 1e-10)
+
+  no_rotation <- rotate_vector(c(1, 0, 0), c(0, 0, 1), 0)
+  expect_equal(no_rotation, c(1, 0, 0), tolerance = 1e-10)
+})
+
+test_that("generate_tube_mesh creates correct mesh structure", {
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0),
+    nrow = 4,
+    byrow = TRUE
+  )
+
+  result <- generate_tube_mesh(centerline, radius = 0.5, segments = 6)
+
+  expect_true("vertices" %in% names(result))
+  expect_true("faces" %in% names(result))
+  expect_true("metadata" %in% names(result))
+  expect_equal(nrow(result$vertices), 4 * 6)
+  expect_equal(nrow(result$faces), (4 - 1) * 6 * 2)
+  expect_equal(result$metadata$n_centerline_points, 4)
+})
+
+test_that("generate_tube_mesh accepts per-point radius", {
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+
+  result <- generate_tube_mesh(
+    centerline,
+    radius = c(0.5, 1.0, 0.5),
+    segments = 4
+  )
+
+  expect_equal(nrow(result$vertices), 3 * 4)
+})
+
+test_that("generate_tube_mesh errors on bad input", {
+  expect_error(generate_tube_mesh(matrix(1:3, nrow = 1)), "at least 2 rows")
+  expect_error(generate_tube_mesh(c(1, 2, 3)), "matrix")
+})
+
+test_that("compute_parallel_transport_frames returns correct structure", {
+  curve <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 1, 0, 3, 1, 1),
+    nrow = 4,
+    byrow = TRUE
+  )
+
+  frames <- compute_parallel_transport_frames(curve)
+
+  expect_true("tangents" %in% names(frames))
+  expect_true("normals" %in% names(frames))
+  expect_true("binormals" %in% names(frames))
+  expect_equal(nrow(frames$tangents), 4)
+  expect_equal(nrow(frames$normals), 4)
+  expect_equal(nrow(frames$binormals), 4)
+
+  for (i in 1:4) {
+    expect_equal(sqrt(sum(frames$tangents[i, ]^2)), 1, tolerance = 1e-10)
+    expect_equal(sqrt(sum(frames$normals[i, ]^2)), 1, tolerance = 1e-10)
+    expect_equal(sqrt(sum(frames$binormals[i, ]^2)), 1, tolerance = 1e-10)
+  }
+})
+
+test_that("build_tract_meshes with centerlines creates tube meshes", {
+  atlas_data <- data.frame(
+    label = c("tract_a"),
+    colour = c("#FF0000"),
+    stringsAsFactors = FALSE
+  )
+
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+  tangents <- matrix(
+    c(1, 0, 0, 1, 0, 0, 1, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+
+  atlas_centerlines <- list(
+    centerlines = data.frame(label = "tract_a", stringsAsFactors = FALSE),
+    tube_radius = 0.5,
+    tube_segments = 4
+  )
+  atlas_centerlines$centerlines$points <- list(centerline)
+  atlas_centerlines$centerlines$tangents <- list(tangents)
+
+  meshes <- build_tract_meshes(
+    atlas_data,
+    "#CCCCCC",
+    color_by = "colour",
+    atlas_centerlines = atlas_centerlines
+  )
+
+  expect_length(meshes, 1)
+  expect_equal(meshes[[1]]$name, "tract_a")
+  expect_equal(meshes[[1]]$colorMode, "vertexcolor")
+  expect_equal(length(meshes[[1]]$colors), 3 * 4)
+})
+
+test_that("build_tract_meshes warns with no data", {
+  atlas_data <- data.frame(
+    label = c("tract_a"),
+    colour = c("#FF0000"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_warning(
+    meshes <- build_tract_meshes(atlas_data, "#CCCCCC"),
+    "No centerlines or meshes"
+  )
+  expect_length(meshes, 0)
+})
+
+test_that("build_tract_meshes with centerlines and orientation coloring", {
+  atlas_data <- data.frame(
+    label = c("tract_a"),
+    colour = c("#FF0000"),
+    stringsAsFactors = FALSE
+  )
+
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3,
+    byrow = TRUE
+  )
+  tangents <- matrix(
+    c(1, 0, 0, 0, 1, 0, 0, 0, 1),
+    nrow = 3,
+    byrow = TRUE
+  )
+
+  atlas_centerlines <- list(
+    centerlines = data.frame(label = "tract_a", stringsAsFactors = FALSE),
+    tube_radius = 0.5,
+    tube_segments = 4
+  )
+  atlas_centerlines$centerlines$points <- list(centerline)
+  atlas_centerlines$centerlines$tangents <- list(tangents)
+
+  meshes <- build_tract_meshes(
+    atlas_data,
+    "#CCCCCC",
+    color_by = "orientation",
+    atlas_centerlines = atlas_centerlines
+  )
+
+  expect_length(meshes, 1)
+  expect_true(all(grepl("^#", meshes[[1]]$colors)))
 })

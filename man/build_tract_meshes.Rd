@@ -19,8 +19,6 @@ columns}
 
 \item{color_by}{How to colour tracts: "colour" (use colour column),
 "orientation" (direction-based RGB from tangents)}
-
-\item{colormap}{Colormap for scalar colouring (not yet implemented)}
 }
 \value{
 List of mesh data structures

@@ -1,5 +1,5 @@
 Package: ggseg3d
-Title: Tri-Surface Mesh Plots for Brain Atlases
+Title: Interactive 3D Brain Atlas Visualization
 Version: 2.0.0
 Authors@R: c(person("Athanasia Mo", "Mowinckel",
                     email = "a.m.mowinckel@psykologi.uio.no",
@@ -9,14 +9,15 @@ Authors@R: c(person("Athanasia Mo", "Mowinckel",
                     email = "d.v.pineiro@psykologi.uio.no",
                     role = c("aut"),
                     comment = c(ORCID = "0000-0001-9997-9156")))
-Description: Mainly contains a plotting function ggseg3d(),
-    and data of two standard brain atlases (Desikan-Killiany and aseg).
-    By far, the largest bit of the package is the data for each of the atlases.
-    The functions and data enable users to plot tri-surface mesh plots of
-    brain atlases, and customise these by projecting colours onto the brain
-    segments based on values in their own data sets. Uses 'Three.js' for
-    WebGL-based 3D rendering via 'htmlwidgets'. Mowinckel & Vidal-Piñeiro (2020)
-    <doi:10.1177/2515245920928009>.
+Description: Plot brain atlases as interactive 3D meshes using 'Three.js'
+    via 'htmlwidgets', or render publication-quality static images through
+    'rgl' and 'rayshader'. Ships with the Desikan-Killiany ('dk') cortical,
+    automatic subcortical segmentation ('aseg'), and TRACULA white matter
+    tract ('tracula') atlases. A pipe-friendly
+    API lets you map data onto brain regions, control camera angles, toggle
+    region edges, overlay glass brains, and snapshot or ray-trace the result.
+    Additional atlases are available through the 'ggseg' r-universe.
+    Mowinckel & Vidal-Piñeiro (2020) <doi:10.1177/2515245920928009>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.3
@@ -41,8 +42,12 @@ Suggests:
     ggsegExtra,
     lintr,
     processx,
+    quarto,
+    rayshader,
+    rgl,
     shiny,
     spelling
-URL: https://github.com/ggseg/ggseg3d/, https://github.com/ggseg/ggseg3d
+URL: https://github.com/ggseg/ggseg3d, https://ggseg.github.io/ggseg3d/
 BugReports: https://github.com/ggseg/ggseg3d/issues
+VignetteBuilder: quarto
 Language: en-US

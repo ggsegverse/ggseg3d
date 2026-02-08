@@ -91,6 +91,56 @@ test_that("pan_camera validates input", {
   )
 })
 
+test_that("set_positioning centers hemispheres", {
+  p <- ggseg3d(hemisphere = c("left", "right")) |>
+    set_positioning("centered")
+  expect_s3_class(p, c("ggseg3d", "htmlwidget"))
+
+  for (m in p$x$meshes) {
+    if (!grepl("left|right", m$name, ignore.case = TRUE)) {
+      next
+    }
+    x_range <- range(m$vertices$x)
+    x_center <- mean(x_range)
+    expect_true(abs(x_center) < 1)
+  }
+})
+
+test_that("set_positioning anatomical offsets hemispheres", {
+  p <- ggseg3d(hemisphere = c("left", "right")) |>
+    set_positioning("anatomical")
+  expect_s3_class(p, c("ggseg3d", "htmlwidget"))
+
+  left_mesh <- NULL
+  right_mesh <- NULL
+  for (m in p$x$meshes) {
+    if (grepl("left", m$name, ignore.case = TRUE)) {
+      left_mesh <- m
+    }
+    if (grepl("right", m$name, ignore.case = TRUE)) right_mesh <- m
+  }
+  expect_true(mean(range(left_mesh$vertices$x)) < 0)
+  expect_true(mean(range(right_mesh$vertices$x)) > 0)
+})
+
+test_that("set_positioning skips meshes without left/right in name", {
+  p <- ggseg3d(atlas = aseg)
+  original_meshes <- p$x$meshes
+
+  p_positioned <- p |> set_positioning("centered")
+  for (i in seq_along(p_positioned$x$meshes)) {
+    m <- p_positioned$x$meshes[[i]]
+    name <- m$name %||% ""
+    if (!grepl("left|right", name, ignore.case = TRUE)) {
+      expect_equal(m$vertices, original_meshes[[i]]$vertices)
+    }
+  }
+})
+
+test_that("set_positioning rejects non-ggseg3d objects", {
+  expect_error(set_positioning(list()), "ggseg3d")
+})
+
 test_that("additions can be chained", {
   p <- ggseg3d() |>
     set_background("black") |>

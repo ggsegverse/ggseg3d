@@ -1,4 +1,4 @@
-test_that("build_unified_meshes skips hemisphere without data", {
+test_that("build_meshes skips hemisphere without data", {
   atlas_data <- data.frame(
     label = c("a"),
     region = c("region a"),
@@ -8,7 +8,7 @@ test_that("build_unified_meshes skips hemisphere without data", {
   )
   atlas_data$vertices <- list(c(0, 1, 2))
 
-  meshes <- build_unified_meshes(
+  meshes <- build_meshes(
     atlas_data,
     c("left", "right"),
     "inflated",
@@ -20,7 +20,7 @@ test_that("build_unified_meshes skips hemisphere without data", {
   expect_true(length(meshes) >= 1)
 })
 
-test_that("build_unified_meshes with edge.by parameter", {
+test_that("build_meshes with edge.by parameter", {
   atlas_data <- data.frame(
     label = c("a", "b"),
     region = c("region a", "region b"),
@@ -31,7 +31,7 @@ test_that("build_unified_meshes with edge.by parameter", {
   )
   atlas_data$vertices <- list(0:50, 51:100)
 
-  meshes <- build_unified_meshes(
+  meshes <- build_meshes(
     atlas_data,
     "left",
     "inflated",
@@ -44,7 +44,7 @@ test_that("build_unified_meshes with edge.by parameter", {
   expect_true(!is.null(meshes[[1]]$edgeColor))
 })
 
-test_that("build_unified_meshes handles subcort hemisphere", {
+test_that("build_meshes handles subcort hemisphere", {
   atlas_data <- data.frame(
     label = c("Left-Caudate"),
     region = c("caudate"),
@@ -59,7 +59,7 @@ test_that("build_unified_meshes handles subcort hemisphere", {
     )
   )
 
-  meshes <- build_unified_meshes(
+  meshes <- build_meshes(
     atlas_data,
     "subcort",
     "inflated",
@@ -72,7 +72,7 @@ test_that("build_unified_meshes handles subcort hemisphere", {
   expect_true(length(meshes) > 0)
 })
 
-test_that("build_unified_meshes handles tract atlas type", {
+test_that("build_meshes handles tract atlas type", {
   atlas_data <- data.frame(
     label = c("tract1"),
     region = c("tract 1"),
@@ -87,7 +87,7 @@ test_that("build_unified_meshes handles tract atlas type", {
     )
   )
 
-  meshes <- build_unified_meshes(
+  meshes <- build_meshes(
     atlas_data,
     "subcort",
     "inflated",

@@ -10,8 +10,9 @@
 #'   (data.frame with i, j, k), or NULL if mesh not found
 #' @export
 get_brain_mesh <- function(
-    hemisphere = c("lh", "rh"),
-    surface = c("inflated", "semi-inflated", "white", "pial")) {
+  hemisphere = c("lh", "rh"),
+  surface = c("inflated", "semi-inflated", "white", "pial")
+) {
   hemisphere <- match.arg(hemisphere)
   surface <- match.arg(surface)
 
@@ -56,9 +57,10 @@ get_brain_mesh <- function(
 #' @return Character vector of colors, one per mesh vertex
 #' @keywords internal
 vertices_to_colors <- function(
-    atlas_data,
-    n_vertices,
-    na_colour = "#CCCCCC") {
+  atlas_data,
+  n_vertices,
+  na_colour = "#CCCCCC"
+) {
   vertex_colors <- rep(na_colour, n_vertices)
 
   for (i in seq_len(nrow(atlas_data))) {
@@ -88,9 +90,10 @@ vertices_to_colors <- function(
 #' @return Character vector of labels, one per mesh vertex
 #' @keywords internal
 vertices_to_labels <- function(
-    atlas_data,
-    n_vertices,
-    na_label = NA_character_) {
+  atlas_data,
+  n_vertices,
+  na_label = NA_character_
+) {
   vertex_labels <- rep(na_label, n_vertices)
 
   for (i in seq_len(nrow(atlas_data))) {
@@ -122,10 +125,11 @@ vertices_to_labels <- function(
 #' @return Character vector of group values, one per mesh vertex
 #' @export
 vertices_to_groups <- function(
-    atlas_data,
-    n_vertices,
-    group_col,
-    na_group = NA_character_) {
+  atlas_data,
+  n_vertices,
+  group_col,
+  na_group = NA_character_
+) {
   vertex_groups <- rep(na_group, n_vertices)
 
   if (!group_col %in% names(atlas_data)) {
@@ -168,15 +172,16 @@ vertices_to_groups <- function(
 #' @importFrom rlang .data
 #' @keywords internal
 build_meshes <- function(
-    atlas_data,
-    hemisphere,
-    surface,
-    na_colour,
-    edge_by,
-    atlas_meshes = NULL,
-    atlas_type = "cortical",
-    color_by = "colour",
-    atlas_centerlines = NULL) {
+  atlas_data,
+  hemisphere,
+  surface,
+  na_colour,
+  edge_by,
+  atlas_meshes = NULL,
+  atlas_type = "cortical",
+  color_by = "colour",
+  atlas_centerlines = NULL
+) {
   meshes <- list()
   hemi_map <- c("right" = "rh", "left" = "lh")
 
@@ -184,7 +189,10 @@ build_meshes <- function(
     if (current_hemi == "subcort") {
       if (atlas_type == "tract") {
         tract_meshes <- build_tract_meshes(
-          atlas_data, na_colour, color_by, atlas_centerlines
+          atlas_data,
+          na_colour,
+          color_by,
+          atlas_centerlines
         )
         meshes <- c(meshes, tract_meshes)
       } else if (!is.null(atlas_meshes)) {
@@ -205,7 +213,9 @@ build_meshes <- function(
     }
 
     hemi_data <- dplyr::filter(atlas_data, .data$hemi == current_hemi)
-    if (nrow(hemi_data) == 0) next
+    if (nrow(hemi_data) == 0) {
+      next
+    }
 
     vertices <- mesh$vertices
 
@@ -282,7 +292,9 @@ build_subcortical_meshes <- function(atlas_data, na_colour) {
     label <- atlas_data$label[i]
     mesh_data <- atlas_data$mesh[[i]]
 
-    if (is.null(mesh_data)) next
+    if (is.null(mesh_data)) {
+      next
+    }
 
     colour <- atlas_data$colour[i]
     if (is.na(colour)) {
@@ -319,15 +331,15 @@ build_subcortical_meshes <- function(atlas_data, na_colour) {
 #' @param na_colour Colour for NA values
 #' @param color_by How to colour tracts: "colour" (use colour column),
 #'   "orientation" (direction-based RGB from tangents)
-#' @param colormap Colormap for scalar colouring (not yet implemented)
 #'
 #' @return List of mesh data structures
 #' @keywords internal
 build_tract_meshes <- function(
-    atlas_data,
-    na_colour,
-    color_by = "colour",
-    atlas_centerlines = NULL) {
+  atlas_data,
+  na_colour,
+  color_by = "colour",
+  atlas_centerlines = NULL
+) {
   meshes <- list()
 
   has_centerlines <- !is.null(atlas_centerlines) &&
@@ -344,7 +356,9 @@ build_tract_meshes <- function(
 
     if (has_centerlines) {
       cl_idx <- which(atlas_centerlines$centerlines$label == label)
-      if (length(cl_idx) == 0) next
+      if (length(cl_idx) == 0) {
+        next
+      }
 
       centerline <- atlas_centerlines$centerlines$points[[cl_idx]]
       tangents <- atlas_centerlines$centerlines$tangents[[cl_idx]]
@@ -484,7 +498,11 @@ generate_tube_mesh <- function(centerline, radius = 0.5, segments = 8) {
   }
 
   list(
-    vertices = data.frame(x = vertices[, 1], y = vertices[, 2], z = vertices[, 3]),
+    vertices = data.frame(
+      x = vertices[, 1],
+      y = vertices[, 2],
+      z = vertices[, 3]
+    ),
     faces = data.frame(i = faces[, 1], j = faces[, 2], k = faces[, 3]),
     metadata = list(
       n_centerline_points = n_points,
@@ -497,7 +515,7 @@ generate_tube_mesh <- function(centerline, radius = 0.5, segments = 8) {
 
 #' Compute parallel transport frames along curve
 #' @keywords internal
-compute_parallel_transport_frames <- function(curve) {
+compute_parallel_transport_frames <- function(curve) { # nolint: object_length_linter
   n <- nrow(curve)
 
   tangents <- matrix(0, nrow = n, ncol = 3)
@@ -559,5 +577,8 @@ cross_product <- function(a, b) {
 rotate_vector <- function(v, axis, angle) {
   cos_a <- cos(angle)
   sin_a <- sin(angle)
-  v * cos_a + cross_product(axis, v) * sin_a + axis * sum(axis * v) * (1 - cos_a)
+  v *
+    cos_a +
+    cross_product(axis, v) * sin_a +
+    axis * sum(axis * v) * (1 - cos_a)
 }

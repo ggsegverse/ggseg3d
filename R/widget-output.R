@@ -20,7 +20,10 @@
 # nolint start: object_name_linter
 ggseg3dOutput <- function(outputId, width = "100%", height = "400px") {
   htmlwidgets::shinyWidgetOutput(
-    outputId, "ggseg3d", width, height,
+    outputId,
+    "ggseg3d",
+    width,
+    height,
     package = "ggseg3d"
   )
 }
@@ -48,7 +51,6 @@ renderGgseg3d <- function(expr, env = parent.frame(), quoted = FALSE) {
 updateGgseg3dCamera <- function(session, outputId, camera) {
   session$sendCustomMessage(paste0("ggseg3d-camera-", outputId), camera)
 }
-
 
 
 #' Update background in Shiny

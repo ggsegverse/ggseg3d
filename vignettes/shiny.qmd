@@ -1,13 +1,14 @@
 ---
 title: "Using ggseg3d in Shiny"
-output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ggseg3d in Shiny}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| label: setup
+#| include: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -19,6 +20,7 @@ ggseg3d widgets work in Shiny applications.
 This vignette covers the output and render functions, plus reactive updates.
 
 ```{r}
+#| label: load-packages
 library(shiny)
 library(ggseg3d)
 ```
@@ -28,6 +30,7 @@ library(ggseg3d)
 Use `ggseg3dOutput()` in the UI and `renderGgseg3d()` in the server:
 
 ```{r}
+#| label: basic-app
 ui <- fluidPage(
   titlePanel("Brain Atlas Viewer"),
   sidebarLayout(
@@ -60,12 +63,14 @@ shinyApp(ui, server)
 Set explicit dimensions in `ggseg3dOutput()`:
 
 ```{r}
+#| label: output-sizing
 ggseg3dOutput("brain", width = "100%", height = "600px")
 ```
 
 Or use `set_dimensions()` in the render function:
 
 ```{r}
+#| label: render-dimensions
 renderGgseg3d({
   ggseg3d() |>
     set_dimensions(width = 800, height = 600)
@@ -77,6 +82,7 @@ renderGgseg3d({
 Update the brain plot when data changes:
 
 ```{r}
+#| label: reactive-data
 server <- function(input, output, session) {
   brain_data <- reactive({
     tibble(
@@ -97,6 +103,7 @@ server <- function(input, output, session) {
 Use `updateGgseg3dCamera()` and `updateGgseg3dBackground()` to modify an existing widget without re-rendering:
 
 ```{r}
+#| label: reactive-updates
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -139,6 +146,7 @@ These updates are faster than re-rendering the entire widget.
 Here's a full app with data selection and dynamic updates:
 
 ```{r}
+#| label: complete-app
 library(shiny)
 library(ggseg3d)
 library(dplyr)

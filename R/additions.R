@@ -2,33 +2,39 @@
 #'
 #' Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
 #' Particularly useful for subcortical and tract visualizations where spatial
-#' context helps interpretation.
+#' context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
+#' rgl (`ggsegray`) objects.
 #'
-#' @param p ggseg3d widget object
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
 #' @param hemisphere Character vector. Hemispheres to add: "left", "right",
 #'   or both.
 #' @param surface Character. Surface type: "inflated", "white", or "pial".
 #' @param colour Character. Colour for the glass brain surface (hex or named).
 #' @param opacity Numeric. Transparency of the glass brain (0-1).
 #'
-#' @return ggseg3d widget object with glass brain tri-surface mesh
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' ggseg3d(atlas = my_tract_atlas, hemisphere = "subcort") |>
-#'   add_glassbrain() |>
-#'   pan_camera("left lateral")
-#'
 #' ggseg3d(atlas = aseg) |>
 #'   add_glassbrain("left", opacity = 0.2)
+#'
+#' ggsegray(atlas = aseg) |>
+#'   add_glassbrain(opacity = 0.15) |>
+#'   pan_camera("right lateral")
 #' }
 add_glassbrain <- function(
-    p,
-    hemisphere = c("left", "right"),
-    surface = "pial",
-    colour = "#CCCCCC",
-    opacity = 0.3) {
+  p,
+  hemisphere = c("left", "right"),
+  surface = "pial",
+  colour = "#CCCCCC",
+  opacity = 0.3
+) {
+  if (inherits(p, "ggsegray")) {
+    return(add_glassbrain_rgl(p, hemisphere, surface, colour, opacity))
+  }
+
   check_ggseg3d(p)
 
   colour <- if (grepl("^#", colour)) colour else col2hex(colour)
@@ -67,14 +73,49 @@ add_glassbrain <- function(
 }
 
 
+#' @keywords internal
+add_glassbrain_rgl <- function(p, hemisphere, surface, colour, opacity) {
+  check_ggsegray(p)
+
+  colour <- if (grepl("^#", colour)) colour else col2hex(colour)
+  hemi_map <- c("left" = "lh", "right" = "rh")
+
+  cortical_hemis <- intersect(hemisphere, c("left", "right"))
+
+  for (hemi in cortical_hemis) {
+    hemi_short <- hemi_map[hemi]
+    mesh <- get_brain_mesh(hemisphere = hemi_short, surface = surface)
+    if (is.null(mesh)) {
+      next
+    }
+
+    n_vertices <- nrow(mesh$vertices)
+
+    entry <- make_mesh_entry(
+      name = paste("glass brain", hemi),
+      vertices = mesh$vertices,
+      faces = mesh$faces,
+      colors = rep(colour, n_vertices),
+      color_mode = "vertexcolor",
+      opacity = opacity
+    )
+
+    mesh3d <- mesh_entry_to_mesh3d(entry)
+    rgl::shade3d(mesh3d)
+  }
+
+  invisible(p)
+}
+
+
 #' Pan camera position of ggseg3d plot
 #'
-#' Sets the camera position for a ggseg3d widget
+#' Sets the camera position for a ggseg3d widget or ggsegray rgl scene
 #' to standard anatomical views or custom positions.
 #'
-#' @param p ggseg3d widget object
-#' @param camera string or list. Camera position preset name or custom eye
-#'   position.
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @param camera string, list, or numeric vector. Camera position preset
+#'   name, custom eye position list, or `c(x, y, z)` for rgl.
 #'
 #' \strong{Available camera presets:}
 #' \itemize{
@@ -92,15 +133,21 @@ add_glassbrain <- function(
 #' \item `right posterior` or `right_posterior`
 #' }
 #'
-#' @return ggseg3d widget object with updated camera
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' ggseg3d() |>
-#'   pan_camera("right lateral")
+#' ggseg3d() |> pan_camera("right lateral")
+#'
+#' ggsegray(atlas = dk, hemisphere = "left") |>
+#'   pan_camera("left lateral")
 #' }
 pan_camera <- function(p, camera) {
+  if (inherits(p, "ggsegray")) {
+    return(pan_camera_rgl(p, camera))
+  }
+
   check_ggseg3d(p)
   if (!is.character(camera) && !is.list(camera)) {
     cli::cli_abort(
@@ -116,22 +163,54 @@ pan_camera <- function(p, camera) {
 }
 
 
+#' @keywords internal
+pan_camera_rgl <- function(p, camera) {
+  check_ggsegray(p)
+
+  cam_pos <- if (is.numeric(camera)) {
+    camera
+  } else if (is.character(camera)) {
+    camera_preset_to_position(camera)
+  } else {
+    cli::cli_abort(
+      c(
+        "{.arg camera} must be a character string or numeric vector,",
+        "not {.obj_type_friendly {camera}}."
+      )
+    )
+  }
+
+  rgl::view3d(
+    userMatrix = rgl::rotationMatrix(0, 0, 0, 1),
+    type = "modelviewpoint"
+  )
+  rgl::observer3d(cam_pos[1], cam_pos[2], cam_pos[3])
+
+  invisible(p)
+}
+
+
 #' Set background color of ggseg3d plot
 #'
-#' Changes the background color of a ggseg3d widget.
+#' Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 #'
-#' @param p ggseg3d widget object
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
 #' @param colour string. Background color (hex or named color)
 #'
-#' @return ggseg3d widget object with updated background
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' ggseg3d() |>
-#'   set_background("black")
+#' ggseg3d() |> set_background("black")
+#'
+#' ggsegray(atlas = dk) |> set_background("black")
 #' }
 set_background <- function(p, colour = "#ffffff") {
+  if (inherits(p, "ggsegray")) {
+    return(set_background_rgl(p, colour))
+  }
+
   check_ggseg3d(p)
 
   if (!grepl("^#", colour)) {
@@ -140,6 +219,20 @@ set_background <- function(p, colour = "#ffffff") {
 
   p$x$options$backgroundColor <- colour
   p
+}
+
+
+#' @keywords internal
+set_background_rgl <- function(p, colour) {
+  check_ggsegray(p)
+
+  if (!grepl("^#", colour)) {
+    colour <- col2hex(colour)
+  }
+
+  rgl::bg3d(color = colour)
+
+  invisible(p)
 }
 
 
@@ -322,7 +415,9 @@ set_positioning <- function(p, positioning = c("anatomical", "centered")) {
     is_left <- grepl("left", name, ignore.case = TRUE)
     is_right <- grepl("right", name, ignore.case = TRUE)
 
-    if (!is_left && !is_right) next
+    if (!is_left && !is_right) {
+      next
+    }
 
     vertices <- mesh$vertices
     x_range <- range(vertices$x)
@@ -373,13 +468,14 @@ set_positioning <- function(p, positioning = c("anatomical", "centered")) {
 #' }
 # nocov start
 snapshot_brain <- function(
-    p,
-    file,
-    width = 600,
-    height = 500,
-    delay = 1,
-    zoom = 2,
-    ...) {
+  p,
+  file,
+  width = 600,
+  height = 500,
+  delay = 1,
+  zoom = 2,
+  ...
+) {
   check_ggseg3d(p)
 
   tmpfile <- tempfile(fileext = ".html")

@@ -1,7 +1,8 @@
 check_ggseg3d <- function(
-    p,
-    arg = rlang::caller_arg(p),
-    call = rlang::caller_env()) {
+  p,
+  arg = rlang::caller_arg(p),
+  call = rlang::caller_env()
+) {
   if (!inherits(p, "ggseg3d")) {
     cli::cli_abort(
       "{.arg {arg}} must be a {.cls ggseg3d} widget, not {.obj_type_friendly {p}}.", # nolint: line_length_linter
@@ -24,8 +25,10 @@ merge_atlas_data <- function(.data, atlas_data) {
   }
 
   merged <- dplyr::left_join(
-    atlas_data, .data,
-    by = cols, relationship = "many-to-many"
+    atlas_data,
+    .data,
+    by = cols,
+    relationship = "many-to-many"
   )
 
   unmatched <- .data[!.data[[cols[1]]] %in% atlas_data[[cols[1]]], ]
@@ -53,17 +56,18 @@ col2hex <- function(colour) {
 
 
 make_mesh_entry <- function(
-    name,
-    vertices,
-    faces,
-    colors,
-    color_mode = "vertexcolor",
-    opacity = 1,
-    hover_text = NULL,
-    boundary_edges = NULL,
-    edge_color = NULL,
-    edge_width = NULL,
-    vertex_labels = NULL) {
+  name,
+  vertices,
+  faces,
+  colors,
+  color_mode = "vertexcolor",
+  opacity = 1,
+  hover_text = NULL,
+  boundary_edges = NULL,
+  edge_color = NULL,
+  edge_width = NULL,
+  vertex_labels = NULL
+) {
   entry <- list(
     name = name,
     vertices = list(
@@ -130,8 +134,10 @@ find_boundary_edges <- function(faces, vertex_colors) {
 
   mapply(
     function(a, b) c(a - 1L, b - 1L),
-    unique_v1, unique_v2,
-    SIMPLIFY = FALSE, USE.NAMES = FALSE
+    unique_v1,
+    unique_v2,
+    SIMPLIFY = FALSE,
+    USE.NAMES = FALSE
   )
 }
 
@@ -179,16 +185,3 @@ get_palette <- function(palette) {
 range_norm <- function(x) {
   (x - min(x)) / (max(x) - min(x))
 }
-
-
-utils::globalVariables(c(
-  "region",
-  "atlas",
-  "colour",
-  "group",
-  "hemi",
-  ".lat",
-  ".long",
-  ".id",
-  "x"
-))

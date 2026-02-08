@@ -11,12 +11,14 @@
 #' @return List with data, fill column name, palette, and colour metadata
 #' @keywords internal
 apply_colour_palette <- function(
-    atlas_data,
-    colour,
-    palette,
-    na_colour) {
+  atlas_data,
+  colour,
+  palette,
+  na_colour
+) {
   pal_colours <- get_palette(palette)
-  is_numeric <- colour %in% names(atlas_data) &&
+  is_numeric <- colour %in%
+    names(atlas_data) &&
     is.numeric(atlas_data[[colour]])
   data_min <- NA
   data_max <- NA
@@ -30,12 +32,15 @@ apply_colour_palette <- function(
     } else {
       if (is.null(names(palette))) {
         pal_colours$values <- seq(
-          data_min, data_max,
+          data_min,
+          data_max,
           length.out = nrow(pal_colours)
         )
       }
       atlas_data$new_col <- scales::gradient_n_pal(
-        pal_colours$orig, pal_colours$values, "Lab"
+        pal_colours$orig,
+        pal_colours$values,
+        "Lab"
       )(atlas_data[[colour]])
     }
     fill <- "new_col"

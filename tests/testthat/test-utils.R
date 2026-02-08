@@ -10,7 +10,6 @@ test_that("get_palette works", {
     )
   )
 
-
   expect_equal(
     get_palette(c("blue" = 1)),
     data.frame(
