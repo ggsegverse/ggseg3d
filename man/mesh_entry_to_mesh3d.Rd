@@ -4,11 +4,15 @@
 \alias{mesh_entry_to_mesh3d}
 \title{Convert mesh entry to rgl mesh3d object}
 \usage{
-mesh_entry_to_mesh3d(mesh_entry)
+mesh_entry_to_mesh3d(mesh_entry, specular = "white", shininess = 50)
 }
 \arguments{
 \item{mesh_entry}{A mesh entry list with vertices, faces, colors,
 colorMode, and opacity.}
+
+\item{specular}{Character. Specular reflection colour.}
+
+\item{shininess}{Numeric. Shininess coefficient.}
 }
 \value{
 An rgl `mesh3d` object

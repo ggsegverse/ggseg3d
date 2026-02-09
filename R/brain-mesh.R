@@ -1,39 +1,39 @@
 #' Get brain surface mesh
 #'
-#' Retrieves a brain surface mesh for the specified hemisphere and surface type
-#' from the internal brain_meshes data.
+#' Retrieves a brain surface mesh for the specified hemisphere and surface type.
+#' Inflated surfaces are provided by ggseg.formats; pial, white, and
+#' semi-inflated surfaces are stored in ggseg3d.
 #'
-#' @param hemisphere "lh" or "rh"
-#' @param surface Surface type: "inflated", "semi-inflated", "white", "pial"
+#' @param hemisphere `"lh"` or `"rh"`
+#' @param surface Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
+#'   `"pial"`
+#' @param brain_meshes Optional user-supplied mesh data. Passed through to
+#'   [ggseg.formats::get_brain_mesh()] for format details.
 #'
 #' @return list with vertices (data.frame with x, y, z) and faces
 #'   (data.frame with i, j, k), or NULL if mesh not found
 #' @export
 get_brain_mesh <- function(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial")
+  surface = c("inflated", "semi-inflated", "white", "pial"),
+  brain_meshes = NULL
 ) {
   hemisphere <- match.arg(hemisphere)
   surface <- match.arg(surface)
 
-  mesh_name <- paste(hemisphere, surface, sep = "_")
-
-  if (!exists("brain_meshes", envir = asNamespace("ggseg3d"))) {
-    cli::cli_warn("Internal brain_meshes data not found.")
-    return(NULL)
+  if (!is.null(brain_meshes) || surface == "inflated") {
+    mesh <- ggseg.formats::get_brain_mesh(hemisphere, surface, brain_meshes)
+  } else {
+    mesh_data <- switch(
+      surface,
+      "pial" = brain_mesh_pial,
+      "white" = brain_mesh_white,
+      "semi-inflated" = brain_mesh_semi_inflated
+    )
+    mesh <- mesh_data[[hemisphere]]
   }
 
-  meshes <- get("brain_meshes", envir = asNamespace("ggseg3d"))
-
-  if (!mesh_name %in% names(meshes)) {
-    cli::cli_warn(c(
-      "Brain mesh {.val {mesh_name}} not available.",
-      "i" = "Available meshes: {.val {names(meshes)}}"
-    ))
-    return(NULL)
-  }
-
-  mesh <- meshes[[mesh_name]]
+  if (is.null(mesh)) return(NULL)
 
   if (min(mesh$faces$i) == 0) {
     mesh$faces$i <- mesh$faces$i + 1L
@@ -41,7 +41,53 @@ get_brain_mesh <- function(
     mesh$faces$k <- mesh$faces$k + 1L
   }
 
+  if (surface %in% c("inflated", "semi-inflated")) {
+    pial <- brain_mesh_pial[[hemisphere]]
+    mesh$vertices$x <- mesh$vertices$x +
+      (mean(pial$vertices$x) - mean(mesh$vertices$x))
+    mesh$vertices$y <- mesh$vertices$y +
+      (mean(pial$vertices$y) - mean(mesh$vertices$y))
+    mesh$vertices$z <- mesh$vertices$z +
+      (mean(pial$vertices$z) - mean(mesh$vertices$z))
+  }
+
   mesh
+}
+
+
+native_offset <- function() {
+  pial_lh <- brain_mesh_pial[["lh"]]
+  pial_rh <- brain_mesh_pial[["rh"]]
+  inf_lh <- ggseg.formats::get_brain_mesh("lh", "inflated")
+  inf_rh <- ggseg.formats::get_brain_mesh("rh", "inflated")
+
+  c(
+    y = mean(c(
+      mean(pial_lh$vertices$y) - mean(inf_lh$vertices$y),
+      mean(pial_rh$vertices$y) - mean(inf_rh$vertices$y)
+    )),
+    z = mean(c(
+      mean(pial_lh$vertices$z) - mean(inf_lh$vertices$z),
+      mean(pial_rh$vertices$z) - mean(inf_rh$vertices$z)
+    ))
+  )
+}
+
+
+to_native_coords <- function(mesh_data_df) {
+  if (is.null(mesh_data_df) || is.null(mesh_data_df$mesh)) {
+    return(mesh_data_df)
+  }
+
+  offset <- native_offset()
+  for (i in seq_len(nrow(mesh_data_df))) {
+    if (is.null(mesh_data_df$mesh[[i]])) next
+    mesh_data_df$mesh[[i]]$vertices$y <-
+      mesh_data_df$mesh[[i]]$vertices$y + offset[["y"]]
+    mesh_data_df$mesh[[i]]$vertices$z <-
+      mesh_data_df$mesh[[i]]$vertices$z + offset[["z"]]
+  }
+  mesh_data_df
 }
 
 
@@ -166,7 +212,7 @@ vertices_to_groups <- function(
 #' @param edge_by Column for edge grouping (or NULL)
 #' @param atlas_meshes Optional meshes component from brain_atlas for
 #'   subcortical rendering
-#' @param atlas_type Type of atlas ("cortical", "subcortical", "tract")
+#' @param atlas A `brain_atlas` object used for class-based dispatch
 #' @param color_by How to colour tracts: "colour" or "orientation"
 #'
 #' @return List of mesh data structures
@@ -179,16 +225,17 @@ build_meshes <- function(
   na_colour,
   edge_by,
   atlas_meshes = NULL,
-  atlas_type = "cortical",
+  atlas = NULL,
   color_by = "colour",
-  atlas_centerlines = NULL
+  atlas_centerlines = NULL,
+  brain_meshes = NULL
 ) {
   meshes <- list()
   hemi_map <- c("right" = "rh", "left" = "lh")
 
   for (current_hemi in hemisphere) {
     if (current_hemi == "subcort") {
-      if (atlas_type == "tract") {
+      if (is_tract_atlas(atlas)) {
         tract_meshes <- build_tract_meshes(
           atlas_data,
           na_colour,
@@ -204,7 +251,11 @@ build_meshes <- function(
     }
 
     hemi_short <- hemi_map[current_hemi]
-    mesh <- get_brain_mesh(hemisphere = hemi_short, surface = surface)
+    mesh <- get_brain_mesh(
+      hemisphere = hemi_short,
+      surface = surface,
+      brain_meshes = brain_meshes
+    )
 
     if (is.null(mesh)) {
       cli::cli_warn(
@@ -454,7 +505,7 @@ generate_tube_mesh <- function(centerline, radius = 0.5, segments = 8) {
   }
 
   n_points <- nrow(centerline)
-  frames <- compute_parallel_transport_frames(centerline)
+  frames <- compute_parallel_transp_fr(centerline)
 
   if (length(radius) == 1) {
     radius <- rep(radius, n_points)
@@ -516,7 +567,8 @@ generate_tube_mesh <- function(centerline, radius = 0.5, segments = 8) {
 
 #' Compute parallel transport frames along curve
 #' @keywords internal
-compute_parallel_transport_frames <- function(curve) { # nolint: object_length_linter
+compute_parallel_transp_fr <- function(curve) {
+  # nolint: object_length_linter
   n <- nrow(curve)
 
   tangents <- matrix(0, nrow = n, ncol = 3)

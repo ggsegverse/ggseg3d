@@ -50,10 +50,15 @@ HTMLWidgets.widget({
               colorMode: meshData.colorMode || 'facecolor',
               opacity: meshData.opacity !== undefined ? meshData.opacity : 1.0,
               hoverText: meshData.hoverText || null,
-              vertexLabels: meshData.vertexLabels || null
+              vertexLabels: meshData.vertexLabels || null,
+              edgeColor: meshData.edgeColor || null,
+              edgeWidth: meshData.edgeWidth || null,
+              boundaryEdges: meshData.boundaryEdges || null
             });
           }
         }
+
+        renderer.centerOnMeshes();
 
         if (options.camera) {
           renderer.setCamera(options.camera);

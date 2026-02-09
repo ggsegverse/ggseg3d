@@ -1,14 +1,16 @@
 ---
 title: "Ray-traced brain renders with rayshader"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Ray-traced brain renders with rayshader}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}
 #| label: setup
 #| include: false
+options(rgl.useNULL = TRUE)
 has_rgl <- rlang::is_installed("rgl")
 has_rayshader <- has_rgl && rlang::is_installed("rayshader")
 knitr::opts_chunk$set(
@@ -47,12 +49,9 @@ mapping. The difference: instead of an htmlwidget, you get an rgl window.
 Camera, background, glass brain overlays --- all of that comes through the same
 pipe functions you already know from the widget side.
 
-```{r}
-#| label: first-render
-#| fig-cap: "Left hemisphere of the Desikan-Killiany atlas rendered with rgl."
+```{r first-render, fig.cap="Left hemisphere of the Desikan-Killiany atlas rendered with rgl."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
-rgl::close3d()
 ```
 
 This opens an interactive rgl window. Rotate with the mouse, zoom with the
@@ -65,9 +64,7 @@ Data mapping works identically to `ggseg3d()`. Provide a data frame with a
 `region` column, point `colour` at a numeric or categorical variable, and
 optionally set a custom palette:
 
-```{r}
-#| label: map-data
-#| fig-cap: "Left hemisphere coloured by p-value."
+```{r map-data, fig.cap="Left hemisphere coloured by p-value."}
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
@@ -81,37 +78,29 @@ ggsegray(
   palette = c("forestgreen" = 0, "white" = 0.05, "firebrick" = 1)
 ) |>
   pan_camera("left lateral")
-rgl::close3d()
 ```
 
 ## Quick snapshots with rgl
 
-Before reaching for the ray tracer, `rgl::snapshot3d()` gives you a fast screen
-capture of whatever is in the rgl window. Useful for draft figures or quick
-checks:
+Before reaching for the ray tracer, grab a fast screenshot with
+`rgl::snapshot3d()`. In an interactive session:
 
-```{r}
-#| label: quick-snapshot
-#| fig-cap: "Quick rgl snapshot of the left hemisphere."
+```{r snapshot-example, eval=FALSE}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
 
-rgl::snapshot3d(tempfile(fileext = ".png"))
-rgl::close3d()
+rgl::snapshot3d("brain_draft.png")
 ```
 
-No ray tracing, no wait --- just a screenshot. When the lighting and angle look
-right, switch to `render_highquality()` for the final version.
+No ray tracing, no wait. When the angle and lighting look right, switch to
+`render_highquality()` for the final version.
 
 ## Ray-traced output
 
 Build the scene with `ggsegray()` and pipe functions, then call
 `render_highquality()`:
 
-```{r}
-#| label: raytrace
-#| eval: !expr has_rayshader
-#| fig-cap: "Ray-traced render of the left hemisphere."
+```{r raytrace, eval=has_rayshader, fig.cap="Ray-traced render of the left hemisphere."}
 ggsegray(
   .data = some_data,
   atlas = dk,
@@ -121,14 +110,15 @@ ggsegray(
   pan_camera("left lateral") |>
   set_background("white")
 
+outfile <- tempfile(fileext = ".png")
 rayshader::render_highquality(
-  filename = tempfile(fileext = ".png"),
+  filename = outfile,
   samples = 64,
   width = 600,
   height = 450
 )
-
 rgl::close3d()
+knitr::include_graphics(outfile)
 ```
 
 Higher `samples` means less noise and longer render times. For drafts, 64--128 is
@@ -139,30 +129,26 @@ fine. For final figures, 256--512 produces clean results.
 Camera presets map to the same positions as the Three.js viewer. Pipe
 `pan_camera()` after `ggsegray()`:
 
-```{r}
-#| label: camera-presets
-#| fig-cap: "Camera angles: lateral, medial, superior."
+```{r camera-lateral, fig.cap="Left lateral view."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
-rgl::close3d()
+```
 
+```{r camera-medial, fig.cap="Left medial view."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left medial")
-rgl::close3d()
+```
 
+```{r camera-superior, fig.cap="Right superior view."}
 ggsegray(atlas = dk, hemisphere = "right") |>
   pan_camera("right superior")
-rgl::close3d()
 ```
 
 For a custom viewpoint, pass a numeric vector `c(x, y, z)`:
 
-```{r}
-#| label: camera-custom
-#| fig-cap: "Left hemisphere from a custom camera position."
+```{r camera-custom, fig.cap="Left hemisphere from a custom camera position."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera(c(-300, 100, 150))
-rgl::close3d()
 ```
 
 Once the rgl window is open, `rgl::view3d()` and `rgl::observer3d()` let you
@@ -173,35 +159,31 @@ fine-tune interactively before rendering.
 Rayshader controls lighting through `render_highquality()`. The `light_direction`
 and `light_altitude` parameters set the angle and elevation of the light source:
 
-```{r}
-#| label: lighting-basic
-#| eval: !expr has_rayshader
-#| fig-cap: "Left hemisphere with side lighting at 90 degrees."
+```{r lighting-basic, eval=has_rayshader, fig.cap="Left hemisphere with side lighting at 90 degrees."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
 
+outfile <- tempfile(fileext = ".png")
 rayshader::render_highquality(
-  filename = tempfile(fileext = ".png"),
+  filename = outfile,
   samples = 64,
   light_direction = 90,
   light_altitude = 30
 )
-
 rgl::close3d()
+knitr::include_graphics(outfile)
 ```
 
 For richer lighting setups --- multiple light sources, coloured lights, area
 lights --- pass custom scene elements:
 
-```{r}
-#| label: lighting-custom
-#| eval: !expr has_rayshader
-#| fig-cap: "Left hemisphere with a custom point light source."
+```{r lighting-custom, eval=has_rayshader, fig.cap="Left hemisphere with a custom point light source."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
 
+outfile <- tempfile(fileext = ".png")
 rayshader::render_highquality(
-  filename = tempfile(fileext = ".png"),
+  filename = outfile,
   samples = 64,
   width = 600,
   height = 450,
@@ -213,8 +195,8 @@ rayshader::render_highquality(
   ),
   interactive = FALSE
 )
-
 rgl::close3d()
+knitr::include_graphics(outfile)
 ```
 
 ## Background colour
@@ -222,13 +204,10 @@ rgl::close3d()
 White backgrounds work for most journals. For posters or slides, a dark
 background can look striking. Pipe `set_background()` after `ggsegray()`:
 
-```{r}
-#| label: background-dark
-#| fig-cap: "Left hemisphere with a black background."
+```{r background-dark, fig.cap="Left hemisphere with a black background."}
 ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black")
-rgl::close3d()
 ```
 
 ## Glass brain overlay
@@ -236,23 +215,20 @@ rgl::close3d()
 Subcortical structures float in space without context. A translucent glass brain
 fixes that. Pipe `add_glassbrain()`:
 
-```{r}
-#| label: glassbrain
-#| fig-cap: "Subcortical atlas with a translucent glass brain overlay."
+```{r glassbrain, fig.cap="Subcortical atlas with a translucent glass brain overlay."}
 ggsegray(atlas = aseg) |>
   add_glassbrain(colour = "#CCCCCC", opacity = 0.15) |>
   pan_camera("right lateral")
-rgl::close3d()
 ```
 
 Lower opacity values make the glass brain more see-through. For subcortical
 atlases, 0.1--0.2 tends to give enough context without obscuring the structures
 underneath.
 
-## Advanced rayshader techniques
+## Going further
 
-Everything below works on any rgl scene produced by `ggsegray()`. Build your
-scene first, then layer on rayshader functions before rendering.
+Everything below works on any rgl scene produced by `ggsegray()`. Some use
+rayshader for rendering, others are plain rgl.
 
 ### Depth of field
 
@@ -260,10 +236,7 @@ Depth of field blurs regions away from a focal point, pulling attention to
 a specific structure. `render_depth()` applies this as a post-processing step
 on a snapshot:
 
-```{r}
-#| label: depth-of-field
-#| eval: !expr has_rayshader
-#| fig-cap: "Left hemisphere with depth-of-field blur."
+```{r depth-of-field, eval=has_rayshader, fig.cap="Left hemisphere with depth-of-field blur."}
 ggsegray(
   .data = some_data,
   atlas = dk,
@@ -272,16 +245,17 @@ ggsegray(
 ) |>
   pan_camera("left lateral")
 
+outfile <- tempfile(fileext = ".png")
 rayshader::render_depth(
-  filename = tempfile(fileext = ".png"),
+  filename = outfile,
   focus = 0.5,
   focallength = 200,
   fstop = 4,
   width = 600,
   height = 450
 )
-
 rgl::close3d()
+knitr::include_graphics(outfile)
 ```
 
 The `focus` parameter (0--1) controls where the focal plane sits in the depth
@@ -290,24 +264,16 @@ f-stop means shallower depth of field, just like a real camera lens.
 
 ### Adding labels
 
-Place text labels directly in the 3D scene. These render alongside the brain
-mesh and respect depth and lighting:
+Place text labels directly in the 3D scene with `rgl::text3d()`. These render
+alongside the brain mesh in the rgl window and the exported widget:
 
-```{r}
-#| label: labels
-#| eval: !expr has_rayshader
-ggsegray(atlas = dk, hemisphere = "left") |>
+```{r labels, fig.cap="Left hemisphere with a text label on the precentral gyrus."}
+p <- ggsegray(atlas = dk, hemisphere = "left") |>
   pan_camera("left lateral")
 
-rayshader::render_label(
-  heightmap = matrix(1),
-  text = "precentral",
-  x = 150, y = 150, z = 50,
-  textsize = 1.5,
-  textcolor = "black",
-  linecolor = "black"
-)
-rgl::close3d()
+rgl::text3d(x = -45, y = 10, z = 55, text = "precentral", cex = 0.8)
+
+p
 ```
 
 ### Camera animation
@@ -315,9 +281,7 @@ rgl::close3d()
 `render_movie()` orbits the camera around the scene and writes frames to a
 video file. Handy for conference talks or supplementary materials:
 
-```{r}
-#| label: animation
-#| eval: false
+```{r animation, eval=FALSE}
 ggsegray(
   .data = some_data,
   atlas = dk,
@@ -342,33 +306,27 @@ duration and smoothness.
 
 ### Custom materials via rgl
 
-Before calling rayshader, you can modify material properties on the rgl objects
-directly. Every mesh added by `ggsegray()` is a standard `mesh3d` object in
-the rgl scene.
+Control specular highlights and shininess through `ggsegray()` directly:
 
-```{r}
-#| label: custom-materials
-ggsegray(atlas = dk, hemisphere = "left") |>
+```{r custom-materials}
+ggsegray(
+  atlas = dk,
+  hemisphere = "left",
+  specular = "white",
+  shininess = 100
+) |>
   pan_camera("left lateral")
-
-ids <- rgl::ids3d()
-for (id in ids$id) {
-  rgl::rgl.set.material(id = id, specular = "white", shininess = 50)
-}
-rgl::close3d()
 ```
 
-Higher shininess gives a glossy look; set specular to black for a fully matte
-surface.
+Higher `shininess` gives a glossier look. Set `specular = "black"` for a fully
+matte surface.
 
 ### Combining views
 
 For multi-panel figures, render each view separately and stitch them together
 with magick:
 
-```{r}
-#| label: combine-views
-#| eval: false
+```{r combine-views, eval=FALSE}
 library(magick)
 
 views <- c("left lateral", "left medial", "right lateral", "right medial")

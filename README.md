@@ -44,7 +44,7 @@ ggseg3d() |>
   pan_camera("left lateral")
 ```
 
-![](man/img/README-dk_3d-plot.png)
+![](man/figures/README-dk_3d-plot.png)
 
 Map data onto regions by passing a data frame with a `region` column:
 
@@ -68,7 +68,7 @@ ggseg3d(atlas = aseg) |>
   pan_camera("right lateral")
 ```
 
-![](man/img/README-aseg_3d-plot.png)
+![](man/figures/README-aseg_3d-plot.png)
 
 ## Pipe functions
 

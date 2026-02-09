@@ -1,32 +1,33 @@
-#' Check if atlas is a unified brain_atlas
+#' Check if atlas is a unified ggseg_atlas
 #'
-#' Checks whether an atlas object is a brain_atlas with the unified format
+#' Checks whether an atlas object is a ggseg_atlas with the unified format
 #' (containing vertices or meshes component for 3D rendering).
 #'
-#' Unified atlases (brain_atlas class from ggseg.formats) contain:
+#' Unified atlases (ggseg_atlas class from ggseg.formats) contain:
 #' - core: region info (hemi, region, label)
-#' - data: type-specific data object (cortical_data, subcortical_data,
-#'   or tract_data)
+#' - data: type-specific data object
+#'   (ggseg_data_cortical, ggseg_data_subcortical, ggseg_data_tract)
 #' - palette: colours keyed by label
 #'
 #' @param atlas An atlas object to check
 #'
-#' @return Logical indicating if this is a unified brain_atlas
-#' @export
-#'
-#' @examples
+#' @return Logical indicating if this is a unified ggseg_atlas
+#' @noRd
+#' @keywords internal
 #' \dontrun{
 #' is_unified_atlas(dk)
 #' is_unified_atlas(ggseg.formats::dk)
 #' }
 is_unified_atlas <- function(atlas) {
-  if (!inherits(atlas, "brain_atlas")) {
+  if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {
     return(FALSE)
   }
 
   has_core <- !is.null(atlas$core)
 
-  if (!is.null(atlas$data) && inherits(atlas$data, "brain_atlas_data")) {
+  if (!is.null(atlas$data) &&
+        (inherits(atlas$data, "ggseg_atlas_data") ||
+           inherits(atlas$data, "brain_atlas_data"))) {
     has_3d <- !is.null(atlas$data$vertices) ||
       !is.null(atlas$data$meshes) ||
       !is.null(atlas$data$centerlines)
@@ -38,38 +39,12 @@ is_unified_atlas <- function(atlas) {
 }
 
 
-#' Check if atlas uses mesh-based rendering
-#'
-#' Checks whether a brain_atlas uses per-region meshes
-#' (subcortical/tract) rather than vertex indices on shared brain meshes
-#' (cortical).
-#'
-#' @param atlas An atlas object to check
-#' @return Logical indicating if this atlas uses mesh-based rendering
-#' @noRd
-#' @keywords internal
-is_mesh_atlas <- function(atlas) {
-  if (!inherits(atlas, "brain_atlas")) {
-    return(FALSE)
-  }
-
-  if (!is.null(atlas$data) && inherits(atlas$data, "brain_atlas_data")) {
-    has_meshes <- !is.null(atlas$data$meshes)
-    has_centerlines <- !is.null(atlas$data$centerlines)
-    return((has_meshes || has_centerlines) && !is.null(atlas$core))
-  }
-
-  !is.null(atlas$meshes) && !is.null(atlas$core)
-}
-
-
-
 #' Prepare atlas data
 #'
-#' Extracts and prepares data from a brain_atlas object for rendering.
+#' Extracts and prepares data from a ggseg_atlas object for rendering.
 #' Joins vertices with core region info and palette colours.
 #'
-#' @param atlas A brain_atlas object
+#' @param atlas A ggseg_atlas object
 #' @param .data Optional user data to merge
 #'
 #' @return Prepared data frame with hemi, region, label, colour, and vertices
@@ -103,11 +78,11 @@ prepare_atlas_data <- function(atlas, .data) {
 
 #' Prepare mesh-based atlas data
 #'
-#' Extracts and prepares data from a mesh-based brain_atlas object
+#' Extracts and prepares data from a mesh-based ggseg_atlas object
 #' (subcortical/tract) for rendering. Joins meshes with core region info
 #' and palette colours.
 #'
-#' @param atlas A mesh-based brain_atlas object
+#' @param atlas A mesh-based ggseg_atlas object
 #' @param .data Optional user data to merge
 #'
 #' @return Prepared data frame with hemi, region, label, colour, and mesh

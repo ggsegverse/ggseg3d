@@ -46,6 +46,9 @@
 #'   (default, use atlas palette) or "orientation" (direction-based RGB
 #'   where R=left-right, G=anterior-posterior, B=superior-inferior).
 #'   Only applies to tract atlases.
+#' @param brain_meshes Optional user-supplied brain meshes for custom
+#'   surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
+#'   format details. When NULL (default), uses built-in fsaverage5 meshes.
 #'
 #' \strong{Available surfaces:}
 #' \itemize{
@@ -87,16 +90,17 @@ ggseg3d <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = c("palette", "orientation")
+  tract_color = c("palette", "orientation"),
+  brain_meshes = NULL
 ) {
   tract_color <- match.arg(tract_color)
   atlas_obj <- if (is.character(atlas)) get(atlas) else atlas
 
   if (!is_unified_atlas(atlas_obj)) {
     cli::cli_abort(c(
-      "Atlas must be a {.cls brain_atlas} object with 3D data.",
+      "Atlas must be a {.cls ggseg_atlas} object with 3D data.",
       "i" = "Use atlases from {.pkg ggseg.formats}.",
-      "i" = "Create atlases with {.fn ggsegExtra::make_brain_atlas}."
+      "i" = "Create atlases with {.fn ggsegExtra::create_cortical_atlas}."
     ))
   }
 
@@ -114,7 +118,8 @@ ggseg3d <- function(
     na_colour = na_colour,
     na_alpha = na_alpha,
     edge_by = edge_by,
-    tract_color = tract_color
+    tract_color = tract_color,
+    brain_meshes = brain_meshes
   )
 }
 
@@ -142,7 +147,8 @@ render_brain_atlas <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = "palette"
+  tract_color = "palette",
+  brain_meshes = NULL
 ) {
   prepared <- prepare_brain_meshes(
     .data = .data,
@@ -156,7 +162,8 @@ render_brain_atlas <- function(
     na_colour = na_colour,
     na_alpha = na_alpha,
     edge_by = edge_by,
-    tract_color = tract_color
+    tract_color = tract_color,
+    brain_meshes = brain_meshes
   )
 
   create_ggseg3d_widget(prepared$meshes, prepared$legend_data)
@@ -185,16 +192,18 @@ prepare_brain_meshes <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = "palette"
+  tract_color = "palette",
+  brain_meshes = NULL
 ) {
-  is_mesh_based <- is_mesh_atlas(atlas)
-  atlas_type <- atlas$type %||% "cortical"
+  is_subcort <- is_subcortical_atlas(atlas)
+  is_tract <- is_tract_atlas(atlas)
+  is_mesh_based <- is_subcort || is_tract
 
-  if (is_mesh_based && atlas_type %in% c("subcortical", "tract")) {
+  if (is_mesh_based) {
     hemisphere <- "subcort"
   }
 
-  color_by <- if (atlas_type == "tract" && tract_color == "orientation") {
+  color_by <- if (is_tract && tract_color == "orientation") {
     "orientation"
   } else {
     "colour"
@@ -222,9 +231,23 @@ prepare_brain_meshes <- function(
     NULL
   }
 
+  if (is_mesh_based) {
+    atlas_data <- to_native_coords(atlas_data)
+  }
+
   atlas_centerlines <- if (!is.null(atlas$data$centerlines)) {
+    cl <- atlas$data$centerlines
+    if (is_mesh_based && !is.null(cl$points)) {
+      offset <- native_offset()
+      for (j in seq_len(nrow(cl))) {
+        if (!is.null(cl$points[[j]])) {
+          cl$points[[j]][, 2] <- cl$points[[j]][, 2] + offset[["y"]]
+          cl$points[[j]][, 3] <- cl$points[[j]][, 3] + offset[["z"]]
+        }
+      }
+    }
     list(
-      centerlines = atlas$data$centerlines,
+      centerlines = cl,
       tube_radius = atlas$data$tube_radius %||% 5,
       tube_segments = atlas$data$tube_segments %||% 8
     )
@@ -239,9 +262,10 @@ prepare_brain_meshes <- function(
     na_colour,
     edge_by,
     atlas_meshes,
-    atlas_type,
+    atlas,
     color_by,
-    atlas_centerlines
+    atlas_centerlines,
+    brain_meshes = brain_meshes
   )
 
   # nolint start: object_usage_linter

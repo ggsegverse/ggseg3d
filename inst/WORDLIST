@@ -14,6 +14,7 @@ Pre
 Rayshader
 Repositions
 Rodrigues
+Specular
 Subcortical
 TRACULA
 UI
@@ -32,6 +33,7 @@ customise
 dk
 doi
 dplyr
+fsaverage
 ggseg
 ggsegExtra
 ggsegray
@@ -64,6 +66,7 @@ tmesh
 tractography
 tracula
 uncoloured
+userMatrix
 visualise
 walkthrough
 webshot

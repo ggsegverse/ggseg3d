@@ -14,7 +14,6 @@
 img
 logo.png
 ^_pkgdown\.yml$
-vignettes
 ^\.github$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
@@ -23,3 +22,4 @@ vignettes
 ^package\.json$
 ^package-lock\.json$
 ggseg3d.Rcheck
+.lintr

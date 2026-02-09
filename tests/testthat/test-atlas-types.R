@@ -16,7 +16,7 @@ test_that("prepare_atlas_data extracts vertices and joins core", {
       vertices = vertices_data,
       palette = c("bankssts" = "#FF0000", "caudalanteriorcingulate" = "#00FF00")
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   result <- prepare_atlas_data(atlas, NULL)
@@ -46,11 +46,11 @@ test_that("prepare_atlas_data works with data component", {
       ),
       data = structure(
         list(vertices = vertices_data),
-        class = "brain_atlas_data"
+        class = "ggseg_atlas_data"
       ),
       palette = c("a" = "#AAAAAA", "b" = "#BBBBBB")
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   result <- prepare_atlas_data(atlas, NULL)
@@ -77,7 +77,7 @@ test_that("prepare_atlas_data merges user data", {
       vertices = vertices_data,
       palette = NULL
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   user_data <- data.frame(
@@ -119,7 +119,7 @@ test_that("prepare_mesh_atlas_data extracts meshes and joins core", {
       meshes = meshes_data,
       palette = c("Left-Caudate" = "#123456", "Right-Caudate" = "#654321")
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   result <- prepare_mesh_atlas_data(atlas, NULL)
@@ -152,11 +152,11 @@ test_that("prepare_mesh_atlas_data works with data component", {
       ),
       data = structure(
         list(meshes = meshes_data),
-        class = "brain_atlas_data"
+        class = "ggseg_atlas_data"
       ),
       palette = NULL
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   result <- prepare_mesh_atlas_data(atlas, NULL)
@@ -253,7 +253,7 @@ test_that("prepare_mesh_atlas_data merges user data", {
       meshes = meshes_data,
       palette = NULL
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   user_data <- data.frame(

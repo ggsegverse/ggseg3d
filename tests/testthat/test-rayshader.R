@@ -1,3 +1,5 @@
+options(rgl.useNULL = TRUE)
+
 test_that("camera_preset_to_position returns correct vectors", {
   expect_equal(camera_preset_to_position("left lateral"), c(-350, 0, 0))
   expect_equal(camera_preset_to_position("right lateral"), c(350, 0, 0))
@@ -25,6 +27,24 @@ test_that("camera_preset_to_position errors on unknown preset", {
     camera_preset_to_position("top down"),
     "Unknown camera preset"
   )
+})
+
+test_that("look_at_origin produces orthonormal rotation matrix", {
+  m <- look_at_origin(c(-350, 0, 0))
+  expect_equal(dim(m), c(4, 4))
+  expect_equal(m[4, ], c(0, 0, 0, 1))
+  expect_equal(m[1:3, 4], c(0, 0, 0))
+
+  rows <- m[1:3, 1:3]
+  expect_equal(rows %*% t(rows), diag(3), tolerance = 1e-10)
+})
+
+test_that("look_at_origin handles vertical eye positions", {
+  m <- look_at_origin(c(0, 0, 330))
+  expect_equal(dim(m), c(4, 4))
+
+  rows <- m[1:3, 1:3]
+  expect_equal(rows %*% t(rows), diag(3), tolerance = 1e-10)
 })
 
 test_that("mesh_entry_to_mesh3d converts vertex-colored mesh", {
@@ -116,7 +136,7 @@ test_that("ggsegray errors on invalid atlas", {
 
   expect_error(
     ggsegray(atlas = list(), hemisphere = "left"),
-    "brain_atlas"
+    "ggseg_atlas"
   )
 })
 
@@ -195,6 +215,53 @@ test_that("ggsegray piping chain works", {
     add_glassbrain(opacity = 0.15) |>
     pan_camera("right lateral") |>
     set_background("black")
+
+  expect_s3_class(p, "ggsegray")
+  rgl::close3d()
+})
+
+test_that("render_edges_rgl draws boundary edges", {
+  skip_if_not_installed("rgl")
+
+  entry <- make_mesh_entry(
+    name = "test",
+    vertices = data.frame(
+      x = c(0, 1, 0, 1),
+      y = c(0, 0, 1, 1),
+      z = c(0, 0, 0, 0)
+    ),
+    faces = data.frame(i = c(1L, 2L), j = c(2L, 3L), k = c(3L, 4L)),
+    colors = c("#FF0000", "#00FF00", "#0000FF", "#FF0000"),
+    color_mode = "vertexcolor",
+    boundary_edges = list(c(0L, 1L), c(1L, 2L)),
+    edge_color = "#000000"
+  )
+
+  rgl::open3d()
+  expect_silent(render_edges_rgl(entry))
+  rgl::close3d()
+})
+
+test_that("render_edges_rgl skips when no edges", {
+  entry <- make_mesh_entry(
+    name = "test",
+    vertices = data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0)),
+    faces = data.frame(i = 1L, j = 2L, k = 3L),
+    colors = c("#FF0000", "#00FF00", "#0000FF"),
+    color_mode = "vertexcolor"
+  )
+
+  expect_silent(render_edges_rgl(entry))
+})
+
+test_that("ggsegray renders edges when edge_by is set", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(
+    atlas = dk,
+    hemisphere = "left",
+    edge_by = "region"
+  )
 
   expect_s3_class(p, "ggsegray")
   rgl::close3d()

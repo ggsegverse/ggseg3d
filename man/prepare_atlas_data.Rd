@@ -7,7 +7,7 @@
 prepare_atlas_data(atlas, .data)
 }
 \arguments{
-\item{atlas}{A brain_atlas object}
+\item{atlas}{A ggseg_atlas object}
 
 \item{.data}{Optional user data to merge}
 }
@@ -15,7 +15,7 @@ prepare_atlas_data(atlas, .data)
 Prepared data frame with hemi, region, label, colour, and vertices
 }
 \description{
-Extracts and prepares data from a brain_atlas object for rendering.
+Extracts and prepares data from a ggseg_atlas object for rendering.
 Joins vertices with core region info and palette colours.
 }
 \keyword{internal}

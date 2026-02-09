@@ -11,9 +11,10 @@ build_meshes(
   na_colour,
   edge_by,
   atlas_meshes = NULL,
-  atlas_type = "cortical",
+  atlas = NULL,
   color_by = "colour",
-  atlas_centerlines = NULL
+  atlas_centerlines = NULL,
+  brain_meshes = NULL
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ build_meshes(
 \item{atlas_meshes}{Optional meshes component from brain_atlas for
 subcortical rendering}
 
-\item{atlas_type}{Type of atlas ("cortical", "subcortical", "tract")}
+\item{atlas}{A `brain_atlas` object used for class-based dispatch}
 
 \item{color_by}{How to colour tracts: "colour" or "orientation"}
 }

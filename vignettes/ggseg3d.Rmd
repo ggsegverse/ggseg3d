@@ -1,8 +1,9 @@
 ---
 title: "3D brain visualization with ggseg3d"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{3D brain visualization with ggseg3d}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -140,7 +141,7 @@ Add outlines around regions with `set_edges()`:
 #| label: edges
 #| fig-cap: "Left hemisphere with black region boundary edges."
 ggseg3d(hemisphere = "left") |>
-  set_edges("black") |>
+  set_edges("black", width = 10) |>
   pan_camera("left lateral")
 ```
 

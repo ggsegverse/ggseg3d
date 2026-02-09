@@ -9,7 +9,8 @@ add_glassbrain(
   hemisphere = c("left", "right"),
   surface = "pial",
   colour = "#CCCCCC",
-  opacity = 0.3
+  opacity = 0.3,
+  brain_meshes = NULL
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ or both.}
 \item{colour}{Character. Colour for the glass brain surface (hex or named).}
 
 \item{opacity}{Numeric. Transparency of the glass brain (0-1).}
+
+\item{brain_meshes}{Optional user-supplied brain meshes. See
+[ggseg.formats::get_brain_mesh()] for format details.}
 }
 \value{
 The input object (modified), for piping.

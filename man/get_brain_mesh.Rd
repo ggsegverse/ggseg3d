@@ -6,19 +6,25 @@
 \usage{
 get_brain_mesh(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial")
+  surface = c("inflated", "semi-inflated", "white", "pial"),
+  brain_meshes = NULL
 )
 }
 \arguments{
-\item{hemisphere}{"lh" or "rh"}
+\item{hemisphere}{`"lh"` or `"rh"`}
 
-\item{surface}{Surface type: "inflated", "semi-inflated", "white", "pial"}
+\item{surface}{Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
+`"pial"`}
+
+\item{brain_meshes}{Optional user-supplied mesh data. Passed through to
+[ggseg.formats::get_brain_mesh()] for format details.}
 }
 \value{
 list with vertices (data.frame with x, y, z) and faces
   (data.frame with i, j, k), or NULL if mesh not found
 }
 \description{
-Retrieves a brain surface mesh for the specified hemisphere and surface type
-from the internal brain_meshes data.
+Retrieves a brain surface mesh for the specified hemisphere and surface type.
+Inflated surfaces are provided by ggseg.formats; pial, white, and
+semi-inflated surfaces are stored in ggseg3d.
 }

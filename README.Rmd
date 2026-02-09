@@ -7,7 +7,7 @@ format: gfm
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/img/README-",
+  fig.path = "man/figures/README-",
   echo = TRUE
 )
 
@@ -98,8 +98,8 @@ p <- p |>
                   font = list(color = 'darkgrey',
                               family = 'sans serif',
                               size = 50)) 
-plotly::orca(p, "man/img/README-dk-plot.png")
-knitr::include_graphics("man/img/README-dk-plot.png")
+plotly::orca(p, "man/figures/README-dk-plot.png")
+knitr::include_graphics("man/figures/README-dk-plot.png")
 ```
 
 
@@ -117,8 +117,8 @@ p <- p |>
     showarrow = FALSE,
     font = list(color = 'darkgrey', family = 'sans serif', size = 50)
   )
-plotly::orca(p, "man/img/README-aseg-plot.png")
-knitr::include_graphics("man/img/README-aseg-plot.png")
+plotly::orca(p, "man/figures/README-aseg-plot.png")
+knitr::include_graphics("man/figures/README-aseg-plot.png")
 ```
 
 ### Report bugs or requests  

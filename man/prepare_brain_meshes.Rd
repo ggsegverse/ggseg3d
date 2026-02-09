@@ -16,7 +16,8 @@ prepare_brain_meshes(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = "palette"
+  tract_color = "palette",
+  brain_meshes = NULL
 )
 }
 \arguments{
@@ -69,9 +70,13 @@ transparency of NA-regions.}
   Use [set_edges()] to customise appearance.}
 
 \item{tract_color}{String. How to colour tract atlases: "palette"
-  (default, use atlas palette) or "orientation" (direction-based RGB
-  where R=left-right, G=anterior-posterior, B=superior-inferior).
-  Only applies to tract atlases.
+(default, use atlas palette) or "orientation" (direction-based RGB
+where R=left-right, G=anterior-posterior, B=superior-inferior).
+Only applies to tract atlases.}
+
+\item{brain_meshes}{Optional user-supplied brain meshes for custom
+  surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
+  format details. When NULL (default), uses built-in fsaverage5 meshes.
 
 \strong{Available surfaces:}
 \itemize{

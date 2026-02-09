@@ -157,8 +157,8 @@ test_that("ggseg3d with aseg mesh atlas", {
 })
 
 test_that("ggseg3d errors on invalid atlas object", {
-  expect_error(ggseg3d(atlas = list()), "brain_atlas")
-  expect_error(ggseg3d(atlas = data.frame()), "brain_atlas")
+  expect_error(ggseg3d(atlas = list()), "ggseg_atlas")
+  expect_error(ggseg3d(atlas = data.frame()), "ggseg_atlas")
 })
 
 test_that("prepare_brain_meshes handles atlas with centerlines", {
@@ -184,6 +184,8 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
 
   atlas <- structure(
     list(
+      atlas = "test_tract",
+      type = "tract",
       core = data.frame(
         label = "tract_a",
         region = "tract a",
@@ -196,12 +198,11 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
           tube_radius = 1,
           tube_segments = 4
         ),
-        class = "brain_atlas_data"
+        class = c("ggseg_data_tract", "ggseg_atlas_data")
       ),
-      type = "tract",
       palette = c("tract_a" = "#FF0000")
     ),
-    class = "brain_atlas"
+    class = c("tract_atlas", "ggseg_atlas", "list")
   )
 
   prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")
@@ -224,6 +225,8 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
 
   atlas <- structure(
     list(
+      atlas = "test_subcort",
+      type = "subcortical",
       core = data.frame(
         label = "Left-Caudate",
         region = "caudate",
@@ -232,12 +235,11 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
       ),
       data = structure(
         list(meshes = meshes_data),
-        class = "brain_atlas_data"
+        class = c("ggseg_data_subcortical", "ggseg_atlas_data")
       ),
-      type = "subcortical",
       palette = c("Left-Caudate" = "#FF0000")
     ),
-    class = "brain_atlas"
+    class = c("subcortical_atlas", "ggseg_atlas", "list")
   )
 
   prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")

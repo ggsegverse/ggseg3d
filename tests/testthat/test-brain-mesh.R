@@ -34,10 +34,14 @@ test_that("is_unified_atlas identifies unified atlases correctly", {
   expect_false(is_unified_atlas("dk"))
 })
 
-test_that("is_mesh_atlas identifies mesh-based atlases", {
-  expect_false(is_mesh_atlas(dk))
-  expect_false(is_mesh_atlas(list()))
-  expect_false(is_mesh_atlas(NULL))
+test_that("class-based atlas checks work correctly", {
+  expect_true(is_cortical_atlas(dk))
+  expect_false(is_subcortical_atlas(dk))
+  expect_false(is_tract_atlas(dk))
+
+  expect_true(is_subcortical_atlas(aseg))
+  expect_false(is_cortical_atlas(aseg))
+  expect_false(is_tract_atlas(aseg))
 })
 
 
@@ -177,10 +181,10 @@ test_that("is_unified_atlas detects atlas with data component", {
       core = data.frame(label = "a", region = "r", hemi = "left"),
       data = structure(
         list(vertices = data.frame(label = "a")),
-        class = "brain_atlas_data"
+        class = "ggseg_atlas_data"
       )
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
   atlas$data$vertices$vertices <- list(1:10)
 
@@ -193,41 +197,18 @@ test_that("is_unified_atlas returns FALSE for atlas without 3d data", {
       core = data.frame(label = "a", region = "r", hemi = "left"),
       data = structure(
         list(geometry = data.frame()),
-        class = "brain_atlas_data"
+        class = "ggseg_atlas_data"
       )
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   expect_false(is_unified_atlas(atlas))
 })
 
-test_that("is_mesh_atlas detects atlas with meshes in data component", {
-  atlas <- structure(
-    list(
-      core = data.frame(label = "a", region = "r", hemi = "subcort"),
-      data = structure(
-        list(meshes = data.frame(label = "a")),
-        class = "brain_atlas_data"
-      )
-    ),
-    class = "brain_atlas"
-  )
-
-  expect_true(is_mesh_atlas(atlas))
-})
-
-test_that("is_mesh_atlas detects atlas with direct meshes", {
-  atlas <- structure(
-    list(
-      core = data.frame(label = "a", region = "r", hemi = "subcort"),
-      meshes = data.frame(label = "a")
-    ),
-    class = "brain_atlas"
-  )
-  atlas$meshes$mesh <- list(list())
-
-  expect_true(is_mesh_atlas(atlas))
+test_that("is_subcortical_atlas detects subcortical atlases", {
+  expect_true(is_subcortical_atlas(aseg))
+  expect_false(is_subcortical_atlas(dk))
 })
 
 test_that("is_unified_atlas detects direct vertices", {
@@ -236,7 +217,7 @@ test_that("is_unified_atlas detects direct vertices", {
       core = data.frame(label = "a", region = "r", hemi = "left"),
       vertices = data.frame(label = "a")
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
   atlas$vertices$vertices <- list(1:10)
 
@@ -249,7 +230,7 @@ test_that("is_unified_atlas detects direct meshes", {
       core = data.frame(label = "a", region = "r", hemi = "subcort"),
       meshes = data.frame(label = "a")
     ),
-    class = "brain_atlas"
+    class = "ggseg_atlas"
   )
 
   expect_true(is_unified_atlas(atlas))
@@ -309,14 +290,14 @@ test_that("generate_tube_mesh errors on bad input", {
   expect_error(generate_tube_mesh(c(1, 2, 3)), "matrix")
 })
 
-test_that("compute_parallel_transport_frames returns correct structure", {
+test_that("compute_parallel_transp_fr returns correct structure", {
   curve <- matrix(
     c(0, 0, 0, 1, 0, 0, 2, 1, 0, 3, 1, 1),
     nrow = 4,
     byrow = TRUE
   )
 
-  frames <- compute_parallel_transport_frames(curve)
+  frames <- compute_parallel_transp_fr(curve)
 
   expect_true("tangents" %in% names(frames))
   expect_true("normals" %in% names(frames))

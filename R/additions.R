@@ -11,6 +11,8 @@
 #' @param surface Character. Surface type: "inflated", "white", or "pial".
 #' @param colour Character. Colour for the glass brain surface (hex or named).
 #' @param opacity Numeric. Transparency of the glass brain (0-1).
+#' @param brain_meshes Optional user-supplied brain meshes. See
+#'   [ggseg.formats::get_brain_mesh()] for format details.
 #'
 #' @return The input object (modified), for piping.
 #' @export
@@ -29,10 +31,13 @@ add_glassbrain <- function(
   hemisphere = c("left", "right"),
   surface = "pial",
   colour = "#CCCCCC",
-  opacity = 0.3
+  opacity = 0.3,
+  brain_meshes = NULL
 ) {
   if (inherits(p, "ggsegray")) {
-    return(add_glassbrain_rgl(p, hemisphere, surface, colour, opacity))
+    return(add_glassbrain_rgl(
+      p, hemisphere, surface, colour, opacity, brain_meshes
+    ))
   }
 
   check_ggseg3d(p)
@@ -44,7 +49,11 @@ add_glassbrain <- function(
 
   for (hemi in hemisphere) {
     hemi_short <- hemi_map[hemi]
-    mesh <- get_brain_mesh(hemisphere = hemi_short, surface = surface)
+    mesh <- get_brain_mesh(
+      hemisphere = hemi_short,
+      surface = surface,
+      brain_meshes = brain_meshes
+    )
 
     if (is.null(mesh)) {
       cli::cli_warn(
@@ -53,14 +62,12 @@ add_glassbrain <- function(
       next
     }
 
-    vertices <- position_hemisphere(mesh$vertices, hemi)
-
-    n_vertices <- nrow(vertices)
+    n_vertices <- nrow(mesh$vertices)
     vertex_colors <- rep(colour, n_vertices)
 
     new_meshes[[length(new_meshes) + 1]] <- make_mesh_entry(
       name = paste("glass brain", hemi),
-      vertices = vertices,
+      vertices = mesh$vertices,
       faces = mesh$faces,
       colors = vertex_colors,
       color_mode = "vertexcolor",
@@ -74,8 +81,9 @@ add_glassbrain <- function(
 
 
 #' @keywords internal
-add_glassbrain_rgl <- function(p, hemisphere, surface, colour, opacity) {
-  check_ggsegray(p)
+add_glassbrain_rgl <- function(
+    p, hemisphere, surface, colour, opacity, brain_meshes = NULL) {
+  check_ggsegray(p) # nolint [object_usage_linter]
 
   colour <- if (grepl("^#", colour)) colour else col2hex(colour)
   hemi_map <- c("left" = "lh", "right" = "rh")
@@ -84,7 +92,11 @@ add_glassbrain_rgl <- function(p, hemisphere, surface, colour, opacity) {
 
   for (hemi in cortical_hemis) {
     hemi_short <- hemi_map[hemi]
-    mesh <- get_brain_mesh(hemisphere = hemi_short, surface = surface)
+    mesh <- get_brain_mesh(
+      hemisphere = hemi_short,
+      surface = surface,
+      brain_meshes = brain_meshes
+    )
     if (is.null(mesh)) {
       next
     }
@@ -100,11 +112,11 @@ add_glassbrain_rgl <- function(p, hemisphere, surface, colour, opacity) {
       opacity = opacity
     )
 
-    mesh3d <- mesh_entry_to_mesh3d(entry)
+    mesh3d <- mesh_entry_to_mesh3d(entry) # nolint [object_usage_linter]
     rgl::shade3d(mesh3d)
   }
 
-  invisible(p)
+  p
 }
 
 
@@ -165,12 +177,12 @@ pan_camera <- function(p, camera) {
 
 #' @keywords internal
 pan_camera_rgl <- function(p, camera) {
-  check_ggsegray(p)
+  check_ggsegray(p) # nolint [object_usage_linter]
 
   cam_pos <- if (is.numeric(camera)) {
     camera
   } else if (is.character(camera)) {
-    camera_preset_to_position(camera)
+    camera_preset_to_position(camera) # nolint [object_usage_linter]
   } else {
     cli::cli_abort(
       c(
@@ -180,13 +192,10 @@ pan_camera_rgl <- function(p, camera) {
     )
   }
 
-  rgl::view3d(
-    userMatrix = rgl::rotationMatrix(0, 0, 0, 1),
-    type = "modelviewpoint"
-  )
-  rgl::observer3d(cam_pos[1], cam_pos[2], cam_pos[3])
+  um <- look_at_origin(cam_pos) # nolint [object_usage_linter]
+  rgl::view3d(userMatrix = um, fov = 0)
 
-  invisible(p)
+  p
 }
 
 
@@ -224,7 +233,7 @@ set_background <- function(p, colour = "#ffffff") {
 
 #' @keywords internal
 set_background_rgl <- function(p, colour) {
-  check_ggsegray(p)
+  check_ggsegray(p) # nolint [object_usage_linter]
 
   if (!grepl("^#", colour)) {
     colour <- col2hex(colour)
@@ -232,7 +241,7 @@ set_background_rgl <- function(p, colour) {
 
   rgl::bg3d(color = colour)
 
-  invisible(p)
+  p
 }
 
 

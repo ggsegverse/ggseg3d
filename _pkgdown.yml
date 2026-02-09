@@ -8,10 +8,7 @@ articles:
     navbar: ~
     contents:
       - ggseg3d
-
-  - title: Advanced Usage
-    contents:
-      - unified-atlases
+      - rayshader
       - shiny
 
 reference:
@@ -19,18 +16,14 @@ reference:
     desc: Core 3D visualization function
     contents:
       - ggseg3d
+      - ggsegray
 
   - title: Widget Customization
     desc: Pipe-friendly functions to modify the 3D widget
     contents:
       - pan_camera
-      - set_background
-      - set_edges
-      - set_legend
-      - set_dimensions
-      - set_flat_shading
-      - set_orthographic
       - add_glassbrain
+      - starts_with("set")
       - snapshot_brain
 
   - title: Mesh Utilities
@@ -45,9 +38,3 @@ reference:
       - renderGgseg3d
       - updateGgseg3dCamera
       - updateGgseg3dBackground
-
-  - title: Data
-    desc: Built-in atlases
-    contents:
-      - dk
-      - aseg

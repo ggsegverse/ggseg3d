@@ -1,6 +1,8 @@
-# Generate internal brain meshes for ggseg3d
+# Generate per-surface brain meshes for ggseg3d
 #
-# Creates brain_meshes for unified atlas rendering and glassbrain.
+# Creates brain_mesh_pial, brain_mesh_white, and brain_mesh_semi_inflated
+# for unified atlas rendering and glassbrain.
+# The inflated surface lives in ggseg.formats.
 # Requires ggsegExtra and FreeSurfer.
 #
 # Run with: source("data-raw/make_brain_meshes.R")
@@ -22,7 +24,7 @@ subject <- "fsaverage5"
 surfaces <- c("inflated", "pial", "white")
 hemispheres <- c("lh", "rh")
 
-brain_meshes <- list()
+all_meshes <- list()
 
 for (hemi in hemispheres) {
   for (surf in surfaces) {
@@ -30,13 +32,13 @@ for (hemi in hemispheres) {
 
     cli::cli_alert_info("Generating {mesh_name}...")
 
-    mesh <- ggsegExtra:::get_brain_mesh(
+    mesh <- ggsegExtra:::read_fs_mesh(
       subject = subject,
       hemisphere = hemi,
       surface = surf
     )
 
-    brain_meshes[[mesh_name]] <- list(
+    all_meshes[[mesh_name]] <- list(
       vertices = mesh$vertices,
       faces = mesh$faces
     )
@@ -48,8 +50,8 @@ for (hemi in hemispheres) {
 
   cli::cli_alert_info("Generating {hemi}_semi-inflated...")
 
-  white_verts <- brain_meshes[[paste0(hemi, "_white")]]$vertices
-  infl_verts <- brain_meshes[[paste0(hemi, "_inflated")]]$vertices
+  white_verts <- all_meshes[[paste0(hemi, "_white")]]$vertices
+  infl_verts <- all_meshes[[paste0(hemi, "_inflated")]]$vertices
 
   semi_verts <- data.frame(
     x = 0.5 * white_verts$x + 0.5 * infl_verts$x,
@@ -57,9 +59,9 @@ for (hemi in hemispheres) {
     z = 0.5 * white_verts$z + 0.5 * infl_verts$z
   )
 
-  brain_meshes[[paste0(hemi, "_semi-inflated")]] <- list(
+  all_meshes[[paste0(hemi, "_semi-inflated")]] <- list(
     vertices = semi_verts,
-    faces = brain_meshes[[paste0(hemi, "_white")]]$faces
+    faces = all_meshes[[paste0(hemi, "_white")]]$faces
   )
 
   cli::cli_alert_success(
@@ -67,11 +69,29 @@ for (hemi in hemispheres) {
   )
 }
 
+brain_mesh_pial <- list(
+  lh = all_meshes[["lh_pial"]],
+  rh = all_meshes[["rh_pial"]]
+)
+
+brain_mesh_white <- list(
+  lh = all_meshes[["lh_white"]],
+  rh = all_meshes[["rh_white"]]
+)
+
+brain_mesh_semi_inflated <- list(
+  lh = all_meshes[["lh_semi-inflated"]],
+  rh = all_meshes[["rh_semi-inflated"]]
+)
+
 usethis::use_data(
-  brain_meshes,
+  brain_mesh_pial,
+  brain_mesh_white,
+  brain_mesh_semi_inflated,
   internal = TRUE,
   overwrite = TRUE,
   compress = "xz"
 )
 
 cli::cli_alert_success("Internal data saved to R/sysdata.rda")
+cli::cli_alert_info("Inflated surface is in ggseg.formats::brain_mesh_inflated")

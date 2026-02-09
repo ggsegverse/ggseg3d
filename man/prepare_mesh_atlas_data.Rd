@@ -7,7 +7,7 @@
 prepare_mesh_atlas_data(atlas, .data)
 }
 \arguments{
-\item{atlas}{A mesh-based brain_atlas object}
+\item{atlas}{A mesh-based ggseg_atlas object}
 
 \item{.data}{Optional user data to merge}
 }
@@ -15,7 +15,7 @@ prepare_mesh_atlas_data(atlas, .data)
 Prepared data frame with hemi, region, label, colour, and mesh
 }
 \description{
-Extracts and prepares data from a mesh-based brain_atlas object
+Extracts and prepares data from a mesh-based ggseg_atlas object
 (subcortical/tract) for rendering. Joins meshes with core region info
 and palette colours.
 }

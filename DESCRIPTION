@@ -28,13 +28,13 @@ Imports:
     cli,
     dplyr,
     htmlwidgets,
+    knitr,
     lifecycle,
     rlang,
     scales,
     tidyr,
     webshot2
 Suggests:
-    knitr,
     rmarkdown,
     covr,
     testthat (>= 2.1.0),
@@ -42,12 +42,11 @@ Suggests:
     ggsegExtra,
     lintr,
     processx,
-    quarto,
     rayshader,
     rgl,
     shiny,
     spelling
 URL: https://github.com/ggseg/ggseg3d, https://ggseg.github.io/ggseg3d/
 BugReports: https://github.com/ggseg/ggseg3d/issues
-VignetteBuilder: quarto
+VignetteBuilder: knitr
 Language: en-US

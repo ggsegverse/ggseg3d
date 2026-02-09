@@ -6,7 +6,7 @@
 \usage{
 ggsegray(
   .data = NULL,
-  atlas = "dk",
+  atlas = dk,
   surface = "LCBC",
   hemisphere = c("right", "subcort"),
   label = "region",
@@ -16,7 +16,10 @@ ggsegray(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = c("palette", "orientation")
+  tract_color = c("palette", "orientation"),
+  specular = "black",
+  shininess = 128,
+  brain_meshes = NULL
 )
 }
 \arguments{
@@ -69,9 +72,19 @@ transparency of NA-regions.}
   Use [set_edges()] to customise appearance.}
 
 \item{tract_color}{String. How to colour tract atlases: "palette"
-  (default, use atlas palette) or "orientation" (direction-based RGB
-  where R=left-right, G=anterior-posterior, B=superior-inferior).
-  Only applies to tract atlases.
+(default, use atlas palette) or "orientation" (direction-based RGB
+where R=left-right, G=anterior-posterior, B=superior-inferior).
+Only applies to tract atlases.}
+
+\item{specular}{Character. Specular reflection colour for the mesh
+material. Set to `"black"` for a fully matte surface. Default `"white"`.}
+
+\item{shininess}{Numeric. Shininess coefficient for specular highlights.
+Higher values produce tighter, glossier highlights. Default `50`.}
+
+\item{brain_meshes}{Optional user-supplied brain meshes for custom
+  surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
+  format details. When NULL (default), uses built-in fsaverage5 meshes.
 
 \strong{Available surfaces:}
 \itemize{

@@ -1,8 +1,9 @@
 ---
 title: "Using ggseg3d in Shiny"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ggseg3d in Shiny}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -35,7 +36,9 @@ ui <- fluidPage(
   titlePanel("Brain Atlas Viewer"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("hemi", "Hemisphere",
+      selectInput(
+        "hemi",
+        "Hemisphere",
         choices = c("left", "right", "both"),
         selected = "left"
       )
@@ -92,7 +95,11 @@ server <- function(input, output, session) {
   })
 
   output$brain <- renderGgseg3d({
-    ggseg3d(.data = brain_data(), atlas = dk, colour = "value") |>
+    ggseg3d(
+      .data = brain_data(),
+      atlas = dk, # nolint [object_usage_linter]
+      colour = "value"
+    ) |>
       pan_camera("left lateral")
   })
 }
@@ -107,15 +114,17 @@ Use `updateGgseg3dCamera()` and `updateGgseg3dBackground()` to modify an existin
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      selectInput("view", "View",
+      selectInput(
+        "view",
+        "View",
         choices = c(
-          "left lateral", "left medial",
-          "right lateral", "right medial"
+          "left lateral",
+          "left medial",
+          "right lateral",
+          "right medial"
         )
       ),
-      selectInput("bg", "Background",
-        choices = c("white", "black", "grey")
-      )
+      selectInput("bg", "Background", choices = c("white", "black", "grey"))
     ),
     mainPanel(
       ggseg3dOutput("brain")
@@ -153,8 +162,14 @@ library(dplyr)
 
 example_data <- tibble(
   region = c(
-    "precentral", "postcentral", "insula", "superior parietal",
-    "inferior parietal", "supramarginal", "cuneus", "pericalcarine"
+    "precentral",
+    "postcentral",
+    "insula",
+    "superior parietal",
+    "inferior parietal",
+    "supramarginal",
+    "cuneus",
+    "pericalcarine"
   ),
   thickness = c(2.5, 2.3, 3.1, 2.2, 2.4, 2.6, 1.8, 1.9),
   volume = c(8500, 7200, 6800, 9100, 8800, 7500, 4200, 3800)
@@ -164,20 +179,21 @@ ui <- fluidPage(
   titlePanel("Brain Metrics Explorer"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("metric", "Metric",
-        choices = c("thickness", "volume")
-      ),
-      selectInput("view", "Camera View",
+      selectInput("metric", "Metric", choices = c("thickness", "volume")),
+      selectInput(
+        "view",
+        "Camera View",
         choices = c(
-          "left lateral", "left medial",
-          "right lateral", "right medial",
-          "left superior", "left inferior"
+          "left lateral",
+          "left medial",
+          "right lateral",
+          "right medial",
+          "left superior",
+          "left inferior"
         )
       ),
       checkboxInput("edges", "Show edges", value = FALSE),
-      selectInput("bg", "Background",
-        choices = c("white", "black", "grey90")
-      )
+      selectInput("bg", "Background", choices = c("white", "black", "grey90"))
     ),
     mainPanel(
       ggseg3dOutput("brain", height = "600px")
@@ -189,7 +205,7 @@ server <- function(input, output, session) {
   output$brain <- renderGgseg3d({
     p <- ggseg3d(
       .data = example_data,
-      atlas = dk,
+      atlas = dk, # nolint [object_usage_linter]
       colour = input$metric,
       text = input$metric
     ) |>

@@ -59,6 +59,11 @@ test_that("build_meshes handles subcort hemisphere", {
     )
   )
 
+  subcort_atlas <- structure(
+    list(core = data.frame(label = "Left-Caudate", hemi = "subcort")),
+    class = c("subcortical_atlas", "ggseg_atlas")
+  )
+
   meshes <- build_meshes(
     atlas_data,
     "subcort",
@@ -66,7 +71,7 @@ test_that("build_meshes handles subcort hemisphere", {
     "#CCCCCC",
     NULL,
     atlas_data,
-    atlas_type = "subcortical"
+    atlas = subcort_atlas
   )
 
   expect_true(length(meshes) > 0)
@@ -87,6 +92,11 @@ test_that("build_meshes handles tract atlas type", {
     )
   )
 
+  tract_atlas <- structure(
+    list(core = data.frame(label = "tract1", hemi = "subcort")),
+    class = c("tract_atlas", "ggseg_atlas")
+  )
+
   meshes <- build_meshes(
     atlas_data,
     "subcort",
@@ -94,7 +104,7 @@ test_that("build_meshes handles tract atlas type", {
     "#CCCCCC",
     NULL,
     atlas_data,
-    atlas_type = "tract"
+    atlas = tract_atlas
   )
 
   expect_true(length(meshes) > 0)
