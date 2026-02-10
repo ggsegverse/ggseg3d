@@ -271,3 +271,99 @@ test_that("check_ggsegray rejects non-ggsegray objects", {
   expect_error(check_ggsegray(list()), "ggsegray")
   expect_error(check_ggsegray("not a scene"), "ggsegray")
 })
+
+test_that("ggsegray errors on non-unified atlas", {
+  skip_if_not_installed("rgl")
+
+  fake_atlas <- structure(
+    list(
+      core = data.frame(label = "a", region = "r", hemi = "left"),
+      data = structure(list(), class = "ggseg_atlas_data")
+    ),
+    class = "ggseg_atlas"
+  )
+
+  expect_error(ggsegray(atlas = fake_atlas), "no 3D data")
+})
+
+test_that("pan_camera rejects bad type for ggsegray", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(hemisphere = "left", atlas = dk)
+
+  expect_error(
+    pan_camera(p, list(x = 1)),
+    "character string or numeric"
+  )
+  rgl::close3d()
+})
+
+test_that("set_legend works with ggsegray", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(hemisphere = "left", atlas = dk)
+  result <- set_legend(p)
+  expect_s3_class(result, "ggsegray")
+  rgl::close3d()
+})
+
+test_that("set_edges works with ggsegray", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(
+    atlas = dk,
+    hemisphere = "left",
+    edge_by = "region"
+  )
+
+  p2 <- set_edges(p, "red", width = 2)
+  expect_s3_class(p2, "ggsegray")
+
+  p3 <- set_edges(p2, NULL)
+  expect_s3_class(p3, "ggsegray")
+  expect_equal(length(p3$edge_ids), 0)
+
+  rgl::close3d()
+})
+
+test_that("ggsegray stores meshes and edge_ids", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(hemisphere = "left", atlas = dk)
+  expect_true("meshes" %in% names(p))
+  expect_true("edge_ids" %in% names(p))
+  rgl::close3d()
+})
+
+test_that("print.ggsegray returns rglwidget", {
+  skip_if_not_installed("rgl")
+
+  p <- ggsegray(hemisphere = "left", atlas = dk)
+  widget <- print(p)
+  expect_s3_class(widget, "htmlwidget")
+  rgl::close3d()
+})
+
+test_that("knit_print.ggsegray method exists", {
+  expect_true(is.function(getS3method("knit_print", "ggsegray")))
+})
+
+test_that("set_legend renders continuous legend for numeric data", {
+  skip_if_not_installed("rgl")
+
+  some_data <- dplyr::tibble(
+    region = c("precentral", "postcentral"),
+    p = c(0.1, 0.5)
+  )
+
+  p <- ggsegray(
+    .data = some_data,
+    atlas = dk,
+    colour = "p",
+    hemisphere = "left"
+  )
+  expect_equal(p$legend_data$type, "continuous")
+  result <- set_legend(p)
+  expect_s3_class(result, "ggsegray")
+  rgl::close3d()
+})

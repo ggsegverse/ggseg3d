@@ -17,9 +17,8 @@ ggsegray(
   na_alpha = 1,
   edge_by = NULL,
   tract_color = c("palette", "orientation"),
-  specular = "black",
-  shininess = 128,
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  ...
 )
 }
 \arguments{
@@ -76,12 +75,6 @@ transparency of NA-regions.}
 where R=left-right, G=anterior-posterior, B=superior-inferior).
 Only applies to tract atlases.}
 
-\item{specular}{Character. Specular reflection colour for the mesh
-material. Set to `"black"` for a fully matte surface. Default `"white"`.}
-
-\item{shininess}{Numeric. Shininess coefficient for specular highlights.
-Higher values produce tighter, glossier highlights. Default `50`.}
-
 \item{brain_meshes}{Optional user-supplied brain meshes for custom
   surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
   format details. When NULL (default), uses built-in fsaverage5 meshes.
@@ -92,6 +85,34 @@ Higher values produce tighter, glossier highlights. Default `50`.}
 \item `semi-inflated:` Semi-inflated surface
 \item `white:` white matter surface
  }}
+
+\item{...}{Material properties passed to the `material` argument of
+  [rgl::tmesh3d()]. These control how the mesh surface is shaded.
+
+  Defaults applied by ggseg3d:
+  \describe{
+    \item{`specular`}{Specular highlight colour. `"black"` (default) gives
+      a matte surface, `"white"` adds glossy highlights.}
+    \item{`shininess`}{Exponent for specular highlights. Default `128`.
+      Higher values produce tighter highlights.}
+  }
+
+  Other useful properties:
+  \describe{
+    \item{`lit`}{`FALSE` disables lighting entirely. Vertices render at
+      their exact assigned colour with no shading — useful for
+      mask/contour extraction where shadows would contaminate the output.}
+    \item{`ambient`}{Ambient reflection colour (default `"black"`).}
+    \item{`emission`}{Self-illumination colour (default `"black"`).
+      Set to a colour to make the mesh glow independently of lights.}
+    \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
+    \item{`smooth`}{`TRUE` (default) for Gouraud shading, `FALSE` for
+      flat faceted shading.}
+    \item{`front`, `back`}{Polygon rendering mode: `"filled"`,
+      `"lines"`, or `"points"`.}
+  }
+
+  See [rgl::material3d()] for the full list of supported properties.}
 }
 \value{
 An object of class `ggsegray` (invisibly), which wraps the

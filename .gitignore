@@ -11,3 +11,5 @@ inst/doc
 docs/
 *Rcheck
 
+/doc/
+/Meta/

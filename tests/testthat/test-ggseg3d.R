@@ -247,3 +247,55 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
   expect_type(prepared, "list")
   expect_true(length(prepared$meshes) > 0)
 })
+
+test_that("prepare_brain_meshes uses orientation coloring for tracts", {
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3, byrow = TRUE
+  )
+  tangents <- matrix(
+    c(1, 0, 0, 0, 1, 0, 0, 0, 1),
+    nrow = 3, byrow = TRUE
+  )
+
+  cl_data <- data.frame(label = "tract_a", stringsAsFactors = FALSE)
+  cl_data$points <- list(centerline)
+  cl_data$tangents <- list(tangents)
+
+  meshes_data <- data.frame(
+    label = "tract_a",
+    stringsAsFactors = FALSE
+  )
+  meshes_data$mesh <- list(NULL)
+
+  atlas <- structure(
+    list(
+      atlas = "test_tract",
+      type = "tract",
+      core = data.frame(
+        label = "tract_a", region = "tract a", hemi = "subcort",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(
+          meshes = meshes_data,
+          centerlines = cl_data,
+          tube_radius = 1,
+          tube_segments = 4
+        ),
+        class = c("ggseg_data_tract", "ggseg_atlas_data")
+      ),
+      palette = c("tract_a" = "#FF0000")
+    ),
+    class = c("tract_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(
+    atlas = atlas,
+    hemisphere = "subcort",
+    tract_color = "orientation"
+  )
+
+  expect_true(length(prepared$meshes) > 0)
+  expect_true(all(grepl("^#", prepared$meshes[[1]]$colors)))
+})

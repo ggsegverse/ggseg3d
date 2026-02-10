@@ -7,7 +7,7 @@
 set_edges(p, colour = "black", width = 1)
 }
 \arguments{
-\item{p}{ggseg3d widget object}
+\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
 
 \item{colour}{string. Edge colour (hex or named color). Set to NULL to
 hide edges.}
@@ -16,16 +16,27 @@ hide edges.}
 may not render on all systems due to WebGL limitations.}
 }
 \value{
-ggseg3d widget object with updated edge settings
+The input object (modified), for piping.
 }
 \description{
 Adds coloured outlines around brain regions. This is useful for
-highlighting region boundaries in figures.
+highlighting region boundaries in figures. Works with both
+htmlwidget (`ggseg3d`) and rgl (`ggsegray`) objects. For rgl,
+edges must have been computed at creation time via `edge_by`.
 }
+\section{Lifecycle}{
+
+`r lifecycle::badge("experimental")`
+}
+
 \examples{
 \dontrun{
-ggseg3d(hemisphere = "left") |>
+ggseg3d(hemisphere = "left", edge_by = "region") |>
   set_edges("black") |>
+  pan_camera("left lateral")
+
+ggsegray(hemisphere = "left", edge_by = "region") |>
+  set_edges("red", width = 2) |>
   pan_camera("left lateral")
 }
 }

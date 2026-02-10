@@ -141,6 +141,18 @@ test_that("set_positioning rejects non-ggseg3d objects", {
   expect_error(set_positioning(list()), "ggseg3d")
 })
 
+test_that("add_glassbrain warns for unavailable mesh", {
+  expect_warning(
+    ggseg3d(atlas = aseg) |>
+      add_glassbrain(
+        hemisphere = "left",
+        surface = "pial",
+        brain_meshes = list()
+      ),
+    "not available"
+  )
+})
+
 test_that("additions can be chained", {
   p <- ggseg3d() |>
     set_background("black") |>

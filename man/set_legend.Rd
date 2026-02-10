@@ -7,18 +7,20 @@
 set_legend(p, show = TRUE)
 }
 \arguments{
-\item{p}{ggseg3d widget object}
+\item{p}{A ggseg3d or ggsegray object}
 
 \item{show}{logical. Whether to show the legend (default: TRUE)}
 }
 \value{
-ggseg3d widget object with updated legend visibility
+The input object, modified
 }
 \description{
-Controls visibility of the colour bar legend for numeric data.
+For htmlwidget output, toggles legend visibility. For rgl output,
+draws or removes the legend overlay.
 }
 \examples{
 \dontrun{
 ggseg3d() |> set_legend(FALSE)
+ggsegray(hemisphere = "left") |> set_legend()
 }
 }

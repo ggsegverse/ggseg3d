@@ -158,6 +158,18 @@ test_that("build_discrete_legend handles tibble input", {
 })
 
 
+test_that("build_discrete_legend handles non-dataframe input", {
+  data <- matrix(
+    c("a", "b", "#FF0000", "#00FF00"),
+    ncol = 2,
+    dimnames = list(NULL, c("region", "colour"))
+  )
+
+  result <- build_discrete_legend(data, "colour", "region")
+  expect_equal(result$type, "discrete")
+  expect_equal(length(result$labels), 2)
+})
+
 test_that("build_discrete_legend removes duplicate labels", {
   data <- data.frame(
     region = c("a", "a", "b"),

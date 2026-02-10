@@ -20,3 +20,36 @@
 #' @import ggseg.formats
 #' @importFrom cli cli_abort cli_warn cli_inform
 "_PACKAGE"
+
+# nocov start
+#' @noRd
+release_questions <- function() {
+  c(
+    "Have you re-knitted precompiled vignettes 
+    with `ggseg3d:::knit_vignettes()`?"
+  )
+}
+
+#' @noRd
+knit_vignettes <- function() {
+  orig <- list.files(
+    "vignettes",
+    pattern = "\\.Rmd\\.orig$",
+    full.names = TRUE
+  )
+  if (length(orig) == 0L) {
+    cli::cli_inform("No .Rmd.orig files found in vignettes/")
+    return(invisible())
+  }
+  old_wd <- getwd()
+  setwd("vignettes")
+  on.exit(setwd(old_wd))
+  for (f in basename(orig)) {
+    out <- sub("\\.orig$", "", f)
+    cli::cli_inform("Knitting {f} -> {out}")
+    knitr::knit(f, output = out)
+  }
+  cli::cli_inform("Done. Commit the .Rmd files and any generated figures.")
+  invisible()
+}
+# nocov end

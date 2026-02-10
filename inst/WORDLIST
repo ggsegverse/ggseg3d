@@ -3,6 +3,7 @@ CMD
 Colour
 Debounce
 Desikan
+Gouraud
 Killiany
 Lifebrain
 Lifecycle
@@ -45,6 +46,7 @@ htmlwidget
 htmlwidgets
 js
 lh
+lifecycle
 magick
 midline
 mimmick

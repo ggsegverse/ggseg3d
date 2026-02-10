@@ -9,14 +9,39 @@ utils::globalVariables("dk")
 #' rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
 #'
 #' @inheritParams ggseg3d
-#' @param specular Character. Specular reflection colour for the mesh
-#'   material. Set to `"black"` for a fully matte surface. Default `"white"`.
-#' @param shininess Numeric. Shininess coefficient for specular highlights.
-#'   Higher values produce tighter, glossier highlights. Default `50`.
+#' @param ... Material properties passed to the `material` argument of
+#'   [rgl::tmesh3d()]. These control how the mesh surface is shaded.
+#'
+#'   Defaults applied by ggseg3d:
+#'   \describe{
+#'     \item{`specular`}{Specular highlight colour. `"black"` (default) gives
+#'       a matte surface, `"white"` adds glossy highlights.}
+#'     \item{`shininess`}{Exponent for specular highlights. Default `128`.
+#'       Higher values produce tighter highlights.}
+#'   }
+#'
+#'   Other useful properties:
+#'   \describe{
+#'     \item{`lit`}{`FALSE` disables lighting entirely. Vertices render at
+#'       their exact assigned colour with no shading — useful for
+#'       mask/contour extraction where shadows would contaminate the output.}
+#'     \item{`ambient`}{Ambient reflection colour (default `"black"`).}
+#'     \item{`emission`}{Self-illumination colour (default `"black"`).
+#'       Set to a colour to make the mesh glow independently of lights.}
+#'     \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
+#'     \item{`smooth`}{`TRUE` (default) for Gouraud shading, `FALSE` for
+#'       flat faceted shading.}
+#'     \item{`front`, `back`}{Polygon rendering mode: `"filled"`,
+#'       `"lines"`, or `"points"`.}
+#'   }
+#'
+#'   See [rgl::material3d()] for the full list of supported properties.
 #'
 #' @return An object of class `ggsegray` (invisibly), which wraps the
 #'   rgl device ID. Pipe into [pan_camera()], [add_glassbrain()], or
 #'   [set_background()] to modify the scene.
+#'
+#' @importFrom graphics par plot.new plot.window rect text
 #'
 #' @examples
 #' \dontrun{
@@ -43,9 +68,8 @@ ggsegray <- function(
   na_alpha = 1,
   edge_by = NULL,
   tract_color = c("palette", "orientation"),
-  specular = "black",
-  shininess = 128,
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  ...
 ) {
   rlang::check_installed("rgl", reason = "to render 3D brain scenes")
 
@@ -88,21 +112,25 @@ ggsegray <- function(
 
   rgl::open3d()
 
+  edge_ids <- integer(0)
   for (mesh_entry in prepared$meshes) {
     mesh3d <- mesh_entry_to_mesh3d(
       mesh_entry,
-      specular = specular,
-      shininess = shininess
+      ...
     )
     rgl::shade3d(mesh3d)
-    render_edges_rgl(mesh_entry)
+    eid <- render_edges_rgl(mesh_entry)
+    if (!is.null(eid)) edge_ids <- c(edge_ids, eid)
   }
 
   structure(
     list(
       device = rgl::cur3d(),
       hemisphere = hemisphere,
-      surface = unified_surface
+      surface = unified_surface,
+      legend_data = prepared$legend_data,
+      meshes = prepared$meshes,
+      edge_ids = edge_ids
     ),
     class = "ggsegray"
   )
@@ -116,16 +144,13 @@ ggsegray <- function(
 #'
 #' @param mesh_entry A mesh entry list with vertices, faces, colors,
 #'   colorMode, and opacity.
-#' @param specular Character. Specular reflection colour.
-#' @param shininess Numeric. Shininess coefficient.
+#' @param ... Material properties merged into the `material` list of
+#'   [rgl::tmesh3d()]. Overrides defaults (`specular = "black"`,
+#'   `shininess = 128`). See [rgl::material3d()] for all options.
 #'
 #' @return An rgl `mesh3d` object
 #' @keywords internal
-mesh_entry_to_mesh3d <- function(
-  mesh_entry,
-  specular = "white",
-  shininess = 50
-) {
+mesh_entry_to_mesh3d <- function(mesh_entry, ...) {
   rlang::check_installed("rgl", reason = "to convert meshes")
 
   vb <- rbind(
@@ -149,15 +174,19 @@ mesh_entry_to_mesh3d <- function(
 
   alpha <- mesh_entry$opacity %||% 1
 
+  material <- list(
+    color = mesh_entry$colors,
+    alpha = alpha,
+    specular = "black",
+    shininess = 128
+  )
+  extra <- list(...)
+  material[names(extra)] <- extra
+
   rgl::tmesh3d(
     vertices = vb,
     indices = it,
-    material = list(
-      color = mesh_entry$colors,
-      alpha = alpha,
-      specular = specular,
-      shininess = shininess
-    ),
+    material = material,
     meshColor = mesh_color
   )
 }
@@ -253,26 +282,46 @@ look_at_origin <- function(eye) {
 }
 
 
-render_edges_rgl <- function(mesh_entry) {
+render_edges_rgl <- function(mesh_entry, colour = NULL, width = NULL) {
   edges <- mesh_entry$boundaryEdges
-  edge_color <- mesh_entry$edgeColor
-  if (is.null(edges) || is.null(edge_color) || length(edges) == 0) {
+  if (is.null(edges) || length(edges) == 0) {
     return(invisible(NULL))
   }
 
-  edge_width <- mesh_entry$edgeWidth %||% 1
+  edge_color <- colour %||% mesh_entry$edgeColor
+  if (is.null(edge_color)) return(invisible(NULL))
+
+  edge_width <- width %||% mesh_entry$edgeWidth %||% 1
   verts <- mesh_entry$vertices
 
   edge_matrix <- do.call(rbind, edges)
   idx1 <- edge_matrix[, 1] + 1L
   idx2 <- edge_matrix[, 2] + 1L
 
-  x <- as.vector(rbind(verts$x[idx1], verts$x[idx2]))
-  y <- as.vector(rbind(verts$y[idx1], verts$y[idx2]))
-  z <- as.vector(rbind(verts$z[idx1], verts$z[idx2]))
+  cx <- mean(verts$x)
+  cy <- mean(verts$y)
+  cz <- mean(verts$z)
+  nudge <- 0.3
 
-  rgl::segments3d(x, y, z, color = edge_color, lwd = edge_width)
-  invisible(NULL)
+  edge_x <- c(verts$x[idx1], verts$x[idx2])
+  edge_y <- c(verts$y[idx1], verts$y[idx2])
+  edge_z <- c(verts$z[idx1], verts$z[idx2])
+  dx <- edge_x - cx
+  dy <- edge_y - cy
+  dz <- edge_z - cz
+  d <- sqrt(dx^2 + dy^2 + dz^2)
+  d[d == 0] <- 1
+  edge_x <- edge_x + nudge * dx / d
+  edge_y <- edge_y + nudge * dy / d
+  edge_z <- edge_z + nudge * dz / d
+
+  n <- length(idx1)
+  x <- as.vector(rbind(edge_x[seq_len(n)], edge_x[n + seq_len(n)]))
+  y <- as.vector(rbind(edge_y[seq_len(n)], edge_y[n + seq_len(n)]))
+  z <- as.vector(rbind(edge_z[seq_len(n)], edge_z[n + seq_len(n)]))
+
+  id <- rgl::segments3d(x, y, z, color = edge_color, lwd = edge_width)
+  invisible(id)
 }
 
 
@@ -284,10 +333,10 @@ print.ggsegray <- function(x, ...) {
 
 #' @importFrom knitr knit_print
 #' @export
-knit_print.ggsegray <- function(x, ...) {
+knit_print.ggsegray <- function(x, ...) { # nocov start
   rgl::set3d(x$device)
   knitr::knit_print(rgl::rglwidget(), ...)
-}
+} # nocov end
 
 
 check_ggsegray <- function(
@@ -303,4 +352,100 @@ check_ggsegray <- function(
   }
   rlang::check_installed("rgl", reason = "to modify rgl scenes")
   rgl::set3d(p$device)
+}
+
+
+render_legend_rgl <- function(legend_data) {
+  if (legend_data$type == "continuous") {
+    render_continuous_legend_rgl(legend_data)
+  } else if (legend_data$type == "discrete") {
+    render_discrete_legend_rgl(legend_data)
+  }
+}
+
+
+render_continuous_legend_rgl <- function(legend_data) {
+  colors <- legend_data$colors
+  title <- legend_data$title
+  data_min <- legend_data$min
+  data_max <- legend_data$max
+
+  rgl::bgplot3d({
+    par(mar = c(0, 0, 0, 0))
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+    bar_x <- 0.88
+    bar_w <- 0.03
+    bar_y0 <- 0.25
+    bar_y1 <- 0.75
+    n_steps <- 100
+
+    y_seq <- seq(bar_y0, bar_y1, length.out = n_steps + 1)
+    col_fn <- grDevices::colorRampPalette(colors)
+    bar_cols <- col_fn(n_steps)
+
+    for (i in seq_len(n_steps)) {
+      rect(
+        bar_x, y_seq[i], bar_x + bar_w, y_seq[i + 1],
+        col = bar_cols[i], border = NA
+      )
+    }
+    rect(bar_x, bar_y0, bar_x + bar_w, bar_y1, border = "black", lwd = 0.5)
+
+    tick_x <- bar_x + bar_w + 0.005
+    text(
+      tick_x, bar_y0, format(data_min, digits = 2),
+      adj = c(0, 0.5), cex = 0.7
+    )
+    text(
+      tick_x, bar_y1, format(data_max, digits = 2),
+      adj = c(0, 0.5), cex = 0.7
+    )
+
+    text(
+      bar_x + bar_w / 2, bar_y1 + 0.03, title,
+      adj = c(0.5, 0), cex = 0.8, font = 2
+    )
+  })
+}
+
+
+render_discrete_legend_rgl <- function(legend_data) {
+  labels <- legend_data$labels
+  colors <- legend_data$colors
+  title <- legend_data$title
+
+  n <- length(labels)
+  max_show <- min(n, 30)
+  labels <- labels[seq_len(max_show)]
+  colors <- colors[seq_len(max_show)]
+
+  rgl::bgplot3d({
+    par(mar = c(0, 0, 0, 0))
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+    box_size <- 0.015
+    line_h <- 0.025
+    col_x <- 0.82
+    top_y <- 0.95
+
+    text(
+      col_x + box_size + 0.005, top_y, title,
+      adj = c(0, 0.5), cex = 0.7, font = 2
+    )
+
+    for (i in seq_len(max_show)) {
+      y <- top_y - i * line_h
+      rect(
+        col_x, y - box_size / 2, col_x + box_size, y + box_size / 2,
+        col = colors[i], border = "grey50", lwd = 0.3
+      )
+      text(
+        col_x + box_size + 0.005, y,
+        labels[i], adj = c(0, 0.5), cex = 0.55
+      )
+    }
+  })
 }

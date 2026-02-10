@@ -402,3 +402,157 @@ test_that("build_tract_meshes with centerlines and orientation coloring", {
   expect_length(meshes, 1)
   expect_true(all(grepl("^#", meshes[[1]]$colors)))
 })
+
+test_that("get_brain_mesh returns NULL for empty brain_meshes", {
+  result <- get_brain_mesh(
+    hemisphere = "lh", surface = "pial", brain_meshes = list()
+  )
+  expect_null(result)
+})
+
+test_that("position_hemisphere shifts left hemisphere left", {
+  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
+  result <- position_hemisphere(verts, "left")
+  expect_true(mean(result$x) < mean(verts$x))
+})
+
+test_that("position_hemisphere shifts right hemisphere right", {
+  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
+  result <- position_hemisphere(verts, "right")
+  expect_true(mean(result$x) > mean(verts$x))
+})
+
+test_that("position_hemisphere passes through unknown hemisphere", {
+  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
+  result <- position_hemisphere(verts, "subcort")
+  expect_equal(result, verts)
+})
+
+test_that("to_native_coords handles NULL input", {
+  expect_null(to_native_coords(NULL))
+})
+
+test_that("to_native_coords skips NULL meshes in list", {
+  df <- data.frame(label = c("a", "b"), stringsAsFactors = FALSE)
+  mesh_a <- list(
+    vertices = data.frame(x = 1, y = 2, z = 3),
+    faces = data.frame(i = 0, j = 0, k = 0)
+  )
+  df$mesh <- list(mesh_a, NULL)
+
+  result <- to_native_coords(df)
+  expect_null(result$mesh[[2]])
+  expect_false(identical(result$mesh[[1]]$vertices$y, 2))
+})
+
+test_that("build_tract_meshes with mesh data (no centerlines)", {
+  atlas_data <- data.frame(
+    label = c("tract_a"),
+    colour = c("#FF0000"),
+    stringsAsFactors = FALSE
+  )
+  mesh <- list(
+    vertices = data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0)),
+    faces = data.frame(i = 0, j = 1, k = 2)
+  )
+  atlas_data$mesh <- list(mesh)
+
+  meshes <- build_tract_meshes(atlas_data, "#CCCCCC", color_by = "colour")
+
+  expect_length(meshes, 1)
+  expect_equal(meshes[[1]]$name, "tract_a")
+  expect_equal(meshes[[1]]$colors, rep("#FF0000", 3))
+})
+
+test_that("build_tract_meshes skips NULL mesh entries", {
+  atlas_data <- data.frame(
+    label = c("tract_a", "tract_b"),
+    colour = c("#FF0000", "#00FF00"),
+    stringsAsFactors = FALSE
+  )
+  mesh <- list(
+    vertices = data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0)),
+    faces = data.frame(i = 0, j = 1, k = 2)
+  )
+  atlas_data$mesh <- list(mesh, NULL)
+
+  meshes <- build_tract_meshes(atlas_data, "#CCCCCC", color_by = "colour")
+
+  expect_length(meshes, 1)
+  expect_equal(meshes[[1]]$name, "tract_a")
+})
+
+test_that("build_meshes warns when brain mesh not found", {
+  atlas_data <- data.frame(
+    region = "precentral",
+    hemi = "left",
+    colour = "#FF0000",
+    stringsAsFactors = FALSE
+  )
+  atlas_data$vertices <- list(c(0, 1, 2))
+
+  expect_warning(
+    build_meshes(
+      atlas_data,
+      hemisphere = "left",
+      surface = "pial",
+      na_colour = "#CCCCCC",
+      edge_by = NULL,
+      brain_meshes = list()
+    ),
+    "Brain mesh not found"
+  )
+})
+
+test_that("build_tract_meshes skips labels not in centerlines", {
+  atlas_data <- data.frame(
+    label = c("tract_a", "tract_missing"),
+    colour = c("#FF0000", "#00FF00"),
+    stringsAsFactors = FALSE
+  )
+
+  centerline <- matrix(
+    c(0, 0, 0, 1, 0, 0, 2, 0, 0),
+    nrow = 3, byrow = TRUE
+  )
+  tangents <- matrix(
+    c(1, 0, 0, 1, 0, 0, 1, 0, 0),
+    nrow = 3, byrow = TRUE
+  )
+
+  atlas_centerlines <- list(
+    centerlines = data.frame(label = "tract_a", stringsAsFactors = FALSE),
+    tube_radius = 0.5,
+    tube_segments = 4
+  )
+  atlas_centerlines$centerlines$points <- list(centerline)
+  atlas_centerlines$centerlines$tangents <- list(tangents)
+
+  meshes <- build_tract_meshes(
+    atlas_data, "#CCCCCC",
+    color_by = "colour",
+    atlas_centerlines = atlas_centerlines
+  )
+
+  expect_length(meshes, 1)
+  expect_equal(meshes[[1]]$name, "tract_a")
+})
+
+test_that("build_tract_meshes applies na_colour for NA colour", {
+  atlas_data <- data.frame(
+    label = c("tract_a"),
+    colour = NA_character_,
+    stringsAsFactors = FALSE
+  )
+  mesh <- list(
+    vertices = data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0)),
+    faces = data.frame(i = 0, j = 1, k = 2)
+  )
+  atlas_data$mesh <- list(mesh)
+
+  meshes <- build_tract_meshes(
+    atlas_data, "#CCCCCC", color_by = "colour"
+  )
+
+  expect_equal(meshes[[1]]$colors, rep("#CCCCCC", 3))
+})

@@ -34,20 +34,21 @@ add_glassbrain <- function(
   opacity = 0.3,
   brain_meshes = NULL
 ) {
-  if (inherits(p, "ggsegray")) {
-    return(add_glassbrain_rgl(
-      p, hemisphere, surface, colour, opacity, brain_meshes
-    ))
-  }
+  is_rgl <- inherits(p, "ggsegray")
 
-  check_ggseg3d(p)
+  if (is_rgl) {
+    check_ggsegray(p)
+  } else {
+    check_ggseg3d(p)
+  }
 
   colour <- if (grepl("^#", colour)) colour else col2hex(colour)
   hemi_map <- c("left" = "lh", "right" = "rh")
+  cortical_hemis <- intersect(hemisphere, c("left", "right"))
 
   new_meshes <- list()
 
-  for (hemi in hemisphere) {
+  for (hemi in cortical_hemis) {
     hemi_short <- hemi_map[hemi]
     mesh <- get_brain_mesh(
       hemisphere = hemi_short,
@@ -63,45 +64,6 @@ add_glassbrain <- function(
     }
 
     n_vertices <- nrow(mesh$vertices)
-    vertex_colors <- rep(colour, n_vertices)
-
-    new_meshes[[length(new_meshes) + 1]] <- make_mesh_entry(
-      name = paste("glass brain", hemi),
-      vertices = mesh$vertices,
-      faces = mesh$faces,
-      colors = vertex_colors,
-      color_mode = "vertexcolor",
-      opacity = opacity
-    )
-  }
-
-  p$x$meshes <- c(new_meshes, p$x$meshes)
-  p
-}
-
-
-#' @keywords internal
-add_glassbrain_rgl <- function(
-    p, hemisphere, surface, colour, opacity, brain_meshes = NULL) {
-  check_ggsegray(p) # nolint [object_usage_linter]
-
-  colour <- if (grepl("^#", colour)) colour else col2hex(colour)
-  hemi_map <- c("left" = "lh", "right" = "rh")
-
-  cortical_hemis <- intersect(hemisphere, c("left", "right"))
-
-  for (hemi in cortical_hemis) {
-    hemi_short <- hemi_map[hemi]
-    mesh <- get_brain_mesh(
-      hemisphere = hemi_short,
-      surface = surface,
-      brain_meshes = brain_meshes
-    )
-    if (is.null(mesh)) {
-      next
-    }
-
-    n_vertices <- nrow(mesh$vertices)
 
     entry <- make_mesh_entry(
       name = paste("glass brain", hemi),
@@ -112,8 +74,16 @@ add_glassbrain_rgl <- function(
       opacity = opacity
     )
 
-    mesh3d <- mesh_entry_to_mesh3d(entry) # nolint [object_usage_linter]
-    rgl::shade3d(mesh3d)
+    if (is_rgl) {
+      mesh3d <- mesh_entry_to_mesh3d(entry) # nolint [object_usage_linter]
+      rgl::shade3d(mesh3d)
+    } else {
+      new_meshes[[length(new_meshes) + 1]] <- entry
+    }
+  }
+
+  if (!is_rgl) {
+    p$x$meshes <- c(new_meshes, p$x$meshes)
   }
 
   p
@@ -157,44 +127,33 @@ add_glassbrain_rgl <- function(
 #' }
 pan_camera <- function(p, camera) {
   if (inherits(p, "ggsegray")) {
-    return(pan_camera_rgl(p, camera))
+    check_ggsegray(p)
+
+    cam_pos <- if (is.numeric(camera)) {
+      camera
+    } else if (is.character(camera)) {
+      camera_preset_to_position(camera) # nolint [object_usage_linter]
+    } else {
+      cli::cli_abort(c(
+        "{.arg camera} must be a character string or numeric vector,",
+        "not {.obj_type_friendly {camera}}."
+      ))
+    }
+
+    um <- look_at_origin(cam_pos) # nolint [object_usage_linter]
+    rgl::view3d(userMatrix = um, fov = 0)
+    return(p)
   }
 
   check_ggseg3d(p)
   if (!is.character(camera) && !is.list(camera)) {
-    cli::cli_abort(
-      c(
-        "{.arg camera} must be a character string or list,",
-        "not {.obj_type_friendly {camera}}."
-      )
-    )
+    cli::cli_abort(c(
+      "{.arg camera} must be a character string or list,",
+      "not {.obj_type_friendly {camera}}."
+    ))
   }
 
   p$x$options$camera <- camera
-  p
-}
-
-
-#' @keywords internal
-pan_camera_rgl <- function(p, camera) {
-  check_ggsegray(p) # nolint [object_usage_linter]
-
-  cam_pos <- if (is.numeric(camera)) {
-    camera
-  } else if (is.character(camera)) {
-    camera_preset_to_position(camera) # nolint [object_usage_linter]
-  } else {
-    cli::cli_abort(
-      c(
-        "{.arg camera} must be a character string or numeric vector,",
-        "not {.obj_type_friendly {camera}}."
-      )
-    )
-  }
-
-  um <- look_at_origin(cam_pos) # nolint [object_usage_linter]
-  rgl::view3d(userMatrix = um, fov = 0)
-
   p
 }
 
@@ -217,7 +176,12 @@ pan_camera_rgl <- function(p, camera) {
 #' }
 set_background <- function(p, colour = "#ffffff") {
   if (inherits(p, "ggsegray")) {
-    return(set_background_rgl(p, colour))
+    check_ggsegray(p)
+    if (!grepl("^#", colour)) {
+      colour <- col2hex(colour)
+    }
+    rgl::bg3d(color = colour)
+    return(p)
   }
 
   check_ggseg3d(p)
@@ -231,35 +195,31 @@ set_background <- function(p, colour = "#ffffff") {
 }
 
 
-#' @keywords internal
-set_background_rgl <- function(p, colour) {
-  check_ggsegray(p) # nolint [object_usage_linter]
-
-  if (!grepl("^#", colour)) {
-    colour <- col2hex(colour)
-  }
-
-  rgl::bg3d(color = colour)
-
-  p
-}
-
-
 #' Set legend visibility
 #'
-#' Controls visibility of the colour bar legend for numeric data.
+#' For htmlwidget output, toggles legend visibility. For rgl output,
+#' draws or removes the legend overlay.
 #'
-#' @param p ggseg3d widget object
+#' @param p A ggseg3d or ggsegray object
 #' @param show logical. Whether to show the legend (default: TRUE)
 #'
-#' @return ggseg3d widget object with updated legend visibility
+#' @return The input object, modified
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' ggseg3d() |> set_legend(FALSE)
+#' ggsegray(hemisphere = "left") |> set_legend()
 #' }
 set_legend <- function(p, show = TRUE) {
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
+    if (show && !is.null(p$legend_data)) {
+      render_legend_rgl(p$legend_data)
+    }
+    return(p)
+  }
+
   check_ggseg3d(p)
   p$x$options$showLegend <- show
   p
@@ -297,24 +257,56 @@ set_dimensions <- function(p, width = NULL, height = NULL) {
 #' Set region boundary edges
 #'
 #' Adds coloured outlines around brain regions. This is useful for
-#' highlighting region boundaries in figures.
+#' highlighting region boundaries in figures. Works with both
+#' htmlwidget (`ggseg3d`) and rgl (`ggsegray`) objects. For rgl,
+#' edges must have been computed at creation time via `edge_by`.
 #'
-#' @param p ggseg3d widget object
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
 #' @param colour string. Edge colour (hex or named color). Set to NULL to
 #'   hide edges.
 #' @param width numeric. Width of edge lines (default: 1). Note: line width > 1
 #'   may not render on all systems due to WebGL limitations.
 #'
-#' @return ggseg3d widget object with updated edge settings
+#' @return The input object (modified), for piping.
 #' @export
+#'
+#' @section Lifecycle:
+#' `r lifecycle::badge("experimental")`
 #'
 #' @examples
 #' \dontrun{
-#' ggseg3d(hemisphere = "left") |>
+#' ggseg3d(hemisphere = "left", edge_by = "region") |>
 #'   set_edges("black") |>
+#'   pan_camera("left lateral")
+#'
+#' ggsegray(hemisphere = "left", edge_by = "region") |>
+#'   set_edges("red", width = 2) |>
 #'   pan_camera("left lateral")
 #' }
 set_edges <- function(p, colour = "black", width = 1) {
+  lifecycle::signal_stage("experimental", "set_edges()")
+
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
+
+    if (length(p$edge_ids) > 0) {
+      for (eid in p$edge_ids) {
+        rgl::pop3d(id = eid)
+      }
+      p$edge_ids <- integer(0)
+    }
+
+    if (!is.null(colour)) {
+      edge_col <- if (grepl("^#", colour)) colour else col2hex(colour)
+      for (mesh_entry in p$meshes) {
+        eid <- render_edges_rgl(mesh_entry, colour = edge_col, width = width)
+        if (!is.null(eid)) p$edge_ids <- c(p$edge_ids, eid)
+      }
+    }
+
+    return(p)
+  }
+
   check_ggseg3d(p)
 
   if (is.null(colour)) {
