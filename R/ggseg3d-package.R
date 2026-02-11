@@ -44,11 +44,11 @@ knit_vignettes <- function() {
   old_wd <- getwd()
   setwd("vignettes")
   on.exit(setwd(old_wd))
-  for (f in basename(orig)) {
+  invisible(lapply(basename(orig), function(f) {
     out <- sub("\\.orig$", "", f)
     cli::cli_inform("Knitting {f} -> {out}")
     knitr::knit(f, output = out)
-  }
+  }))
   cli::cli_inform("Done. Commit the .Rmd files and any generated figures.")
   invisible()
 }

@@ -1,7 +1,8 @@
 #' Plot 3D brain parcellations
 #'
 #' `ggseg3d` creates and returns an interactive Three.js brain mesh
-#' visualization.
+#' visualization. Dispatches to atlas-type-specific methods via
+#' [prepare_brain_meshes()].
 #'
 #' @author Athanasia Mowinckel and Didac Piñeiro
 #'
@@ -9,19 +10,6 @@
 #'   column called "region" corresponding to regions.
 #' @param atlas Either a string with the name of a 3d atlas to use, or a
 #'   `brain_atlas` object containing 3D vertex mappings.
-#' @param hemisphere String. Hemisphere to plot. Either "left" or
-#'   "right"
-#'
-#'
-#' , can also be "subcort".
-#' @param surface String. Which surface to plot. Either "pial", "white",
-#'
-#'
-#'
-#'   or "inflated"
-#'
-#'
-#' .
 #' @param label String. Quoted name of column in atlas/data that should
 #'   be used to name traces
 #' @param text String. Quoted name of column in atlas/data that should be
@@ -35,27 +23,10 @@
 #'   colour.
 #' @param na_alpha Numeric. A number between 0 and 1 to control
 #'   transparency of NA-regions.
-#' @param edge_by String. Column name to use for computing region boundary
-#'   edges. If provided, edges are drawn between regions with different
+#' @param ... Type-specific arguments passed to the atlas method.
+#'   See section **Type-specific arguments** below.
 #'
-#'
-#'   values in this column, allowing edge boundaries independent of display
-#'   colours. When set, edges are displayed by default (black, width 1).
-#'   Use [set_edges()] to customise appearance.
-#' @param tract_color String. How to colour tract atlases: "palette"
-#'   (default, use atlas palette) or "orientation" (direction-based RGB
-#'   where R=left-right, G=anterior-posterior, B=superior-inferior).
-#'   Only applies to tract atlases.
-#' @param brain_meshes Optional user-supplied brain meshes for custom
-#'   surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
-#'   format details. When NULL (default), uses built-in fsaverage5 meshes.
-#'
-#' \strong{Available surfaces:}
-#' \itemize{
-#' \item `inflated:` Fully inflated surface
-#' \item `semi-inflated:` Semi-inflated surface
-#' \item `white:` white matter surface
-#'  }
+#' @template type-specific-args
 #'
 #' @return an htmlwidget object for interactive 3D brain visualization
 #'
@@ -81,22 +52,17 @@
 ggseg3d <- function(
   .data = NULL,
   atlas = "dk",
-  surface = "LCBC",
-  hemisphere = c("right", "subcort"),
   label = "region",
   text = NULL,
   colour = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  edge_by = NULL,
-  tract_color = c("palette", "orientation"),
-  brain_meshes = NULL
+  ...
 ) {
-  tract_color <- match.arg(tract_color)
-  atlas_obj <- if (is.character(atlas)) get(atlas) else atlas
+  atlas <- if (is.character(atlas)) get(atlas) else atlas
 
-  if (!is_unified_atlas(atlas_obj)) {
+  if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
       "Atlas must be a {.cls ggseg_atlas} object with 3D data.",
       "i" = "Use atlases from {.pkg ggseg.formats}.",
@@ -104,86 +70,69 @@ ggseg3d <- function(
     ))
   }
 
-  unified_surface <- if (surface == "LCBC") "inflated" else surface
-
-  render_brain_atlas(
-    .data = .data,
-    atlas = atlas_obj,
-    surface = unified_surface,
-    hemisphere = hemisphere,
-    label = label,
-    text = text,
-    colour = colour,
-    palette = palette,
-    na_colour = na_colour,
-    na_alpha = na_alpha,
-    edge_by = edge_by,
-    tract_color = tract_color,
-    brain_meshes = brain_meshes
-  )
-}
-
-
-#' Render brain_atlas in 3D
-#'
-#' Internal function for rendering brain_atlas objects that contain
-#' vertex mappings or per-region meshes. Uses vertex-based coloring for
-#' cortical atlases on shared brain meshes, or face-based coloring for
-#' subcortical/tract atlases with per-region mesh data.
-#'
-#' @inheritParams ggseg3d
-#' @return an htmlwidget object
-#' @importFrom rlang .data
-#' @keywords internal
-render_brain_atlas <- function(
-  .data = NULL,
-  atlas,
-  surface = "inflated",
-  hemisphere = c("right", "left"),
-  label = "region",
-  text = NULL,
-  colour = "colour",
-  palette = NULL,
-  na_colour = "darkgrey",
-  na_alpha = 1,
-  edge_by = NULL,
-  tract_color = "palette",
-  brain_meshes = NULL
-) {
   prepared <- prepare_brain_meshes(
+    atlas,
     .data = .data,
-    atlas = atlas,
-    surface = surface,
-    hemisphere = hemisphere,
     label = label,
     text = text,
     colour = colour,
     palette = palette,
     na_colour = na_colour,
     na_alpha = na_alpha,
-    edge_by = edge_by,
-    tract_color = tract_color,
-    brain_meshes = brain_meshes
+    ...
   )
 
   create_ggseg3d_widget(prepared$meshes, prepared$legend_data)
 }
 
 
+# prepare_brain_meshes S3 generic ----
+
 #' Prepare brain meshes and legend data
 #'
-#' Shared pipeline that builds mesh data structures and legend data from
-#' a brain_atlas. Used by both [render_brain_atlas()] for htmlwidget output
-#' and [ggsegray()] for rgl/rayshader output.
+#' S3 generic that dispatches to atlas-type-specific preparation methods.
+#' Builds mesh data structures and legend data from a `brain_atlas`.
 #'
-#' @inheritParams ggseg3d
+#' @param atlas A `brain_atlas` object
+#' @param ... Type-specific arguments passed to methods
+#'
 #' @return List with `meshes` (list of mesh entries) and `legend_data`
-#' @importFrom rlang .data
 #' @keywords internal
-prepare_brain_meshes <- function(
-  .data = NULL,
+prepare_brain_meshes <- function(atlas, ...) {
+  UseMethod("prepare_brain_meshes")
+}
+
+#' @export
+#' @keywords internal
+prepare_brain_meshes.default <- function(atlas, ...) {
+  cls <- paste(class(atlas), collapse = "/") # nolint: object_usage_linter
+  cli::cli_abort(c(
+    "No method for atlas of class {.val {cls}}.",
+    "i" = "Expected {.cls cortical_atlas}, {.cls subcortical_atlas},
+    or {.cls tract_atlas}."
+  ))
+}
+
+#' @method prepare_brain_meshes cortical_atlas
+#' @param .data Optional user data to merge
+#' @param surface Surface type: `"inflated"` (default), `"semi-inflated"`,
+#'   `"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.
+#' @param hemisphere Character vector of hemispheres: `"right"`, `"left"`.
+#' @param label Column name for trace labels
+#' @param text Column name for hover text
+#' @param colour Column name for colour values
+#' @param palette Colour palette specification
+#' @param na_colour Colour for NA values
+#' @param na_alpha Transparency for NA regions
+#' @param edge_by Column name for region boundary edge grouping
+#' @param brain_meshes Optional user-supplied brain meshes
+#' @export
+#' @rdname prepare_brain_meshes
+#' @keywords internal
+prepare_brain_meshes.cortical_atlas <- function(
   atlas,
-  surface = "inflated",
+  .data = NULL,
+  surface = "LCBC",
   hemisphere = c("right", "left"),
   label = "region",
   text = NULL,
@@ -192,29 +141,128 @@ prepare_brain_meshes <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = "palette",
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  ...
 ) {
-  is_subcort <- is_subcortical_atlas(atlas)
-  is_tract <- is_tract_atlas(atlas)
-  is_mesh_based <- is_subcort || is_tract
+  surface <- if (surface == "LCBC") "inflated" else surface
 
-  if (is_mesh_based) {
-    hemisphere <- "subcort"
-  }
+  atlas_data <- prepare_atlas_data(atlas, .data)
+  result <- apply_colours_and_legend(
+    atlas_data,
+    colour,
+    palette,
+    na_colour,
+    label
+  )
+  meshes <- build_cortical_meshes(
+    result$atlas_data,
+    hemisphere,
+    surface,
+    na_colour,
+    edge_by,
+    brain_meshes
+  )
 
-  color_by <- if (is_tract && tract_color == "orientation") {
-    "orientation"
-  } else {
-    "colour"
-  }
+  list(meshes = meshes, legend_data = result$legend_data)
+}
 
-  if (is_mesh_based) {
-    atlas_data <- prepare_mesh_atlas_data(atlas, .data)
-  } else {
-    atlas_data <- prepare_atlas_data(atlas, .data)
-  }
+#' @method prepare_brain_meshes subcortical_atlas
+#' @export
+#' @rdname prepare_brain_meshes
+#' @keywords internal
+prepare_brain_meshes.subcortical_atlas <- function(
+  atlas,
+  .data = NULL,
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  ...
+) {
+  atlas_data <- prepare_mesh_atlas_data(atlas, .data)
+  result <- apply_colours_and_legend(
+    atlas_data,
+    colour,
+    palette,
+    na_colour,
+    label
+  )
+  atlas_data <- to_native_coords(result$atlas_data)
+  meshes <- build_subcortical_meshes(atlas_data, na_colour)
 
+  list(meshes = meshes, legend_data = result$legend_data)
+}
+
+#' @method prepare_brain_meshes tract_atlas
+#' @param tract_color `"palette"` (default) or `"orientation"`
+#'   (direction-based RGB colouring)
+#' @param tube_radius Numeric tube radius override. When `NULL`, uses
+#'   the atlas default.
+#' @export
+#' @rdname prepare_brain_meshes
+#' @keywords internal
+prepare_brain_meshes.tract_atlas <- function(
+  atlas,
+  .data = NULL,
+  label = "region",
+  text = NULL,
+
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  tract_color = c("palette", "orientation"),
+  tube_radius = NULL,
+  ...
+) {
+  tract_color <- match.arg(tract_color)
+  color_by <- if (tract_color == "orientation") "orientation" else "colour"
+
+  atlas_data <- prepare_mesh_atlas_data(atlas, .data)
+  result <- apply_colours_and_legend(
+    atlas_data,
+    colour,
+    palette,
+    na_colour,
+    label
+  )
+  atlas_data <- to_native_coords(result$atlas_data)
+  atlas_centerlines <- build_centerline_data(atlas, tube_radius)
+  meshes <- build_tract_meshes(
+    atlas_data,
+    na_colour,
+    color_by,
+    atlas_centerlines
+  )
+
+  list(meshes = meshes, legend_data = result$legend_data)
+}
+
+
+# Shared helpers ----
+
+#' Apply colour palette and build legend data
+#'
+#' Shared pipeline step for all atlas types: applies colour palette to
+#' atlas data and builds the legend data structure.
+#'
+#' @param atlas_data Prepared atlas data frame
+#' @param colour Column name for colour values
+#' @param palette Colour palette specification
+#' @param na_colour Colour for NA values
+#' @param label Column name for labels
+#'
+#' @return List with `atlas_data` and `legend_data`
+#' @keywords internal
+apply_colours_and_legend <- function(
+  atlas_data,
+  colour,
+  palette,
+  na_colour,
+  label
+) {
   colour_result <- apply_colour_palette(
     atlas_data,
     colour,
@@ -222,51 +270,6 @@ prepare_brain_meshes <- function(
     na_colour
   )
   atlas_data <- colour_result$data
-  fill <- colour_result$fill
-  pal_colours <- colour_result$palette
-
-  atlas_meshes <- if (is_mesh_based) {
-    if (!is.null(atlas$data$meshes)) atlas$data$meshes else atlas$meshes
-  } else {
-    NULL
-  }
-
-  if (is_mesh_based) {
-    atlas_data <- to_native_coords(atlas_data)
-  }
-
-  atlas_centerlines <- if (!is.null(atlas$data$centerlines)) {
-    cl <- atlas$data$centerlines
-    if (is_mesh_based && !is.null(cl$points)) {
-      offset <- native_offset()
-      for (j in seq_len(nrow(cl))) {
-        if (!is.null(cl$points[[j]])) {
-          cl$points[[j]][, 2] <- cl$points[[j]][, 2] + offset[["y"]]
-          cl$points[[j]][, 3] <- cl$points[[j]][, 3] + offset[["z"]]
-        }
-      }
-    }
-    list(
-      centerlines = cl,
-      tube_radius = atlas$data$tube_radius %||% 5,
-      tube_segments = atlas$data$tube_segments %||% 8
-    )
-  } else {
-    NULL
-  }
-
-  meshes <- build_meshes(
-    atlas_data,
-    hemisphere,
-    surface,
-    na_colour,
-    edge_by,
-    atlas_meshes,
-    atlas,
-    color_by,
-    atlas_centerlines,
-    brain_meshes = brain_meshes
-  )
 
   # nolint start: object_usage_linter
   legend_data <- build_legend_data(
@@ -274,13 +277,47 @@ prepare_brain_meshes <- function(
     data_min = colour_result$data_min,
     data_max = colour_result$data_max,
     palette = palette,
-    pal_colours = pal_colours,
+    pal_colours = colour_result$palette,
     colour_col = colour,
     label_col = label,
-    fill_col = fill,
+    fill_col = colour_result$fill,
     data = atlas_data
   )
   # nolint end
 
-  list(meshes = meshes, legend_data = legend_data)
+  list(atlas_data = atlas_data, legend_data = legend_data)
+}
+
+
+#' Build centerline data for tract atlases
+#'
+#' Extracts centerline data from a tract atlas, applies native coordinate
+#' offsets, and assembles the tube generation parameters.
+#'
+#' @param atlas A `tract_atlas` object
+#' @param tube_radius Optional radius override
+#'
+#' @return List with centerlines, tube_radius, tube_segments, or NULL
+#' @keywords internal
+build_centerline_data <- function(atlas, tube_radius = NULL) {
+  if (is.null(atlas$data$centerlines)) {
+    return(NULL)
+  }
+
+  cl <- atlas$data$centerlines
+  if (!is.null(cl$points)) {
+    offset <- native_offset()
+    cl$points <- lapply(cl$points, function(pts) {
+      if (is.null(pts)) return(pts)
+      pts[, 2] <- pts[, 2] + offset[["y"]]
+      pts[, 3] <- pts[, 3] + offset[["z"]]
+      pts
+    })
+  }
+
+  list(
+    centerlines = cl,
+    tube_radius = tube_radius %||% atlas$data$tube_radius %||% 5,
+    tube_segments = atlas$data$tube_segments %||% 8
+  )
 }

@@ -80,13 +80,12 @@ to_native_coords <- function(mesh_data_df) {
   }
 
   offset <- native_offset()
-  for (i in seq_len(nrow(mesh_data_df))) {
-    if (is.null(mesh_data_df$mesh[[i]])) next
-    mesh_data_df$mesh[[i]]$vertices$y <-
-      mesh_data_df$mesh[[i]]$vertices$y + offset[["y"]]
-    mesh_data_df$mesh[[i]]$vertices$z <-
-      mesh_data_df$mesh[[i]]$vertices$z + offset[["z"]]
-  }
+  mesh_data_df$mesh <- lapply(mesh_data_df$mesh, function(m) {
+    if (is.null(m)) return(m)
+    m$vertices$y <- m$vertices$y + offset[["y"]]
+    m$vertices$z <- m$vertices$z + offset[["z"]]
+    m
+  })
   mesh_data_df
 }
 
@@ -200,9 +199,9 @@ vertices_to_groups <- function(
 }
 
 
-#' Build mesh list for atlases
+#' Build mesh list for cortical atlases
 #'
-#' Creates mesh data structures for brain_atlas objects using
+#' Creates mesh data structures for cortical brain_atlas objects using
 #' shared brain meshes with vertex-based colouring.
 #'
 #' @param atlas_data Prepared atlas data frame
@@ -210,46 +209,22 @@ vertices_to_groups <- function(
 #' @param surface Surface type
 #' @param na_colour Colour for NA values
 #' @param edge_by Column for edge grouping (or NULL)
-#' @param atlas_meshes Optional meshes component from brain_atlas for
-#'   subcortical rendering
-#' @param atlas A `brain_atlas` object used for class-based dispatch
-#' @param color_by How to colour tracts: "colour" or "orientation"
+#' @param brain_meshes Optional user-supplied brain meshes
 #'
 #' @return List of mesh data structures
 #' @importFrom rlang .data
 #' @keywords internal
-build_meshes <- function(
+build_cortical_meshes <- function(
   atlas_data,
   hemisphere,
   surface,
   na_colour,
   edge_by,
-  atlas_meshes = NULL,
-  atlas = NULL,
-  color_by = "colour",
-  atlas_centerlines = NULL,
   brain_meshes = NULL
 ) {
-  meshes <- list()
   hemi_map <- c("right" = "rh", "left" = "lh")
 
-  for (current_hemi in hemisphere) {
-    if (current_hemi == "subcort") {
-      if (is_tract_atlas(atlas)) {
-        tract_meshes <- build_tract_meshes(
-          atlas_data,
-          na_colour,
-          color_by,
-          atlas_centerlines
-        )
-        meshes <- c(meshes, tract_meshes)
-      } else if (!is.null(atlas_meshes)) {
-        subcort_meshes <- build_subcortical_meshes(atlas_data, na_colour)
-        meshes <- c(meshes, subcort_meshes)
-      }
-      next
-    }
-
+  meshes <- lapply(hemisphere, function(current_hemi) {
     hemi_short <- hemi_map[current_hemi]
     mesh <- get_brain_mesh(
       hemisphere = hemi_short,
@@ -261,17 +236,15 @@ build_meshes <- function(
       cli::cli_warn(
         "Brain mesh not found for {.val {hemi_short}} {.val {surface}}."
       )
-      next
+      return(NULL)
     }
 
     hemi_data <- dplyr::filter(atlas_data, .data$hemi == current_hemi)
     if (nrow(hemi_data) == 0) {
-      next
+      return(NULL)
     }
 
-    vertices <- mesh$vertices
-
-    n_vertices <- nrow(vertices)
+    n_vertices <- nrow(mesh$vertices)
     vertex_colors <- vertices_to_colors(hemi_data, n_vertices, na_colour)
     vertex_labels <- vertices_to_labels(hemi_data, n_vertices, na_label = "")
 
@@ -284,9 +257,9 @@ build_meshes <- function(
 
     edge_color <- if (!is.null(edge_by)) "#000000" else NULL
 
-    mesh_entry <- make_mesh_entry(
+    make_mesh_entry(
       name = paste(current_hemi, surface),
-      vertices = vertices,
+      vertices = mesh$vertices,
       faces = mesh$faces,
       colors = vertex_colors,
       color_mode = "vertexcolor",
@@ -294,11 +267,9 @@ build_meshes <- function(
       edge_color = edge_color,
       vertex_labels = vertex_labels
     )
+  })
 
-    meshes[[length(meshes) + 1]] <- mesh_entry
-  }
-
-  meshes
+  Filter(Negate(is.null), meshes)
 }
 
 
@@ -338,37 +309,25 @@ position_hemisphere <- function(vertices, hemisphere) {
 #' @return List of mesh data structures
 #' @keywords internal
 build_subcortical_meshes <- function(atlas_data, na_colour) {
-  meshes <- list()
-
-  for (i in seq_len(nrow(atlas_data))) {
-    label <- atlas_data$label[i]
+  meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
     mesh_data <- atlas_data$mesh[[i]]
-
-    if (is.null(mesh_data)) {
-      next
-    }
+    if (is.null(mesh_data)) return(NULL)
 
     colour <- atlas_data$colour[i]
-    if (is.na(colour)) {
-      colour <- na_colour
-    }
-
+    if (is.na(colour)) colour <- na_colour
     colour <- unname(ifelse(grepl("^#", colour), colour, col2hex(colour)))
-    face_colors <- rep(colour, nrow(mesh_data$faces))
 
-    mesh_entry <- make_mesh_entry(
-      name = label,
+    make_mesh_entry(
+      name = atlas_data$label[i],
       vertices = mesh_data$vertices,
       faces = mesh_data$faces,
-      colors = face_colors,
+      colors = rep(colour, nrow(mesh_data$faces)),
       color_mode = "facecolor",
-      hover_text = paste0("Region: ", label)
+      hover_text = paste0("Region: ", atlas_data$label[i])
     )
+  })
 
-    meshes[[length(meshes) + 1]] <- mesh_entry
-  }
-
-  meshes
+  Filter(Negate(is.null), meshes)
 }
 
 
@@ -392,25 +351,21 @@ build_tract_meshes <- function(
   color_by = "colour",
   atlas_centerlines = NULL
 ) {
-  meshes <- list()
-
   has_centerlines <- !is.null(atlas_centerlines) &&
     !is.null(atlas_centerlines$centerlines)
   has_legacy_meshes <- "mesh" %in% names(atlas_data)
 
   if (!has_centerlines && !has_legacy_meshes) {
     cli::cli_warn("No centerlines or meshes found for tract atlas")
-    return(meshes)
+    return(list())
   }
 
-  for (i in seq_len(nrow(atlas_data))) {
+  meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
     label <- atlas_data$label[i]
 
     if (has_centerlines) {
       cl_idx <- which(atlas_centerlines$centerlines$label == label)
-      if (length(cl_idx) == 0) {
-        next
-      }
+      if (length(cl_idx) == 0) return(NULL)
 
       centerline <- atlas_centerlines$centerlines$points[[cl_idx]]
       tangents <- atlas_centerlines$centerlines$tangents[[cl_idx]]
@@ -423,7 +378,7 @@ build_tract_meshes <- function(
       mesh_data$metadata$tangents <- tangents
     } else {
       mesh_data <- atlas_data$mesh[[i]]
-      if (is.null(mesh_data)) next
+      if (is.null(mesh_data)) return(NULL)
     }
 
     n_vertices <- nrow(mesh_data$vertices)
@@ -432,14 +387,12 @@ build_tract_meshes <- function(
       vertex_colors <- tangents_to_colors(mesh_data)
     } else {
       colour <- atlas_data$colour[i]
-      if (is.na(colour)) {
-        colour <- na_colour
-      }
+      if (is.na(colour)) colour <- na_colour
       colour <- unname(ifelse(grepl("^#", colour), colour, col2hex(colour)))
       vertex_colors <- rep(colour, n_vertices)
     }
 
-    mesh_entry <- make_mesh_entry(
+    make_mesh_entry(
       name = label,
       vertices = mesh_data$vertices,
       faces = mesh_data$faces,
@@ -447,11 +400,9 @@ build_tract_meshes <- function(
       color_mode = "vertexcolor",
       hover_text = paste0("Tract: ", label)
     )
+  })
 
-    meshes[[length(meshes) + 1]] <- mesh_entry
-  }
-
-  meshes
+  Filter(Negate(is.null), meshes)
 }
 
 

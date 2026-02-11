@@ -482,7 +482,7 @@ test_that("build_tract_meshes skips NULL mesh entries", {
   expect_equal(meshes[[1]]$name, "tract_a")
 })
 
-test_that("build_meshes warns when brain mesh not found", {
+test_that("build_cortical_meshes warns when brain mesh not found", {
   atlas_data <- data.frame(
     region = "precentral",
     hemi = "left",
@@ -492,7 +492,7 @@ test_that("build_meshes warns when brain mesh not found", {
   atlas_data$vertices <- list(c(0, 1, 2))
 
   expect_warning(
-    build_meshes(
+    build_cortical_meshes(
       atlas_data,
       hemisphere = "left",
       surface = "pial",

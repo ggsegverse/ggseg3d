@@ -7,17 +7,13 @@
 ggsegray(
   .data = NULL,
   atlas = dk,
-  surface = "LCBC",
-  hemisphere = c("right", "subcort"),
   label = "region",
   text = NULL,
   colour = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  edge_by = NULL,
-  tract_color = c("palette", "orientation"),
-  brain_meshes = NULL,
+  material = list(),
   ...
 )
 }
@@ -27,21 +23,6 @@ column called "region" corresponding to regions.}
 
 \item{atlas}{Either a string with the name of a 3d atlas to use, or a
 `brain_atlas` object containing 3D vertex mappings.}
-
-\item{surface}{String. Which surface to plot. Either "pial", "white",
-
-
-
-  or "inflated"
-
-
-.}
-
-\item{hemisphere}{String. Hemisphere to plot. Either "left" or
-  "right"
-
-
-, can also be "subcort".}
 
 \item{label}{String. Quoted name of column in atlas/data that should
 be used to name traces}
@@ -62,57 +43,11 @@ colour.}
 \item{na_alpha}{Numeric. A number between 0 and 1 to control
 transparency of NA-regions.}
 
-\item{edge_by}{String. Column name to use for computing region boundary
-  edges. If provided, edges are drawn between regions with different
+\item{material}{Named list of rgl material properties passed to
+[rgl::tmesh3d()]. Controls how the mesh surface is shaded.}
 
-
-  values in this column, allowing edge boundaries independent of display
-  colours. When set, edges are displayed by default (black, width 1).
-  Use [set_edges()] to customise appearance.}
-
-\item{tract_color}{String. How to colour tract atlases: "palette"
-(default, use atlas palette) or "orientation" (direction-based RGB
-where R=left-right, G=anterior-posterior, B=superior-inferior).
-Only applies to tract atlases.}
-
-\item{brain_meshes}{Optional user-supplied brain meshes for custom
-  surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
-  format details. When NULL (default), uses built-in fsaverage5 meshes.
-
-\strong{Available surfaces:}
-\itemize{
-\item `inflated:` Fully inflated surface
-\item `semi-inflated:` Semi-inflated surface
-\item `white:` white matter surface
- }}
-
-\item{...}{Material properties passed to the `material` argument of
-  [rgl::tmesh3d()]. These control how the mesh surface is shaded.
-
-  Defaults applied by ggseg3d:
-  \describe{
-    \item{`specular`}{Specular highlight colour. `"black"` (default) gives
-      a matte surface, `"white"` adds glossy highlights.}
-    \item{`shininess`}{Exponent for specular highlights. Default `128`.
-      Higher values produce tighter highlights.}
-  }
-
-  Other useful properties:
-  \describe{
-    \item{`lit`}{`FALSE` disables lighting entirely. Vertices render at
-      their exact assigned colour with no shading — useful for
-      mask/contour extraction where shadows would contaminate the output.}
-    \item{`ambient`}{Ambient reflection colour (default `"black"`).}
-    \item{`emission`}{Self-illumination colour (default `"black"`).
-      Set to a colour to make the mesh glow independently of lights.}
-    \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
-    \item{`smooth`}{`TRUE` (default) for Gouraud shading, `FALSE` for
-      flat faceted shading.}
-    \item{`front`, `back`}{Polygon rendering mode: `"filled"`,
-      `"lines"`, or `"points"`.}
-  }
-
-  See [rgl::material3d()] for the full list of supported properties.}
+\item{...}{Type-specific arguments passed to the atlas method.
+See section **Type-specific arguments** below.}
 }
 \value{
 An object of class `ggsegray` (invisibly), which wraps the
@@ -126,6 +61,40 @@ htmlwidgets. The resulting scene can be piped into [pan_camera()],
 [add_glassbrain()], and [set_background()], then rendered with
 rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
 }
+\section{Material properties}{
+
+Useful material list entries:
+\describe{
+  \item{`specular`}{`"black"` (matte) or `"white"` (glossy).}
+  \item{`shininess`}{Specular exponent. Higher = tighter highlights.}
+  \item{`lit`}{`FALSE` disables lighting.}
+  \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
+  \item{`smooth`}{`TRUE` for Gouraud shading, `FALSE` for flat.}
+}
+
+See [rgl::material3d()] for the full list.
+}
+
+\section{Type-specific arguments}{
+
+Cortical atlases (`cortical_atlas`):
+\describe{
+  \item{`surface`}{Surface type: `"LCBC"` (default, alias for
+    inflated), `"inflated"`, `"semi-inflated"`, `"white"`, `"pial"`.}
+  \item{`hemisphere`}{Character vector of hemispheres: `"right"`,
+    `"left"`.}
+  \item{`edge_by`}{Column name for region boundary edges.}
+  \item{`brain_meshes`}{Custom brain mesh data.}
+}
+
+Tract atlases (`tract_atlas`):
+\describe{
+  \item{`tract_color`}{`"palette"` (default) or `"orientation"`
+    (direction-based RGB).}
+  \item{`tube_radius`}{Tube radius override (numeric).}
+}
+}
+
 \examples{
 \dontrun{
 ggsegray(hemisphere = "left") |>

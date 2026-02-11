@@ -2,12 +2,17 @@
 % Please edit documentation in R/ggseg3d.R
 \name{prepare_brain_meshes}
 \alias{prepare_brain_meshes}
+\alias{prepare_brain_meshes.cortical_atlas}
+\alias{prepare_brain_meshes.subcortical_atlas}
+\alias{prepare_brain_meshes.tract_atlas}
 \title{Prepare brain meshes and legend data}
 \usage{
-prepare_brain_meshes(
-  .data = NULL,
+prepare_brain_meshes(atlas, ...)
+
+\method{prepare_brain_meshes}{cortical_atlas}(
   atlas,
-  surface = "inflated",
+  .data = NULL,
+  surface = "LCBC",
   hemisphere = c("right", "left"),
   label = "region",
   text = NULL,
@@ -16,81 +21,75 @@ prepare_brain_meshes(
   na_colour = "darkgrey",
   na_alpha = 1,
   edge_by = NULL,
-  tract_color = "palette",
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  ...
+)
+
+\method{prepare_brain_meshes}{subcortical_atlas}(
+  atlas,
+  .data = NULL,
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  ...
+)
+
+\method{prepare_brain_meshes}{tract_atlas}(
+  atlas,
+  .data = NULL,
+  label = "region",
+  text = NULL,
+  colour = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  tract_color = c("palette", "orientation"),
+  tube_radius = NULL,
+  ...
 )
 }
 \arguments{
-\item{.data}{A data.frame to use for plot aesthetics. Must include a
-column called "region" corresponding to regions.}
+\item{atlas}{A `brain_atlas` object}
 
-\item{atlas}{Either a string with the name of a 3d atlas to use, or a
-`brain_atlas` object containing 3D vertex mappings.}
+\item{...}{Type-specific arguments passed to methods}
 
-\item{surface}{String. Which surface to plot. Either "pial", "white",
+\item{.data}{Optional user data to merge}
 
+\item{surface}{Surface type: `"inflated"` (default), `"semi-inflated"`,
+`"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.}
 
+\item{hemisphere}{Character vector of hemispheres: `"right"`, `"left"`.}
 
-  or "inflated"
+\item{label}{Column name for trace labels}
 
+\item{text}{Column name for hover text}
 
-.}
+\item{colour}{Column name for colour values}
 
-\item{hemisphere}{String. Hemisphere to plot. Either "left" or
-  "right"
+\item{palette}{Colour palette specification}
 
+\item{na_colour}{Colour for NA values}
 
-, can also be "subcort".}
+\item{na_alpha}{Transparency for NA regions}
 
-\item{label}{String. Quoted name of column in atlas/data that should
-be used to name traces}
+\item{edge_by}{Column name for region boundary edge grouping}
 
-\item{text}{String. Quoted name of column in atlas/data that should be
-added as extra information in the hover text.}
+\item{brain_meshes}{Optional user-supplied brain meshes}
 
-\item{colour}{String. Quoted name of column from which colour should
-be supplied}
+\item{tract_color}{`"palette"` (default) or `"orientation"`
+(direction-based RGB colouring)}
 
-\item{palette}{String. Vector of colour names or HEX colours. Can also
-be a named numeric vector, with colours as names, and breakpoint for
-that colour as the value}
-
-\item{na_colour}{String. Either name, hex of RGB for colour of NA in
-colour.}
-
-\item{na_alpha}{Numeric. A number between 0 and 1 to control
-transparency of NA-regions.}
-
-\item{edge_by}{String. Column name to use for computing region boundary
-  edges. If provided, edges are drawn between regions with different
-
-
-  values in this column, allowing edge boundaries independent of display
-  colours. When set, edges are displayed by default (black, width 1).
-  Use [set_edges()] to customise appearance.}
-
-\item{tract_color}{String. How to colour tract atlases: "palette"
-(default, use atlas palette) or "orientation" (direction-based RGB
-where R=left-right, G=anterior-posterior, B=superior-inferior).
-Only applies to tract atlases.}
-
-\item{brain_meshes}{Optional user-supplied brain meshes for custom
-  surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
-  format details. When NULL (default), uses built-in fsaverage5 meshes.
-
-\strong{Available surfaces:}
-\itemize{
-\item `inflated:` Fully inflated surface
-\item `semi-inflated:` Semi-inflated surface
-\item `white:` white matter surface
- }}
+\item{tube_radius}{Numeric tube radius override. When `NULL`, uses
+the atlas default.}
 }
 \value{
 List with `meshes` (list of mesh entries) and `legend_data`
 }
 \description{
-Shared pipeline that builds mesh data structures and legend data from
-a brain_atlas. Used by both [render_brain_atlas()] for htmlwidget output
-and [ggsegray()] for rgl/rayshader output.
+S3 generic that dispatches to atlas-type-specific preparation methods.
+Builds mesh data structures and legend data from a `brain_atlas`.
 }
 \keyword{internal}

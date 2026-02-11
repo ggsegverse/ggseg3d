@@ -119,11 +119,7 @@ test_that("mesh_entry_to_mesh3d converts face-colored mesh", {
 })
 
 test_that("prepare_brain_meshes returns meshes and legend_data", {
-  prepared <- prepare_brain_meshes(
-    atlas = dk,
-    hemisphere = "left",
-    surface = "inflated"
-  )
+  prepared <- prepare_brain_meshes(dk, hemisphere = "left", surface = "inflated")
 
   expect_type(prepared, "list")
   expect_true("meshes" %in% names(prepared))
@@ -135,7 +131,7 @@ test_that("ggsegray errors on invalid atlas", {
   skip_if_not_installed("rgl")
 
   expect_error(
-    ggsegray(atlas = list(), hemisphere = "left"),
+    ggsegray(atlas = list()),
     "ggseg_atlas"
   )
 })

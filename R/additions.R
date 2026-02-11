@@ -46,9 +46,7 @@ add_glassbrain <- function(
   hemi_map <- c("left" = "lh", "right" = "rh")
   cortical_hemis <- intersect(hemisphere, c("left", "right"))
 
-  new_meshes <- list()
-
-  for (hemi in cortical_hemis) {
+  entries <- lapply(cortical_hemis, function(hemi) {
     hemi_short <- hemi_map[hemi]
     mesh <- get_brain_mesh(
       hemisphere = hemi_short,
@@ -60,30 +58,27 @@ add_glassbrain <- function(
       cli::cli_warn(
         "Brain mesh not available for {.val {hemi}} {.val {surface}}. Skipping."
       )
-      next
+      return(NULL)
     }
 
-    n_vertices <- nrow(mesh$vertices)
-
-    entry <- make_mesh_entry(
+    make_mesh_entry(
       name = paste("glass brain", hemi),
       vertices = mesh$vertices,
       faces = mesh$faces,
-      colors = rep(colour, n_vertices),
+      colors = rep(colour, nrow(mesh$vertices)),
       color_mode = "vertexcolor",
       opacity = opacity
     )
+  })
+  entries <- Filter(Negate(is.null), entries)
 
-    if (is_rgl) {
+  if (is_rgl) {
+    lapply(entries, function(entry) {
       mesh3d <- mesh_entry_to_mesh3d(entry) # nolint [object_usage_linter]
       rgl::shade3d(mesh3d)
-    } else {
-      new_meshes[[length(new_meshes) + 1]] <- entry
-    }
-  }
-
-  if (!is_rgl) {
-    p$x$meshes <- c(new_meshes, p$x$meshes)
+    })
+  } else {
+    p$x$meshes <- c(entries, p$x$meshes)
   }
 
   p
@@ -290,18 +285,15 @@ set_edges <- function(p, colour = "black", width = 1) {
     check_ggsegray(p)
 
     if (length(p$edge_ids) > 0) {
-      for (eid in p$edge_ids) {
-        rgl::pop3d(id = eid)
-      }
+      lapply(p$edge_ids, function(eid) rgl::pop3d(id = eid))
       p$edge_ids <- integer(0)
     }
 
     if (!is.null(colour)) {
       edge_col <- if (grepl("^#", colour)) colour else col2hex(colour)
-      for (mesh_entry in p$meshes) {
-        eid <- render_edges_rgl(mesh_entry, colour = edge_col, width = width)
-        if (!is.null(eid)) p$edge_ids <- c(p$edge_ids, eid)
-      }
+      p$edge_ids <- unlist(lapply(p$meshes, function(mesh_entry) {
+        render_edges_rgl(mesh_entry, colour = edge_col, width = width)
+      }))
     }
 
     return(p)
@@ -310,16 +302,18 @@ set_edges <- function(p, colour = "black", width = 1) {
   check_ggseg3d(p)
 
   if (is.null(colour)) {
-    for (i in seq_along(p$x$meshes)) {
-      p$x$meshes[[i]]$edgeColor <- NULL
-      p$x$meshes[[i]]$edgeWidth <- NULL
-    }
+    p$x$meshes <- lapply(p$x$meshes, function(mesh) {
+      mesh$edgeColor <- NULL
+      mesh$edgeWidth <- NULL
+      mesh
+    })
   } else {
     edge_col <- if (grepl("^#", colour)) colour else col2hex(colour)
-    for (i in seq_along(p$x$meshes)) {
-      p$x$meshes[[i]]$edgeColor <- edge_col
-      p$x$meshes[[i]]$edgeWidth <- width
-    }
+    p$x$meshes <- lapply(p$x$meshes, function(mesh) {
+      mesh$edgeColor <- edge_col
+      mesh$edgeWidth <- width
+      mesh
+    })
   }
   p
 }
@@ -409,16 +403,12 @@ set_positioning <- function(p, positioning = c("anatomical", "centered")) {
   check_ggseg3d(p)
   positioning <- match.arg(positioning)
 
-  for (i in seq_along(p$x$meshes)) {
-    mesh <- p$x$meshes[[i]]
+  p$x$meshes <- lapply(p$x$meshes, function(mesh) {
     name <- mesh$name %||% ""
-
     is_left <- grepl("left", name, ignore.case = TRUE)
     is_right <- grepl("right", name, ignore.case = TRUE)
 
-    if (!is_left && !is_right) {
-      next
-    }
+    if (!is_left && !is_right) return(mesh)
 
     vertices <- mesh$vertices
     x_range <- range(vertices$x)
@@ -436,8 +426,9 @@ set_positioning <- function(p, positioning = c("anatomical", "centered")) {
       }
     }
 
-    p$x$meshes[[i]]$vertices <- vertices
-  }
+    mesh$vertices <- vertices
+    mesh
+  })
 
   p
 }

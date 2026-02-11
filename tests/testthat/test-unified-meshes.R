@@ -1,4 +1,4 @@
-test_that("build_meshes skips hemisphere without data", {
+test_that("build_cortical_meshes skips hemisphere without data", {
   atlas_data <- data.frame(
     label = c("a"),
     region = c("region a"),
@@ -8,19 +8,18 @@ test_that("build_meshes skips hemisphere without data", {
   )
   atlas_data$vertices <- list(c(0, 1, 2))
 
-  meshes <- build_meshes(
+  meshes <- build_cortical_meshes(
     atlas_data,
     c("left", "right"),
     "inflated",
     "#CCCCCC",
-    NULL,
     NULL
   )
 
   expect_true(length(meshes) >= 1)
 })
 
-test_that("build_meshes with edge.by parameter", {
+test_that("build_cortical_meshes with edge_by parameter", {
   atlas_data <- data.frame(
     label = c("a", "b"),
     region = c("region a", "region b"),
@@ -31,20 +30,19 @@ test_that("build_meshes with edge.by parameter", {
   )
   atlas_data$vertices <- list(0:50, 51:100)
 
-  meshes <- build_meshes(
+  meshes <- build_cortical_meshes(
     atlas_data,
     "left",
     "inflated",
     "#CCCCCC",
-    "lobe",
-    NULL
+    "lobe"
   )
 
   expect_true(length(meshes) > 0)
   expect_true(!is.null(meshes[[1]]$edgeColor))
 })
 
-test_that("build_meshes handles subcort hemisphere", {
+test_that("build_subcortical_meshes handles subcort data", {
   atlas_data <- data.frame(
     label = c("Left-Caudate"),
     region = c("caudate"),
@@ -59,25 +57,12 @@ test_that("build_meshes handles subcort hemisphere", {
     )
   )
 
-  subcort_atlas <- structure(
-    list(core = data.frame(label = "Left-Caudate", hemi = "subcort")),
-    class = c("subcortical_atlas", "ggseg_atlas")
-  )
-
-  meshes <- build_meshes(
-    atlas_data,
-    "subcort",
-    "inflated",
-    "#CCCCCC",
-    NULL,
-    atlas_data,
-    atlas = subcort_atlas
-  )
+  meshes <- build_subcortical_meshes(atlas_data, "#CCCCCC")
 
   expect_true(length(meshes) > 0)
 })
 
-test_that("build_meshes handles tract atlas type", {
+test_that("build_tract_meshes handles tract data with legacy meshes", {
   atlas_data <- data.frame(
     label = c("tract1"),
     region = c("tract 1"),
@@ -92,20 +77,7 @@ test_that("build_meshes handles tract atlas type", {
     )
   )
 
-  tract_atlas <- structure(
-    list(core = data.frame(label = "tract1", hemi = "subcort")),
-    class = c("tract_atlas", "ggseg_atlas")
-  )
-
-  meshes <- build_meshes(
-    atlas_data,
-    "subcort",
-    "inflated",
-    "#CCCCCC",
-    NULL,
-    atlas_data,
-    atlas = tract_atlas
-  )
+  meshes <- build_tract_meshes(atlas_data, "#CCCCCC", "colour", NULL)
 
   expect_true(length(meshes) > 0)
 })

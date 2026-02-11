@@ -205,7 +205,7 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
     class = c("tract_atlas", "ggseg_atlas", "list")
   )
 
-  prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")
+  prepared <- prepare_brain_meshes(atlas)
 
   expect_type(prepared, "list")
   expect_true(length(prepared$meshes) > 0)
@@ -242,7 +242,7 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
     class = c("subcortical_atlas", "ggseg_atlas", "list")
   )
 
-  prepared <- prepare_brain_meshes(atlas = atlas, hemisphere = "subcort")
+  prepared <- prepare_brain_meshes(atlas)
 
   expect_type(prepared, "list")
   expect_true(length(prepared$meshes) > 0)
@@ -290,12 +290,13 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
     class = c("tract_atlas", "ggseg_atlas", "list")
   )
 
-  prepared <- prepare_brain_meshes(
-    atlas = atlas,
-    hemisphere = "subcort",
-    tract_color = "orientation"
-  )
+  prepared <- prepare_brain_meshes(atlas, tract_color = "orientation")
 
   expect_true(length(prepared$meshes) > 0)
   expect_true(all(grepl("^#", prepared$meshes[[1]]$colors)))
+})
+
+test_that("prepare_brain_meshes.default errors on unknown atlas class", {
+  fake <- structure(list(), class = "weird_atlas")
+  expect_error(prepare_brain_meshes(fake), "No method")
 })

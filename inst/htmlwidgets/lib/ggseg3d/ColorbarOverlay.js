@@ -34,6 +34,10 @@
         transform: translateY(-50%);
         font-family: sans-serif;
         font-size: 11px;
+        color: #333;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px;
+        border-radius: 4px;
       `;
 
       const titleEl = document.createElement('div');
@@ -136,6 +140,7 @@
         border-radius: 4px;
         font-family: sans-serif;
         font-size: 10px;
+        color: #333;
       `;
 
       if (title) {

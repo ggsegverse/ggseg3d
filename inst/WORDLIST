@@ -5,6 +5,7 @@ Debounce
 Desikan
 Gouraud
 Killiany
+LCBC
 Lifebrain
 Lifecycle
 ORCID
@@ -23,6 +24,7 @@ WebGL
 aparc
 aseg
 centerline
+centerlines
 chainable
 colorMode
 colorbar
@@ -30,11 +32,9 @@ colour
 coloured
 colouring
 colours
-customise
 dk
 doi
 dplyr
-fsaverage
 ggseg
 ggsegExtra
 ggsegray
@@ -62,7 +62,6 @@ rgl
 rh
 segmentations
 specular
-subcort
 subcortical
 tmesh
 tractography

@@ -9,33 +9,22 @@ utils::globalVariables("dk")
 #' rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
 #'
 #' @inheritParams ggseg3d
-#' @param ... Material properties passed to the `material` argument of
-#'   [rgl::tmesh3d()]. These control how the mesh surface is shaded.
+#' @param material Named list of rgl material properties passed to
+#'   [rgl::tmesh3d()]. Controls how the mesh surface is shaded.
 #'
-#'   Defaults applied by ggseg3d:
-#'   \describe{
-#'     \item{`specular`}{Specular highlight colour. `"black"` (default) gives
-#'       a matte surface, `"white"` adds glossy highlights.}
-#'     \item{`shininess`}{Exponent for specular highlights. Default `128`.
-#'       Higher values produce tighter highlights.}
-#'   }
+#' @section Material properties:
+#' Useful material list entries:
+#' \describe{
+#'   \item{`specular`}{`"black"` (matte) or `"white"` (glossy).}
+#'   \item{`shininess`}{Specular exponent. Higher = tighter highlights.}
+#'   \item{`lit`}{`FALSE` disables lighting.}
+#'   \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
+#'   \item{`smooth`}{`TRUE` for Gouraud shading, `FALSE` for flat.}
+#' }
 #'
-#'   Other useful properties:
-#'   \describe{
-#'     \item{`lit`}{`FALSE` disables lighting entirely. Vertices render at
-#'       their exact assigned colour with no shading — useful for
-#'       mask/contour extraction where shadows would contaminate the output.}
-#'     \item{`ambient`}{Ambient reflection colour (default `"black"`).}
-#'     \item{`emission`}{Self-illumination colour (default `"black"`).
-#'       Set to a colour to make the mesh glow independently of lights.}
-#'     \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
-#'     \item{`smooth`}{`TRUE` (default) for Gouraud shading, `FALSE` for
-#'       flat faceted shading.}
-#'     \item{`front`, `back`}{Polygon rendering mode: `"filled"`,
-#'       `"lines"`, or `"points"`.}
-#'   }
+#' See [rgl::material3d()] for the full list.
 #'
-#'   See [rgl::material3d()] for the full list of supported properties.
+#' @template type-specific-args
 #'
 #' @return An object of class `ggsegray` (invisibly), which wraps the
 #'   rgl device ID. Pipe into [pan_camera()], [add_glassbrain()], or
@@ -58,22 +47,16 @@ utils::globalVariables("dk")
 ggsegray <- function(
   .data = NULL,
   atlas = dk, # nolint [object_usage_linter]
-  surface = "LCBC",
-  hemisphere = c("right", "subcort"),
   label = "region",
   text = NULL,
   colour = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  edge_by = NULL,
-  tract_color = c("palette", "orientation"),
-  brain_meshes = NULL,
+  material = list(),
   ...
 ) {
-  rlang::check_installed("rgl", reason = "to render 3D brain scenes")
-
-  tract_color <- match.arg(tract_color)
+  rlang::check_installed("rgl", reason = "to render 3D brain scenes with rgl")
 
   if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {
     cli::cli_abort(
@@ -90,44 +73,29 @@ ggsegray <- function(
     ))
   }
 
-  unified_surface <- if (surface == "LCBC") "inflated" else surface
-
-  # nolint start [object_usage_linter]
   prepared <- prepare_brain_meshes(
+    atlas,
     .data = .data,
-    atlas = atlas,
-    surface = unified_surface,
-    hemisphere = hemisphere,
     label = label,
     text = text,
     colour = colour,
     palette = palette,
     na_colour = na_colour,
     na_alpha = na_alpha,
-    edge_by = edge_by,
-    tract_color = tract_color,
-    brain_meshes = brain_meshes
+    ...
   )
-  # nolint end
 
   rgl::open3d()
 
-  edge_ids <- integer(0)
-  for (mesh_entry in prepared$meshes) {
-    mesh3d <- mesh_entry_to_mesh3d(
-      mesh_entry,
-      ...
-    )
+  edge_ids <- unlist(lapply(prepared$meshes, function(mesh_entry) {
+    mesh3d <- do.call(mesh_entry_to_mesh3d, c(list(mesh_entry), material))
     rgl::shade3d(mesh3d)
-    eid <- render_edges_rgl(mesh_entry)
-    if (!is.null(eid)) edge_ids <- c(edge_ids, eid)
-  }
+    render_edges_rgl(mesh_entry)
+  }))
 
   structure(
     list(
       device = rgl::cur3d(),
-      hemisphere = hemisphere,
-      surface = unified_surface,
       legend_data = prepared$legend_data,
       meshes = prepared$meshes,
       edge_ids = edge_ids
@@ -289,7 +257,9 @@ render_edges_rgl <- function(mesh_entry, colour = NULL, width = NULL) {
   }
 
   edge_color <- colour %||% mesh_entry$edgeColor
-  if (is.null(edge_color)) return(invisible(NULL))
+  if (is.null(edge_color)) {
+    return(invisible(NULL))
+  }
 
   edge_width <- width %||% mesh_entry$edgeWidth %||% 1
   verts <- mesh_entry$vertices
@@ -333,7 +303,8 @@ print.ggsegray <- function(x, ...) {
 
 #' @importFrom knitr knit_print
 #' @export
-knit_print.ggsegray <- function(x, ...) { # nocov start
+knit_print.ggsegray <- function(x, ...) {
+  # nocov start
   rgl::set3d(x$device)
   knitr::knit_print(rgl::rglwidget(), ...)
 } # nocov end
@@ -385,27 +356,41 @@ render_continuous_legend_rgl <- function(legend_data) {
     col_fn <- grDevices::colorRampPalette(colors)
     bar_cols <- col_fn(n_steps)
 
-    for (i in seq_len(n_steps)) {
+    invisible(lapply(seq_len(n_steps), function(i) {
       rect(
-        bar_x, y_seq[i], bar_x + bar_w, y_seq[i + 1],
-        col = bar_cols[i], border = NA
+        bar_x,
+        y_seq[i],
+        bar_x + bar_w,
+        y_seq[i + 1],
+        col = bar_cols[i],
+        border = NA
       )
-    }
+    }))
     rect(bar_x, bar_y0, bar_x + bar_w, bar_y1, border = "black", lwd = 0.5)
 
     tick_x <- bar_x + bar_w + 0.005
     text(
-      tick_x, bar_y0, format(data_min, digits = 2),
-      adj = c(0, 0.5), cex = 0.7
+      tick_x,
+      bar_y0,
+      format(data_min, digits = 2),
+      adj = c(0, 0.5),
+      cex = 0.7
     )
     text(
-      tick_x, bar_y1, format(data_max, digits = 2),
-      adj = c(0, 0.5), cex = 0.7
+      tick_x,
+      bar_y1,
+      format(data_max, digits = 2),
+      adj = c(0, 0.5),
+      cex = 0.7
     )
 
     text(
-      bar_x + bar_w / 2, bar_y1 + 0.03, title,
-      adj = c(0.5, 0), cex = 0.8, font = 2
+      bar_x + bar_w / 2,
+      bar_y1 + 0.03,
+      title,
+      adj = c(0.5, 0),
+      cex = 0.8,
+      font = 2
     )
   })
 }
@@ -432,20 +417,32 @@ render_discrete_legend_rgl <- function(legend_data) {
     top_y <- 0.95
 
     text(
-      col_x + box_size + 0.005, top_y, title,
-      adj = c(0, 0.5), cex = 0.7, font = 2
+      col_x + box_size + 0.005,
+      top_y,
+      title,
+      adj = c(0, 0.5),
+      cex = 0.7,
+      font = 2
     )
 
-    for (i in seq_len(max_show)) {
+    invisible(lapply(seq_len(max_show), function(i) {
       y <- top_y - i * line_h
       rect(
-        col_x, y - box_size / 2, col_x + box_size, y + box_size / 2,
-        col = colors[i], border = "grey50", lwd = 0.3
+        col_x,
+        y - box_size / 2,
+        col_x + box_size,
+        y + box_size / 2,
+        col = colors[i],
+        border = "grey50",
+        lwd = 0.3
       )
       text(
-        col_x + box_size + 0.005, y,
-        labels[i], adj = c(0, 0.5), cex = 0.55
+        col_x + box_size + 0.005,
+        y,
+        labels[i],
+        adj = c(0, 0.5),
+        cex = 0.55
       )
-    }
+    }))
   })
 }

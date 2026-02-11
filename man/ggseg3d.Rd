@@ -7,17 +7,13 @@
 ggseg3d(
   .data = NULL,
   atlas = "dk",
-  surface = "LCBC",
-  hemisphere = c("right", "subcort"),
   label = "region",
   text = NULL,
   colour = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  edge_by = NULL,
-  tract_color = c("palette", "orientation"),
-  brain_meshes = NULL
+  ...
 )
 }
 \arguments{
@@ -26,21 +22,6 @@ column called "region" corresponding to regions.}
 
 \item{atlas}{Either a string with the name of a 3d atlas to use, or a
 `brain_atlas` object containing 3D vertex mappings.}
-
-\item{surface}{String. Which surface to plot. Either "pial", "white",
-
-
-
-  or "inflated"
-
-
-.}
-
-\item{hemisphere}{String. Hemisphere to plot. Either "left" or
-  "right"
-
-
-, can also be "subcort".}
 
 \item{label}{String. Quoted name of column in atlas/data that should
 be used to name traces}
@@ -61,37 +42,37 @@ colour.}
 \item{na_alpha}{Numeric. A number between 0 and 1 to control
 transparency of NA-regions.}
 
-\item{edge_by}{String. Column name to use for computing region boundary
-  edges. If provided, edges are drawn between regions with different
-
-
-  values in this column, allowing edge boundaries independent of display
-  colours. When set, edges are displayed by default (black, width 1).
-  Use [set_edges()] to customise appearance.}
-
-\item{tract_color}{String. How to colour tract atlases: "palette"
-(default, use atlas palette) or "orientation" (direction-based RGB
-where R=left-right, G=anterior-posterior, B=superior-inferior).
-Only applies to tract atlases.}
-
-\item{brain_meshes}{Optional user-supplied brain meshes for custom
-  surfaces or subjects. See [ggseg.formats::get_brain_mesh()] for
-  format details. When NULL (default), uses built-in fsaverage5 meshes.
-
-\strong{Available surfaces:}
-\itemize{
-\item `inflated:` Fully inflated surface
-\item `semi-inflated:` Semi-inflated surface
-\item `white:` white matter surface
- }}
+\item{...}{Type-specific arguments passed to the atlas method.
+See section **Type-specific arguments** below.}
 }
 \value{
 an htmlwidget object for interactive 3D brain visualization
 }
 \description{
 `ggseg3d` creates and returns an interactive Three.js brain mesh
-visualization.
+visualization. Dispatches to atlas-type-specific methods via
+[prepare_brain_meshes()].
 }
+\section{Type-specific arguments}{
+
+Cortical atlases (`cortical_atlas`):
+\describe{
+  \item{`surface`}{Surface type: `"LCBC"` (default, alias for
+    inflated), `"inflated"`, `"semi-inflated"`, `"white"`, `"pial"`.}
+  \item{`hemisphere`}{Character vector of hemispheres: `"right"`,
+    `"left"`.}
+  \item{`edge_by`}{Column name for region boundary edges.}
+  \item{`brain_meshes`}{Custom brain mesh data.}
+}
+
+Tract atlases (`tract_atlas`):
+\describe{
+  \item{`tract_color`}{`"palette"` (default) or `"orientation"`
+    (direction-based RGB).}
+  \item{`tube_radius`}{Tube radius override (numeric).}
+}
+}
+
 \examples{
 \dontrun{
 ggseg3d()
