@@ -19,6 +19,7 @@
 #' @keywords internal
 #' @import ggseg.formats
 #' @importFrom cli cli_abort cli_warn cli_inform
+#' @importFrom utils data
 "_PACKAGE"
 
 # nocov start
@@ -41,9 +42,9 @@ knit_vignettes <- function() {
     cli::cli_inform("No .Rmd.orig files found in vignettes/")
     return(invisible())
   }
-  old_wd <- getwd()
-  setwd("vignettes")
-  on.exit(setwd(old_wd))
+  old_wd <- getwd() # nolint: undesirable_function_linter
+  setwd("vignettes") # nolint: undesirable_function_linter
+  on.exit(setwd(old_wd)) # nolint: undesirable_function_linter
   invisible(lapply(basename(orig), function(f) {
     out <- sub("\\.orig$", "", f)
     cli::cli_inform("Knitting {f} -> {out}")

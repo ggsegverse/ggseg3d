@@ -1,13 +1,9 @@
-.onLoad <- function(libname, pkgname) {
-  ns <- topenv(environment())
-  for (obj in c("dk", "aseg", "tracula")) {
-    local({
-      name <- obj
-      delayedAssign(
-        name,
-        getExportedValue("ggseg.formats", name),
-        assign.env = ns
-      )
-    })
-  }
+# nocov start
+.onAttach <- function(libname, pkgname) {
+  data(
+    "dk", "aseg", "tracula",
+    package = "ggseg.formats",
+    envir = as.environment(paste0("package:", pkgname))
+  )
 }
+# nocov end
