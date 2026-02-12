@@ -1,0 +1,161 @@
+---
+title: "Introduction to ggseg3d"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to ggseg3d}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  eval = TRUE,
+  fig.width = 7,
+  fig.height = 5
+)
+library(ggseg3d)
+library(dplyr)
+if (!dir.exists("figures")) dir.create("figures")
+```
+
+ggseg3d renders interactive 3D brain atlases using WebGL via Three.js.
+It provides a pipe-friendly API and unified brain atlases that work with both
+ggseg (2D) and ggseg3d (3D).
+
+## Getting started
+
+```{r}
+#| label: basic
+library(ggseg3d)
+
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral")
+```
+
+Call `ggseg3d()` without arguments to plot the default Desikan-Killiany atlas.
+The widget is interactive: rotate by clicking and dragging, zoom with the scroll
+wheel, and hover over regions to see their names.
+
+## Mapping data
+
+Provide a data frame with a `region` column matching the atlas, and map a
+variable to `colour`:
+
+```{r}
+#| label: plot-data
+#| eval: false
+library(dplyr)
+
+some_data <- tibble(
+  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  p = c(0.01, 0.04, 0.2, 0.5)
+)
+
+ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+  pan_camera("right lateral")
+```
+
+```{r}
+#| label: snap-plot-data
+#| include: false
+some_data <- tibble(
+  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  p = c(0.01, 0.04, 0.2, 0.5)
+)
+
+ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+  pan_camera("right lateral") |>
+  snapshot_brain("figures/plot-data.png")
+```
+
+```{r}
+#| label: fig-plot-data
+#| echo: false
+#| fig.cap: "Brain regions coloured by p-value."
+knitr::include_graphics("figures/plot-data.png")
+```
+
+## Subcortical atlases
+
+For subcortical structures, use the `aseg` atlas and add a translucent glass
+brain for anatomical context:
+
+```{r}
+#| label: subcortical
+#| eval: false
+
+subcort_data <- tibble(
+  region = c("thalamus", "caudate", "hippocampus"),
+  p = c(0.2, 0.5, 0.8)
+)
+
+ggseg3d(.data = subcort_data, atlas = aseg, colour = "p", na_alpha = .5) |>
+  add_glassbrain()
+```
+
+```{r}
+#| label: snap-subcortical
+#| include: false
+subcort_data <- tibble(
+  region = c("thalamus", "caudate", "hippocampus"),
+  p = c(0.2, 0.5, 0.8)
+)
+
+ggseg3d(
+  .data = subcort_data,
+  atlas = aseg,
+  colour = "p",
+  na_alpha = .5
+) |>
+  add_glassbrain() |>
+  snapshot_brain("figures/subcortical.png")
+```
+
+```{r}
+#| label: fig-subcortical
+#| echo: false
+#| fig.cap: "Subcortical structures with a translucent glass brain overlay."
+knitr::include_graphics("figures/subcortical.png")
+```
+
+## Camera and background
+
+Use `pan_camera()` to set the viewing angle and `set_background()` to change
+the background colour:
+
+```{r}
+#| label: camera
+#| eval: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  set_background("black")
+```
+
+```{r}
+#| label: snap-camera
+#| include: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  set_background("black") |>
+  snapshot_brain("figures/background.png")
+```
+
+```{r}
+#| label: fig-camera
+#| echo: false
+#| fig.cap: "Brain atlas with a black background."
+knitr::include_graphics("figures/background.png")
+```
+
+Available presets include `"left lateral"`, `"right medial"`,
+`"left superior"`, and more. For custom positions, pass a list with
+`eye` coordinates.
+
+## Further reading
+
+- [Full ggseg3d walkthrough](../articles/ggseg3d-walkthrough.html) with all features and examples
+- [Ray-traced rendering](../articles/rayshader.html) with lighting, materials, and animation
+- [Shiny integration](shiny.html)
+

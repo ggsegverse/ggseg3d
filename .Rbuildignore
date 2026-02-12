@@ -12,7 +12,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 img
-logo.png
 ^_pkgdown\.yml$
 ^\.github$
 ^cran-comments\.md$
@@ -23,4 +22,7 @@ logo.png
 ^package-lock\.json$
 ggseg3d.Rcheck
 .lintr
-^vignettes/.*\.Rmd\.orig$
+^vignettes/articles$
+man-roxygen/
+^inst/sticker\.png$
+

@@ -303,10 +303,8 @@ print.ggsegray <- function(x, ...) {
 
 #' @importFrom knitr knit_print
 #' @export
-knit_print.ggsegray <- function(x, ...) {
-  # nocov start
-  rgl::set3d(x$device)
-  knitr::knit_print(rgl::rglwidget(), ...)
+knit_print.ggsegray <- function(x, ...) { # nocov start
+  invisible(x)
 } # nocov end
 
 

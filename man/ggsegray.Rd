@@ -91,7 +91,8 @@ Tract atlases (`tract_atlas`):
 \describe{
   \item{`tract_color`}{`"palette"` (default) or `"orientation"`
     (direction-based RGB).}
-  \item{`tube_radius`}{Tube radius override (numeric).}
+  \item{`tube_radius`}{Tube radius (numeric, default 5).}
+  \item{`tube_segments`}{Tube segment count (integer, default 8).}
 }
 }
 

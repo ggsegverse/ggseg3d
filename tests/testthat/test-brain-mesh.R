@@ -556,3 +556,44 @@ test_that("build_tract_meshes applies na_colour for NA colour", {
 
   expect_equal(meshes[[1]]$colors, rep("#CCCCCC", 3))
 })
+
+test_that("build_centerline_data returns NULL when no centerlines", {
+  atlas <- structure(
+    list(
+      data = structure(
+        list(centerlines = NULL),
+        class = c("ggseg_data_tract", "ggseg_atlas_data")
+      )
+    ),
+    class = c("tract_atlas", "ggseg_atlas", "list")
+  )
+
+  expect_null(build_centerline_data(atlas))
+})
+
+test_that("build_centerline_data skips NULL points in centerlines", {
+  cl_data <- data.frame(
+    label = c("tract_a", "tract_b"),
+    stringsAsFactors = FALSE
+  )
+  cl_data$points <- list(
+    matrix(c(0, 0, 0, 1, 0, 0), nrow = 2, byrow = TRUE),
+    NULL
+  )
+
+  atlas <- structure(
+    list(
+      data = structure(
+        list(centerlines = cl_data),
+        class = c("ggseg_data_tract", "ggseg_atlas_data")
+      )
+    ),
+    class = c("tract_atlas", "ggseg_atlas", "list")
+  )
+
+  result <- build_centerline_data(atlas)
+
+  expect_type(result, "list")
+  expect_null(result$centerlines$points[[2]])
+  expect_equal(nrow(result$centerlines$points[[1]]), 2)
+})

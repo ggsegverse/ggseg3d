@@ -193,11 +193,7 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
         stringsAsFactors = FALSE
       ),
       data = structure(
-        list(
-          centerlines = cl_data,
-          tube_radius = 1,
-          tube_segments = 4
-        ),
+        list(centerlines = cl_data),
         class = c("ggseg_data_tract", "ggseg_atlas_data")
       ),
       palette = c("tract_a" = "#FF0000")
@@ -279,9 +275,7 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
       data = structure(
         list(
           meshes = meshes_data,
-          centerlines = cl_data,
-          tube_radius = 1,
-          tube_segments = 4
+          centerlines = cl_data
         ),
         class = c("ggseg_data_tract", "ggseg_atlas_data")
       ),

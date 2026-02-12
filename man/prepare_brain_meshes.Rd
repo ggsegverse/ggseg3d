@@ -47,7 +47,8 @@ prepare_brain_meshes(atlas, ...)
   na_colour = "darkgrey",
   na_alpha = 1,
   tract_color = c("palette", "orientation"),
-  tube_radius = NULL,
+  tube_radius = 1,
+  tube_segments = NULL,
   ...
 )
 }
@@ -82,8 +83,9 @@ prepare_brain_meshes(atlas, ...)
 \item{tract_color}{`"palette"` (default) or `"orientation"`
 (direction-based RGB colouring)}
 
-\item{tube_radius}{Numeric tube radius override. When `NULL`, uses
-the atlas default.}
+\item{tube_radius}{Numeric tube radius (default 5 when `NULL`).}
+
+\item{tube_segments}{Integer tube segment count (default 8 when `NULL`).}
 }
 \value{
 List with `meshes` (list of mesh entries) and `legend_data`

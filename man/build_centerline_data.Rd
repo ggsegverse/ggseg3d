@@ -4,12 +4,14 @@
 \alias{build_centerline_data}
 \title{Build centerline data for tract atlases}
 \usage{
-build_centerline_data(atlas, tube_radius = NULL)
+build_centerline_data(atlas, tube_radius = NULL, tube_segments = NULL)
 }
 \arguments{
 \item{atlas}{A `tract_atlas` object}
 
 \item{tube_radius}{Optional radius override}
+
+\item{tube_segments}{Optional segment count override}
 }
 \value{
 List with centerlines, tube_radius, tube_segments, or NULL

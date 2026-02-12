@@ -44,7 +44,7 @@ ggseg3d() |>
   pan_camera("left lateral")
 ```
 
-![](man/figures/README-dk_3d-plot.png)
+![3D rendering of the Desikan-Killiany cortical atlas](man/figures/README-dk_3d-plot.png)
 
 Map data onto regions by passing a data frame with a `region` column:
 
@@ -68,7 +68,7 @@ ggseg3d(atlas = aseg) |>
   pan_camera("right lateral")
 ```
 
-![](man/figures/README-aseg_3d-plot.png)
+![3D rendering of the aseg subcortical atlas](man/figures/README-aseg_3d-plot.png)
 
 ## Pipe functions
 

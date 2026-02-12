@@ -198,8 +198,8 @@ prepare_brain_meshes.subcortical_atlas <- function(
 #' @method prepare_brain_meshes tract_atlas
 #' @param tract_color `"palette"` (default) or `"orientation"`
 #'   (direction-based RGB colouring)
-#' @param tube_radius Numeric tube radius override. When `NULL`, uses
-#'   the atlas default.
+#' @param tube_radius Numeric tube radius (default 5 when `NULL`).
+#' @param tube_segments Integer tube segment count (default 8 when `NULL`).
 #' @export
 #' @rdname prepare_brain_meshes
 #' @keywords internal
@@ -214,7 +214,8 @@ prepare_brain_meshes.tract_atlas <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   tract_color = c("palette", "orientation"),
-  tube_radius = NULL,
+  tube_radius = 2,
+  tube_segments = 10,
   ...
 ) {
   tract_color <- match.arg(tract_color)
@@ -229,7 +230,7 @@ prepare_brain_meshes.tract_atlas <- function(
     label
   )
   atlas_data <- to_native_coords(result$atlas_data)
-  atlas_centerlines <- build_centerline_data(atlas, tube_radius)
+  atlas_centerlines <- build_centerline_data(atlas, tube_radius, tube_segments)
   meshes <- build_tract_meshes(
     atlas_data,
     na_colour,
@@ -296,10 +297,15 @@ apply_colours_and_legend <- function(
 #'
 #' @param atlas A `tract_atlas` object
 #' @param tube_radius Optional radius override
+#' @param tube_segments Optional segment count override
 #'
 #' @return List with centerlines, tube_radius, tube_segments, or NULL
 #' @keywords internal
-build_centerline_data <- function(atlas, tube_radius = NULL) {
+build_centerline_data <- function(
+  atlas,
+  tube_radius = NULL,
+  tube_segments = NULL
+) {
   if (is.null(atlas$data$centerlines)) {
     return(NULL)
   }
@@ -308,7 +314,9 @@ build_centerline_data <- function(atlas, tube_radius = NULL) {
   if (!is.null(cl$points)) {
     offset <- native_offset()
     cl$points <- lapply(cl$points, function(pts) {
-      if (is.null(pts)) return(pts)
+      if (is.null(pts)) {
+        return(pts)
+      }
       pts[, 2] <- pts[, 2] + offset[["y"]]
       pts[, 3] <- pts[, 3] + offset[["z"]]
       pts
@@ -317,7 +325,7 @@ build_centerline_data <- function(atlas, tube_radius = NULL) {
 
   list(
     centerlines = cl,
-    tube_radius = tube_radius %||% atlas$data$tube_radius %||% 5,
-    tube_segments = atlas$data$tube_segments %||% 8
+    tube_radius = tube_radius %||% 2,
+    tube_segments = tube_segments %||% 10
   )
 }
