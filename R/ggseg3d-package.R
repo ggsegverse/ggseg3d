@@ -19,7 +19,6 @@
 #' @keywords internal
 #' @import ggseg.formats
 #' @importFrom cli cli_abort cli_warn cli_inform
-#' @importFrom utils data
 "_PACKAGE"
 
 # nocov start
