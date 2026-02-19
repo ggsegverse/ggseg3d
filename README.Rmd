@@ -22,8 +22,8 @@ library(ggseg3d)
 [![CRAN status](https://www.r-pkg.org/badges/version/ggseg3d)](https://CRAN.R-project.org/package=ggseg3d)
 [![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue)](https://r-pkg.org/pkg/ggseg3d)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/ggsegverse/ggseg3d/workflows/R-CMD-check/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions)
 [![code-quality](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml)
+[![R-CMD-check](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Interactive 3D brain atlas visualization in R.

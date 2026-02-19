@@ -11,8 +11,8 @@ status](https://www.r-pkg.org/badges/version/ggseg3d.png)](https://CRAN.R-projec
 [![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue.png)](https://r-pkg.org/pkg/ggseg3d)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/ggsegverse/ggseg3d/workflows/R-CMD-check/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions)
 [![code-quality](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml)
+[![R-CMD-check](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Interactive 3D brain atlas visualization in R. Plot brain parcellations
@@ -63,7 +63,7 @@ ggseg3d(atlas = dk(), hemisphere = "left") |>
 
 ![](man/figures/README-dk-plot-1.png)
 
-    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpERcvDH/file717376662b93.html screenshot completed
+    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpnGyPQf/file117da284139d2.html screenshot completed
 
 ![](man/figures/README-dk_3d-plot.png)
 
@@ -77,7 +77,7 @@ ggseg3d(atlas = aseg()) |>
 
 ![](man/figures/README-aseg-plot-1.png)
 
-    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpERcvDH/file71734db3fb6e.html screenshot completed
+    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpnGyPQf/file117dac5dfd80.html screenshot completed
 
 ![](man/figures/README-aseg_3d-plot.png)
 
