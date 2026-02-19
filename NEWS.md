@@ -52,7 +52,7 @@
 - Changed brain.pal to function `brain_pal()`
 - Reduced code necessary for `brain_pals_info`
 - Simplified `display_brain_pal()`
-- Moved palettes of ggsegExtra atlases to ggsegExtra package
+- Moved palettes of ggseg.extra atlases to ggseg.extra package
 - Added a `NEWS.md` file to track changes to the package
 - Changes all `data` options to `.data` to decrease possibility of column naming overlap
 - Added compatibility with `grouped` data.frames

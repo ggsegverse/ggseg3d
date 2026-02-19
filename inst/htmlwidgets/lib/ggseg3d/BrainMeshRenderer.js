@@ -126,7 +126,8 @@
 
     addMesh(meshData) {
       const { vertices, faces, colors, colorMode, opacity, name, hoverText,
-              edgeColor, edgeWidth, boundaryEdges, vertexLabels } = meshData;
+              edgeColor, edgeWidth, boundaryEdges, vertexLabels,
+              vertexTexts } = meshData;
 
       let geometry;
       let material;
@@ -156,7 +157,7 @@
       }
 
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.userData = { name, hoverText, originalColors: colors, vertexLabels };
+      mesh.userData = { name, hoverText, originalColors: colors, vertexLabels, vertexTexts };
       this.scene.add(mesh);
       this.meshes.push(mesh);
       this.meshData.push(meshData);
@@ -373,10 +374,13 @@
           const vertexIndex = intersect.face.a;
           const label = mesh.userData.vertexLabels[vertexIndex];
           if (label) {
+            const vertexText = mesh.userData.vertexTexts
+              ? mesh.userData.vertexTexts[vertexIndex]
+              : null;
             return {
               userData: {
                 name: label,
-                hoverText: mesh.userData.hoverText
+                hoverText: vertexText || mesh.userData.hoverText
               }
             };
           }

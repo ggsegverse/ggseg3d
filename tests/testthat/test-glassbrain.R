@@ -1,16 +1,16 @@
 test_that("Check glassbrain", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain()
 
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
-  n_meshes_base <- length(ggseg3d(atlas = aseg)$x$meshes)
+  n_meshes_base <- length(ggseg3d(atlas = aseg())$x$meshes)
   expect_true(length(p$x$meshes) > n_meshes_base)
 
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left", colour = "red")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 
@@ -26,7 +26,7 @@ test_that("Check glassbrain", {
 })
 
 test_that("add_glassbrain with hex color", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left", colour = "#AABBCC")
 
   glassbrain_meshes <- p$x$meshes[vapply(
@@ -41,7 +41,7 @@ test_that("add_glassbrain with hex color", {
 })
 
 test_that("add_glassbrain with custom opacity", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left", opacity = 0.5)
 
   glassbrain_meshes <- p$x$meshes[vapply(
@@ -63,7 +63,7 @@ test_that("add_glassbrain errors on non-ggseg3d object", {
 })
 
 test_that("add_glassbrain with both hemispheres", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = c("left", "right"))
 
   glassbrain_meshes <- p$x$meshes[vapply(
@@ -78,14 +78,14 @@ test_that("add_glassbrain with both hemispheres", {
 })
 
 test_that("add_glassbrain with inflated surface", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left", surface = "inflated")
 
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })
 
 test_that("add_glassbrain works with white surface", {
-  p <- ggseg3d(atlas = aseg) |>
+  p <- ggseg3d(atlas = aseg()) |>
     add_glassbrain(hemisphere = "left", surface = "white")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })

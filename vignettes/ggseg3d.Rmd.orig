@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r}
-#| label: setup
+#| label: intro-setup
 #| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 )
 library(ggseg3d)
 library(dplyr)
-if (!dir.exists("figures")) dir.create("figures")
 ```
 
 ggseg3d renders interactive 3D brain atlases using WebGL via Three.js.
@@ -27,7 +26,7 @@ ggseg (2D) and ggseg3d (3D).
 ## Getting started
 
 ```{r}
-#| label: basic
+#| label: intro-basic
 library(ggseg3d)
 
 ggseg3d(hemisphere = "left") |>
@@ -41,10 +40,10 @@ wheel, and hover over regions to see their names.
 ## Mapping data
 
 Provide a data frame with a `region` column matching the atlas, and map a
-variable to `colour`:
+variable to `colour_by`:
 
 ```{r}
-#| label: plot-data
+#| label: intro-plot-data
 #| eval: false
 library(dplyr)
 
@@ -53,28 +52,28 @@ some_data <- tibble(
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
 ```{r}
-#| label: snap-plot-data
+#| label: intro-snap-plot-data
 #| include: false
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral") |>
-  snapshot_brain("figures/plot-data.png")
+  snapshot_brain("img/intro-plot-data.png")
 ```
 
 ```{r}
-#| label: fig-plot-data
+#| label: intro-fig-plot-data
 #| echo: false
 #| fig.cap: "Brain regions coloured by p-value."
-knitr::include_graphics("figures/plot-data.png")
+knitr::include_graphics("img/intro-plot-data.png")
 ```
 
 ## Subcortical atlases
@@ -83,41 +82,41 @@ For subcortical structures, use the `aseg` atlas and add a translucent glass
 brain for anatomical context:
 
 ```{r}
-#| label: subcortical
+#| label: intro-subcortical
 #| eval: false
 
 subcort_data <- tibble(
-  region = c("thalamus", "caudate", "hippocampus"),
+  region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
-ggseg3d(.data = subcort_data, atlas = aseg, colour = "p", na_alpha = .5) |>
+ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
   add_glassbrain()
 ```
 
 ```{r}
-#| label: snap-subcortical
+#| label: intro-snap-subcortical
 #| include: false
 subcort_data <- tibble(
-  region = c("thalamus", "caudate", "hippocampus"),
+  region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
 ggseg3d(
   .data = subcort_data,
-  atlas = aseg,
-  colour = "p",
+  atlas = aseg(),
+  colour_by = "p",
   na_alpha = .5
 ) |>
   add_glassbrain() |>
-  snapshot_brain("figures/subcortical.png")
+  snapshot_brain("img/intro-subcortical.png")
 ```
 
 ```{r}
-#| label: fig-subcortical
+#| label: intro-fig-subcortical
 #| echo: false
 #| fig.cap: "Subcortical structures with a translucent glass brain overlay."
-knitr::include_graphics("figures/subcortical.png")
+knitr::include_graphics("img/intro-subcortical.png")
 ```
 
 ## Camera and background
@@ -126,7 +125,7 @@ Use `pan_camera()` to set the viewing angle and `set_background()` to change
 the background colour:
 
 ```{r}
-#| label: camera
+#| label: intro-camera
 #| eval: false
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
@@ -134,28 +133,23 @@ ggseg3d(hemisphere = "left") |>
 ```
 
 ```{r}
-#| label: snap-camera
+#| label: intro-snap-camera
 #| include: false
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black") |>
-  snapshot_brain("figures/background.png")
+  snapshot_brain("img/intro-background.png")
 ```
 
 ```{r}
-#| label: fig-camera
+#| label: intro-fig-camera
 #| echo: false
 #| fig.cap: "Brain atlas with a black background."
-knitr::include_graphics("figures/background.png")
+knitr::include_graphics("img/intro-background.png")
 ```
 
 Available presets include `"left lateral"`, `"right medial"`,
 `"left superior"`, and more. For custom positions, pass a list with
 `eye` coordinates.
 
-## Further reading
-
-- [Full ggseg3d walkthrough](../articles/ggseg3d-walkthrough.html) with all features and examples
-- [Ray-traced rendering](../articles/rayshader.html) with lighting, materials, and animation
-- [Shiny integration](shiny.html)
 

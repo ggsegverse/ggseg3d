@@ -4,18 +4,18 @@
 \alias{apply_colours_and_legend}
 \title{Apply colour palette and build legend data}
 \usage{
-apply_colours_and_legend(atlas_data, colour, palette, na_colour, label)
+apply_colours_and_legend(atlas_data, colour_by, palette, na_colour, label_by)
 }
 \arguments{
 \item{atlas_data}{Prepared atlas data frame}
 
-\item{colour}{Column name for colour values}
+\item{colour_by}{Column name for colour values}
 
 \item{palette}{Colour palette specification}
 
 \item{na_colour}{Colour for NA values}
 
-\item{label}{Column name for labels}
+\item{label_by}{Column name for labels}
 }
 \value{
 List with `atlas_data` and `legend_data`

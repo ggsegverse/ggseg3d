@@ -156,7 +156,7 @@ test_that("build_tract_meshes creates vertex-colored meshes", {
 
   expect_length(meshes, 1)
   expect_equal(meshes[[1]]$colorMode, "vertexcolor")
-  expect_equal(meshes[[1]]$hoverText, "Tract: tract_a")
+  expect_equal(meshes[[1]]$name, "tract_a")
 })
 
 test_that("build_tract_meshes handles orientation coloring", {

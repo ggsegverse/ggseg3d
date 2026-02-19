@@ -1,5 +1,5 @@
 test_that("data_merge works with unified atlas", {
-  atlas_data <- ggseg.formats::atlas_sf(dk)
+  atlas_data <- ggseg.formats::atlas_sf(dk())
 
   some_data <- data.frame(
     region = c(

@@ -1,4 +1,4 @@
-url: https://ggseg.github.io/ggseg3d/
+url: https://ggsegverse.github.io/ggseg3d/
 
 template:
   package: ggseg.docs
@@ -7,7 +7,7 @@ navbar:
   components:
     github:
       icon: fa-github
-      href: https://github.com/ggseg/ggseg3d
+      href: https://github.com/ggsegverse/ggseg3d
       aria-label: GitHub
 
 reference:
@@ -24,11 +24,6 @@ reference:
       - add_glassbrain
       - starts_with("set")
       - snapshot_brain
-
-  - title: Data
-    desc: Re-exported brain atlases
-    contents:
-      - brain-atlases
 
   - title: Mesh Utilities
     desc: Work with brain surface meshes

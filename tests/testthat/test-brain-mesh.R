@@ -25,8 +25,8 @@ test_that("get_brain_mesh validates arguments", {
 })
 
 test_that("is_unified_atlas identifies unified atlases correctly", {
-  expect_true(is_unified_atlas(dk))
-  expect_true(is_unified_atlas(aseg))
+  expect_true(is_unified_atlas(dk()))
+  expect_true(is_unified_atlas(aseg()))
 
   expect_false(is_unified_atlas(list()))
   expect_false(is_unified_atlas(data.frame()))
@@ -35,13 +35,13 @@ test_that("is_unified_atlas identifies unified atlases correctly", {
 })
 
 test_that("class-based atlas checks work correctly", {
-  expect_true(is_cortical_atlas(dk))
-  expect_false(is_subcortical_atlas(dk))
-  expect_false(is_tract_atlas(dk))
+  expect_true(is_cortical_atlas(dk()))
+  expect_false(is_subcortical_atlas(dk()))
+  expect_false(is_tract_atlas(dk()))
 
-  expect_true(is_subcortical_atlas(aseg))
-  expect_false(is_cortical_atlas(aseg))
-  expect_false(is_tract_atlas(aseg))
+  expect_true(is_subcortical_atlas(aseg()))
+  expect_false(is_cortical_atlas(aseg()))
+  expect_false(is_tract_atlas(aseg()))
 })
 
 
@@ -207,8 +207,8 @@ test_that("is_unified_atlas returns FALSE for atlas without 3d data", {
 })
 
 test_that("is_subcortical_atlas detects subcortical atlases", {
-  expect_true(is_subcortical_atlas(aseg))
-  expect_false(is_subcortical_atlas(dk))
+  expect_true(is_subcortical_atlas(aseg()))
+  expect_false(is_subcortical_atlas(dk()))
 })
 
 test_that("is_unified_atlas detects direct vertices", {

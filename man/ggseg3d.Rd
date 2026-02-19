@@ -6,31 +6,32 @@
 \usage{
 ggseg3d(
   .data = NULL,
-  atlas = "dk",
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  atlas = dk(),
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  ...
+  ...,
+  label = deprecated(),
+  text = deprecated(),
+  colour = deprecated()
 )
 }
 \arguments{
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{atlas}{Either a string with the name of a 3d atlas to use, or a
-`brain_atlas` object containing 3D vertex mappings.}
+\item{atlas}{A `ggseg_atlas` object containing 3D vertex mappings, or a
+string naming an atlas function (deprecated).}
 
-\item{label}{String. Quoted name of column in atlas/data that should
-be used to name traces}
+\item{label_by}{String. Column name used as hover label for each region.}
 
-\item{text}{String. Quoted name of column in atlas/data that should be
-added as extra information in the hover text.}
+\item{text_by}{String. Column name for extra hover text shown below the
+region label.}
 
-\item{colour}{String. Quoted name of column from which colour should
-be supplied}
+\item{colour_by}{String. Column name mapped to mesh colours.}
 
 \item{palette}{String. Vector of colour names or HEX colours. Can also
 be a named numeric vector, with colours as names, and breakpoint for
@@ -44,6 +45,9 @@ transparency of NA-regions.}
 
 \item{...}{Type-specific arguments passed to the atlas method.
 See section **Type-specific arguments** below.}
+
+\item{label, text, colour}{`r lifecycle::badge("deprecated")` Use
+`label_by`, `text_by`, and `colour_by` instead.}
 }
 \value{
 an htmlwidget object for interactive 3D brain visualization

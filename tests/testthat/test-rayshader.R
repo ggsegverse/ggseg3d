@@ -120,7 +120,7 @@ test_that("mesh_entry_to_mesh3d converts face-colored mesh", {
 
 test_that("prepare_brain_meshes returns meshes and legend_data", {
   prepared <- prepare_brain_meshes(
-    dk, hemisphere = "left", surface = "inflated"
+    dk(), hemisphere = "left", surface = "inflated"
   )
 
   expect_type(prepared, "list")
@@ -139,18 +139,22 @@ test_that("ggsegray errors on invalid atlas", {
 })
 
 test_that("ggsegray errors when rgl not installed", {
-  skip_if(rlang::is_installed("rgl"))
-
-  expect_error(
-    ggsegray(hemisphere = "left"),
-    "rgl"
+  local_mocked_bindings(
+    check_installed = function(pkg, ...) {
+      if ("rgl" %in% pkg) {
+        stop("rgl is required")
+      }
+    },
+    .package = "rlang"
   )
+
+  expect_error(ggsegray(hemisphere = "left"), "rgl")
 })
 
 test_that("ggsegray creates rgl scene", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk)
+  p <- ggsegray(hemisphere = "left", atlas = dk())
 
   expect_s3_class(p, "ggsegray")
   expect_true(is.integer(p$device))
@@ -160,7 +164,7 @@ test_that("ggsegray creates rgl scene", {
 test_that("ggsegray works with aseg atlas", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(atlas = aseg)
+  p <- ggsegray(atlas = aseg())
 
   expect_s3_class(p, "ggsegray")
   rgl::close3d()
@@ -169,7 +173,7 @@ test_that("ggsegray works with aseg atlas", {
 test_that("pan_camera works with ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk) |>
+  p <- ggsegray(hemisphere = "left", atlas = dk()) |>
     pan_camera("left lateral")
 
   expect_s3_class(p, "ggsegray")
@@ -179,7 +183,7 @@ test_that("pan_camera works with ggsegray", {
 test_that("pan_camera with numeric vector works for ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk) |>
+  p <- ggsegray(hemisphere = "left", atlas = dk()) |>
     pan_camera(c(-400, 0, 0))
 
   expect_s3_class(p, "ggsegray")
@@ -189,7 +193,7 @@ test_that("pan_camera with numeric vector works for ggsegray", {
 test_that("set_background works with ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk) |>
+  p <- ggsegray(hemisphere = "left", atlas = dk()) |>
     set_background("black")
 
   expect_s3_class(p, "ggsegray")
@@ -199,7 +203,7 @@ test_that("set_background works with ggsegray", {
 test_that("add_glassbrain works with ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk) |>
+  p <- ggsegray(hemisphere = "left", atlas = dk()) |>
     add_glassbrain(hemisphere = "left")
 
   expect_s3_class(p, "ggsegray")
@@ -209,7 +213,7 @@ test_that("add_glassbrain works with ggsegray", {
 test_that("ggsegray piping chain works", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(atlas = aseg) |>
+  p <- ggsegray(atlas = aseg()) |>
     add_glassbrain(opacity = 0.15) |>
     pan_camera("right lateral") |>
     set_background("black")
@@ -256,7 +260,7 @@ test_that("ggsegray renders edges when edge_by is set", {
   skip_if_not_installed("rgl")
 
   p <- ggsegray(
-    atlas = dk,
+    atlas = dk(),
     hemisphere = "left",
     edge_by = "region"
   )
@@ -287,7 +291,7 @@ test_that("ggsegray errors on non-unified atlas", {
 test_that("pan_camera rejects bad type for ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk)
+  p <- ggsegray(hemisphere = "left", atlas = dk())
 
   expect_error(
     pan_camera(p, list(x = 1)),
@@ -299,7 +303,7 @@ test_that("pan_camera rejects bad type for ggsegray", {
 test_that("set_legend works with ggsegray", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk)
+  p <- ggsegray(hemisphere = "left", atlas = dk())
   result <- set_legend(p)
   expect_s3_class(result, "ggsegray")
   rgl::close3d()
@@ -309,7 +313,7 @@ test_that("set_edges works with ggsegray", {
   skip_if_not_installed("rgl")
 
   p <- ggsegray(
-    atlas = dk,
+    atlas = dk(),
     hemisphere = "left",
     edge_by = "region"
   )
@@ -327,7 +331,7 @@ test_that("set_edges works with ggsegray", {
 test_that("ggsegray stores meshes and edge_ids", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk)
+  p <- ggsegray(hemisphere = "left", atlas = dk())
   expect_true("meshes" %in% names(p))
   expect_true("edge_ids" %in% names(p))
   rgl::close3d()
@@ -336,7 +340,7 @@ test_that("ggsegray stores meshes and edge_ids", {
 test_that("print.ggsegray returns rglwidget", {
   skip_if_not_installed("rgl")
 
-  p <- ggsegray(hemisphere = "left", atlas = dk)
+  p <- ggsegray(hemisphere = "left", atlas = dk())
   widget <- print(p)
   expect_s3_class(widget, "htmlwidget")
   rgl::close3d()
@@ -353,12 +357,36 @@ test_that("set_legend renders continuous legend for numeric data", {
 
   p <- ggsegray(
     .data = some_data,
-    atlas = dk,
-    colour = "p",
+    atlas = dk(),
+    colour_by = "p",
     hemisphere = "left"
   )
   expect_equal(p$legend_data$type, "continuous")
   result <- set_legend(p)
   expect_s3_class(result, "ggsegray")
+  rgl::close3d()
+})
+
+test_that("ggsegray deprecated params trigger warnings", {
+  skip_if_not_installed("rgl")
+
+  lifecycle::expect_deprecated(
+    p <- ggsegray(hemisphere = "left", atlas = dk(), colour = "colour")
+  )
+  rgl::close3d()
+
+  lifecycle::expect_deprecated(
+    p <- ggsegray(hemisphere = "left", atlas = dk(), label = "label")
+  )
+  rgl::close3d()
+
+  some_data <- data.frame(
+    region = c("precentral", "insula"),
+    p = c(0.1, 0.5),
+    stringsAsFactors = FALSE
+  )
+  lifecycle::expect_deprecated(
+    p <- ggsegray(.data = some_data, atlas = dk(), text = "p")
+  )
   rgl::close3d()
 })

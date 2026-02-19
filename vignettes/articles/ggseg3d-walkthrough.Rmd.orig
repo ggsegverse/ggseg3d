@@ -3,7 +3,7 @@ title: "ggseg3d walkthrough"
 ---
 
 ```{r}
-#| label: setup
+#| label: wt-setup
 #| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
@@ -12,7 +12,6 @@ knitr::opts_chunk$set(
 )
 library(ggseg3d)
 library(dplyr)
-if (!dir.exists("figures")) dir.create("figures")
 ```
 
 ggseg3d renders interactive 3D brain atlases using WebGL.
@@ -24,7 +23,7 @@ This brings faster rendering, a pipe-friendly API, and unified brain atlases tha
 Call `ggseg3d()` without arguments to plot the Desikan-Killiany atlas:
 
 ```{r}
-#| label: basic
+#| label: wt-basic
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
@@ -41,25 +40,25 @@ Hover over regions to see their names.
 Use `pan_camera()` to set the viewing angle:
 
 ```{r}
-#| label: camera-preset
+#| label: wt-camera-preset
 #| eval: false
 ggseg3d() |>
   pan_camera("left lateral")
 ```
 
 ```{r}
-#| label: snap-camera-preset
+#| label: wt-snap-camera-preset
 #| include: false
 ggseg3d() |>
   pan_camera("left lateral") |>
-  snapshot_brain("figures/camera-preset.png")
+  snapshot_brain("img/wt-camera-preset.png")
 ```
 
 ```{r}
-#| label: fig-camera-preset
+#| label: wt-fig-camera-preset
 #| echo: false
 #| fig.cap: "Left lateral view of the Desikan-Killiany atlas."
-knitr::include_graphics("figures/camera-preset.png")
+knitr::include_graphics("img/wt-camera-preset.png")
 ```
 
 Available presets:
@@ -73,7 +72,7 @@ Available presets:
 For custom positions, pass a list:
 
 ```{r}
-#| label: camera-custom
+#| label: wt-camera-custom
 #| eval: false
 ggseg3d() |>
   pan_camera(list(eye = list(x = -200, y = 100, z = 100)))
@@ -82,38 +81,38 @@ ggseg3d() |>
 ## Plotting your data
 
 Provide data with a `region` or `label` column matching the atlas.
-Map it to `colour` for the fill and optionally `text` for hover info:
+Map it to `colour_by` for the fill and optionally `text_by` for hover info:
 
 ```{r}
-#| label: plot-data
+#| label: wt-plot-data
 #| eval: false
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
 ```{r}
-#| label: snap-plot-data
+#| label: wt-snap-plot-data
 #| include: false
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral") |>
-  snapshot_brain("figures/plot-data.png")
+  snapshot_brain("img/wt-plot-data.png")
 ```
 
 ```{r}
-#| label: fig-plot-data
+#| label: wt-fig-plot-data
 #| echo: false
 #| fig.cap: "Brain regions coloured by p-value."
-knitr::include_graphics("figures/plot-data.png")
+knitr::include_graphics("img/wt-plot-data.png")
 ```
 
 ## Custom colour palettes
@@ -121,12 +120,12 @@ knitr::include_graphics("figures/plot-data.png")
 Pass colours as a vector:
 
 ```{r}
-#| label: palette-vector
+#| label: wt-palette-vector
 #| eval: false
 ggseg3d(
   .data = some_data,
-  atlas = dk,
-  colour = "p",
+  atlas = dk(),
+  colour_by = "p",
   palette = c("forestgreen", "white", "firebrick")
 )
 ```
@@ -134,19 +133,19 @@ ggseg3d(
 Or use a named vector to control breakpoints:
 
 ```{r}
-#| label: palette-named
+#| label: wt-palette-named
 #| eval: false
 ggseg3d(
   .data = some_data,
-  atlas = dk,
-  colour = "p",
-  text = "p",
+  atlas = dk(),
+  colour_by = "p",
+  text_by = "p",
   palette = c("forestgreen" = 0, "white" = .05, "firebrick" = 1)
 )
 ```
 
 ```{r}
-#| label: snap-palette-named
+#| label: wt-snap-palette-named
 #| include: false
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
@@ -155,19 +154,19 @@ some_data <- tibble(
 
 ggseg3d(
   .data = some_data,
-  atlas = dk,
-  colour = "p",
-  text = "p",
+  atlas = dk(),
+  colour_by = "p",
+  text_by = "p",
   palette = c("forestgreen" = 0, "white" = .05, "firebrick" = 1)
 ) |>
-  snapshot_brain("figures/palette-named.png")
+  snapshot_brain("img/wt-palette-named.png")
 ```
 
 ```{r}
-#| label: fig-palette-named
+#| label: wt-fig-palette-named
 #| echo: false
 #| fig.cap: "Custom green-white-red palette with breakpoints at 0, 0.05, and 1."
-knitr::include_graphics("figures/palette-named.png")
+knitr::include_graphics("img/wt-palette-named.png")
 ```
 
 This lets the colour bar extend beyond your data range.
@@ -177,25 +176,25 @@ This lets the colour bar extend beyond your data range.
 Change the background with `set_background()`:
 
 ```{r}
-#| label: background
+#| label: wt-background
 #| eval: false
 ggseg3d() |>
   set_background("black")
 ```
 
 ```{r}
-#| label: snap-background
+#| label: wt-snap-background
 #| include: false
 ggseg3d() |>
   set_background("black") |>
-  snapshot_brain("figures/background.png")
+  snapshot_brain("img/wt-background.png")
 ```
 
 ```{r}
-#| label: fig-background
+#| label: wt-fig-background
 #| echo: false
 #| fig.cap: "Brain atlas with a black background."
-knitr::include_graphics("figures/background.png")
+knitr::include_graphics("img/wt-background.png")
 ```
 
 ## Region edges
@@ -207,7 +206,7 @@ knitr::include_graphics("figures/background.png")
 Add outlines around regions with `set_edges()`:
 
 ```{r}
-#| label: edges
+#| label: wt-edges
 #| eval: false
 ggseg3d(hemisphere = "left") |>
   set_edges("black", width = 10) |>
@@ -215,19 +214,19 @@ ggseg3d(hemisphere = "left") |>
 ```
 
 ```{r}
-#| label: snap-edges
+#| label: wt-snap-edges
 #| include: false
 ggseg3d(hemisphere = "left") |>
   set_edges("black", width = 10) |>
   pan_camera("left lateral") |>
-  snapshot_brain("figures/edges.png")
+  snapshot_brain("img/wt-edges.png")
 ```
 
 ```{r}
-#| label: fig-edges
+#| label: wt-fig-edges
 #| echo: false
 #| fig.cap: "Left hemisphere with black region boundary edges."
-knitr::include_graphics("figures/edges.png")
+knitr::include_graphics("img/wt-edges.png")
 ```
 
 ### Edge boundaries with edge_by
@@ -236,7 +235,7 @@ By default, edges appear between regions with different colours.
 Use `edge_by` to define boundaries based on a different column:
 
 ```{r}
-#| label: edge-by
+#| label: wt-edge-by
 #| eval: false
 lobe_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
@@ -244,13 +243,13 @@ lobe_data <- tibble(
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
 
-ggseg3d(.data = lobe_data, atlas = dk, colour = "p", edge_by = "lobe") |>
+ggseg3d(.data = lobe_data, atlas = dk(), colour_by = "p", edge_by = "lobe") |>
   set_edges("white", width = 1) |>
   set_background("black")
 ```
 
 ```{r}
-#| label: snap-edge-by
+#| label: wt-snap-edge-by
 #| include: false
 lobe_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
@@ -258,17 +257,17 @@ lobe_data <- tibble(
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
 
-ggseg3d(.data = lobe_data, atlas = dk, colour = "p", edge_by = "lobe") |>
+ggseg3d(.data = lobe_data, atlas = dk(), colour_by = "p", edge_by = "lobe") |>
   set_edges("white", width = 1) |>
   set_background("black") |>
-  snapshot_brain("figures/edge-by.png")
+  snapshot_brain("img/wt-edge-by.png")
 ```
 
 ```{r}
-#| label: fig-edge-by
+#| label: wt-fig-edge-by
 #| echo: false
 #| fig.cap: "Lobe-based edge boundaries on a dark background."
-knitr::include_graphics("figures/edge-by.png")
+knitr::include_graphics("img/wt-edge-by.png")
 ```
 
 Regions in the same lobe won't have edges between them.
@@ -278,17 +277,17 @@ Regions in the same lobe won't have edges between them.
 For subcortical atlases, reduce opacity of uncoloured regions and add a glass brain:
 
 ```{r}
-#| label: subcortical
+#| label: wt-subcortical
 subcort_data <- tibble(
-  region = c("thalamus", "caudate", "hippocampus"),
+  region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
 ggseg3d(
   .data = subcort_data,
-  atlas = aseg,
-  colour = "p",
-  text = "p",
+  atlas = aseg(),
+  colour_by = "p",
+  text_by = "p",
   na_alpha = .5
 ) |>
   add_glassbrain()
@@ -296,12 +295,70 @@ ggseg3d(
 
 The glass brain adds a translucent cortical surface for anatomical context.
 
+## White matter tracts
+
+The `tracula` atlas renders white matter pathways as tube meshes:
+
+```{r}
+#| label: wt-tracula-basic
+ggseg3d(atlas = tracula()) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+### Mapping data to tracts
+
+Map data the same way as cortical or subcortical atlases. The `region` column
+matches tract names:
+
+```{r}
+#| label: wt-tracula-data
+tract_data <- tibble(
+  region = c("arcuate fasciculus", "corticospinal tract",
+             "cingulum bundle", "uncinate fasciculus"),
+  fa = c(0.45, 0.55, 0.40, 0.35)
+)
+
+ggseg3d(
+  .data = tract_data,
+  atlas = tracula(),
+  colour_by = "fa",
+  text_by = "fa"
+) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+### Orientation colouring
+
+Set `tract_color = "orientation"` for direction-based RGB colouring --- red for
+left-right, green for anterior-posterior, blue for superior-inferior:
+
+```{r}
+#| label: wt-tracula-orientation
+ggseg3d(atlas = tracula(), tract_color = "orientation") |>
+  add_glassbrain(opacity = 0.1) |>
+  set_background("black")
+```
+
+### Tube appearance
+
+Control tube geometry with `tube_radius` and `tube_segments`:
+
+```{r}
+#| label: wt-tracula-tube
+#| eval: false
+ggseg3d(atlas = tracula(), tube_radius = 4, tube_segments = 16) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+Larger `tube_radius` makes tracts thicker. More `tube_segments` makes them
+smoother but increases rendering time.
+
 ## Saving images
 
 Use `snapshot_brain()` to save static images:
 
 ```{r}
-#| label: snapshot
+#| label: wt-snapshot
 #| eval: false
 ggseg3d() |>
   pan_camera("left lateral") |>
@@ -315,9 +372,9 @@ This requires Chrome or Chromium.
 For journal figures, increase resolution:
 
 ```{r}
-#| label: snapshot-hires
+#| label: wt-snapshot-hires
 #| eval: false
-ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
   pan_camera("left lateral") |>
   set_background("white") |>
   snapshot_brain(
@@ -338,11 +395,11 @@ ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
 Save individual views and combine them:
 
 ```{r}
-#| label: multi-panel
+#| label: wt-multi-panel
 #| eval: false
 library(magick)
 
-base_plot <- ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
+base_plot <- ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
   set_background("white")
 
 base_plot |>
@@ -373,7 +430,7 @@ image_write(combined, "figure1_all_views.png")
 Hide the legend:
 
 ```{r}
-#| label: legend
+#| label: wt-legend
 #| eval: false
 ggseg3d() |>
   set_legend(FALSE)
@@ -384,7 +441,7 @@ ggseg3d() |>
 Set explicit width and height:
 
 ```{r}
-#| label: dimensions
+#| label: wt-dimensions
 #| eval: false
 ggseg3d() |>
   set_dimensions(width = 800, height = 600)
@@ -395,26 +452,26 @@ ggseg3d() |>
 Disable lighting for exact colour reproduction:
 
 ```{r}
-#| label: flat-shading
+#| label: wt-flat-shading
 #| eval: false
 ggseg3d() |>
   set_flat_shading()
 ```
 
 ```{r}
-#| label: snap-flat-shading
+#| label: wt-snap-flat-shading
 #| include: false
 ggseg3d(hemisphere = "left") |>
   set_flat_shading() |>
   pan_camera("left lateral") |>
-  snapshot_brain("figures/flat-shading.png")
+  snapshot_brain("img/wt-flat-shading.png")
 ```
 
 ```{r}
-#| label: fig-flat-shading
+#| label: wt-fig-flat-shading
 #| echo: false
 #| fig.cap: "Flat shading disables lighting for exact colour reproduction."
-knitr::include_graphics("figures/flat-shading.png")
+knitr::include_graphics("img/wt-flat-shading.png")
 ```
 
 This is useful when creating atlases or when you need colours to match exactly.
@@ -424,39 +481,39 @@ This is useful when creating atlases or when you need colours to match exactly.
 Switch from perspective to orthographic projection:
 
 ```{r}
-#| label: orthographic
+#| label: wt-orthographic
 #| eval: false
 ggseg3d() |>
   set_orthographic()
 ```
 
 ```{r}
-#| label: snap-orthographic
+#| label: wt-snap-orthographic
 #| include: false
 ggseg3d(hemisphere = "left") |>
   set_orthographic() |>
   pan_camera("left lateral") |>
-  snapshot_brain("figures/orthographic.png")
+  snapshot_brain("img/wt-orthographic.png")
 ```
 
 ```{r}
-#| label: fig-orthographic
+#| label: wt-fig-orthographic
 #| echo: false
 #| fig.cap: "Orthographic projection --- regions appear the same size regardless of distance."
-knitr::include_graphics("figures/orthographic.png")
+knitr::include_graphics("img/wt-orthographic.png")
 ```
 
 ## Same atlas for 2D and 3D
 
-The `brain_atlas` class works with both ggseg and ggseg3d.
+The `ggseg_atlas` class works with both ggseg and ggseg3d.
 Use the same atlas object for both:
 
 ```{r}
-#| label: same-atlas
+#| label: wt-same-atlas
 #| eval: false
 library(ggseg)
 
-plot(dk)
+plot(dk())
 
-ggseg3d(atlas = dk)
+ggseg3d(atlas = dk())
 ```

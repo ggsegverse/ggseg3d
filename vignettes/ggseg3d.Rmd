@@ -23,7 +23,7 @@ ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![plot of chunk basic](figure/basic-1.png)
+![plot of chunk intro-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/img/intro-basic-1.png)
 
 Call `ggseg3d()` without arguments to plot the default Desikan-Killiany atlas.
 The widget is interactive: rotate by clicking and dragging, zoom with the scroll
@@ -32,7 +32,7 @@ wheel, and hover over regions to see their names.
 ## Mapping data
 
 Provide a data frame with a `region` column matching the atlas, and map a
-variable to `colour`:
+variable to `colour_by`:
 
 
 ``` r
@@ -43,16 +43,13 @@ some_data <- tibble(
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
 
 
-<div class="figure">
-<img src="figures/plot-data.png" alt="Brain regions coloured by p-value." width="1600" />
-<p class="caption">Brain regions coloured by p-value.</p>
-</div>
+![Brain regions coloured by p-value.](img/intro-plot-data.png)
 
 ## Subcortical atlases
 
@@ -62,20 +59,17 @@ brain for anatomical context:
 
 ``` r
 subcort_data <- tibble(
-  region = c("thalamus", "caudate", "hippocampus"),
+  region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
-ggseg3d(.data = subcort_data, atlas = aseg, colour = "p", na_alpha = .5) |>
+ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
   add_glassbrain()
 ```
 
 
 
-<div class="figure">
-<img src="figures/subcortical.png" alt="Subcortical structures with a translucent glass brain overlay." width="1600" />
-<p class="caption">Subcortical structures with a translucent glass brain overlay.</p>
-</div>
+![Subcortical structures with a translucent glass brain overlay.](img/intro-subcortical.png)
 
 ## Camera and background
 
@@ -91,18 +85,10 @@ ggseg3d(hemisphere = "left") |>
 
 
 
-<div class="figure">
-<img src="figures/background.png" alt="Brain atlas with a black background." width="1600" />
-<p class="caption">Brain atlas with a black background.</p>
-</div>
+![Brain atlas with a black background.](img/intro-background.png)
 
 Available presets include `"left lateral"`, `"right medial"`,
 `"left superior"`, and more. For custom positions, pass a list with
 `eye` coordinates.
 
-## Further reading
-
-- [Full ggseg3d walkthrough](../articles/ggseg3d-walkthrough.html) with all features and examples
-- [Ray-traced rendering](../articles/rayshader.html) with lighting, materials, and animation
-- [Shiny integration](shiny.html)
 

@@ -97,8 +97,8 @@ server <- function(input, output, session) {
   output$brain <- renderGgseg3d({
     ggseg3d(
       .data = brain_data(),
-      atlas = dk, # nolint [object_usage_linter]
-      colour = "value"
+      atlas = dk(), # nolint [object_usage_linter]
+      colour_by = "value"
     ) |>
       pan_camera("left lateral")
   })
@@ -205,9 +205,9 @@ server <- function(input, output, session) {
   output$brain <- renderGgseg3d({
     p <- ggseg3d(
       .data = example_data,
-      atlas = dk, # nolint [object_usage_linter]
-      colour = input$metric,
-      text = input$metric
+      atlas = dk(), # nolint [object_usage_linter]
+      colour_by = input$metric,
+      text_by = input$metric
     ) |>
       pan_camera(input$view) |>
       set_background(input$bg)

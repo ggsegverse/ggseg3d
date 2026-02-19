@@ -18,7 +18,7 @@ ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![plot of chunk basic](figure/basic-1.png)
+![plot of chunk wt-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-basic-1.png)
 
 The widget is interactive:
 - **Rotate**: click and drag
@@ -39,10 +39,7 @@ ggseg3d() |>
 
 
 
-<div class="figure">
-<img src="figures/camera-preset.png" alt="Left lateral view of the Desikan-Killiany atlas." width="1600" />
-<p class="caption">Left lateral view of the Desikan-Killiany atlas.</p>
-</div>
+![Left lateral view of the Desikan-Killiany atlas.](img/wt-camera-preset.png)
 
 Available presets:
 - `left lateral`, `right lateral`
@@ -63,7 +60,7 @@ ggseg3d() |>
 ## Plotting your data
 
 Provide data with a `region` or `label` column matching the atlas.
-Map it to `colour` for the fill and optionally `text` for hover info:
+Map it to `colour_by` for the fill and optionally `text_by` for hover info:
 
 
 ``` r
@@ -72,16 +69,13 @@ some_data <- tibble(
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
-ggseg3d(.data = some_data, atlas = dk, colour = "p", text = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
 
 
-<div class="figure">
-<img src="figures/plot-data.png" alt="Brain regions coloured by p-value." width="1600" />
-<p class="caption">Brain regions coloured by p-value.</p>
-</div>
+![Brain regions coloured by p-value.](img/wt-plot-data.png)
 
 ## Custom colour palettes
 
@@ -91,8 +85,8 @@ Pass colours as a vector:
 ``` r
 ggseg3d(
   .data = some_data,
-  atlas = dk,
-  colour = "p",
+  atlas = dk(),
+  colour_by = "p",
   palette = c("forestgreen", "white", "firebrick")
 )
 ```
@@ -103,19 +97,16 @@ Or use a named vector to control breakpoints:
 ``` r
 ggseg3d(
   .data = some_data,
-  atlas = dk,
-  colour = "p",
-  text = "p",
+  atlas = dk(),
+  colour_by = "p",
+  text_by = "p",
   palette = c("forestgreen" = 0, "white" = .05, "firebrick" = 1)
 )
 ```
 
 
 
-<div class="figure">
-<img src="figures/palette-named.png" alt="Custom green-white-red palette with breakpoints at 0, 0.05, and 1." width="1600" />
-<p class="caption">Custom green-white-red palette with breakpoints at 0, 0.05, and 1.</p>
-</div>
+![Custom green-white-red palette with breakpoints at 0, 0.05, and 1.](img/wt-palette-named.png)
 
 This lets the colour bar extend beyond your data range.
 
@@ -131,10 +122,7 @@ ggseg3d() |>
 
 
 
-<div class="figure">
-<img src="figures/background.png" alt="Brain atlas with a black background." width="1600" />
-<p class="caption">Brain atlas with a black background.</p>
-</div>
+![Brain atlas with a black background.](img/wt-background.png)
 
 ## Region edges
 
@@ -153,10 +141,7 @@ ggseg3d(hemisphere = "left") |>
 
 
 
-<div class="figure">
-<img src="figures/edges.png" alt="Left hemisphere with black region boundary edges." width="1600" />
-<p class="caption">Left hemisphere with black region boundary edges.</p>
-</div>
+![Left hemisphere with black region boundary edges.](img/wt-edges.png)
 
 ### Edge boundaries with edge_by
 
@@ -171,17 +156,14 @@ lobe_data <- tibble(
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
 
-ggseg3d(.data = lobe_data, atlas = dk, colour = "p", edge_by = "lobe") |>
+ggseg3d(.data = lobe_data, atlas = dk(), colour_by = "p", edge_by = "lobe") |>
   set_edges("white", width = 1) |>
   set_background("black")
 ```
 
 
 
-<div class="figure">
-<img src="figures/edge-by.png" alt="Lobe-based edge boundaries on a dark background." width="1600" />
-<p class="caption">Lobe-based edge boundaries on a dark background.</p>
-</div>
+![Lobe-based edge boundaries on a dark background.](img/wt-edge-by.png)
 
 Regions in the same lobe won't have edges between them.
 
@@ -192,23 +174,86 @@ For subcortical atlases, reduce opacity of uncoloured regions and add a glass br
 
 ``` r
 subcort_data <- tibble(
-  region = c("thalamus", "caudate", "hippocampus"),
+  region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
 ggseg3d(
   .data = subcort_data,
-  atlas = aseg,
-  colour = "p",
-  text = "p",
+  atlas = aseg(),
+  colour_by = "p",
+  text_by = "p",
   na_alpha = .5
 ) |>
   add_glassbrain()
 ```
 
-![plot of chunk subcortical](figure/subcortical-1.png)
+![plot of chunk wt-subcortical](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-subcortical-1.png)
 
 The glass brain adds a translucent cortical surface for anatomical context.
+
+## White matter tracts
+
+The `tracula` atlas renders white matter pathways as tube meshes:
+
+
+``` r
+ggseg3d(atlas = tracula()) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+![plot of chunk wt-tracula-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-basic-1.png)
+
+### Mapping data to tracts
+
+Map data the same way as cortical or subcortical atlases. The `region` column
+matches tract names:
+
+
+``` r
+tract_data <- tibble(
+  region = c("arcuate fasciculus", "corticospinal tract",
+             "cingulum bundle", "uncinate fasciculus"),
+  fa = c(0.45, 0.55, 0.40, 0.35)
+)
+
+ggseg3d(
+  .data = tract_data,
+  atlas = tracula(),
+  colour_by = "fa",
+  text_by = "fa"
+) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+![plot of chunk wt-tracula-data](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-data-1.png)
+
+### Orientation colouring
+
+Set `tract_color = "orientation"` for direction-based RGB colouring --- red for
+left-right, green for anterior-posterior, blue for superior-inferior:
+
+
+``` r
+ggseg3d(atlas = tracula(), tract_color = "orientation") |>
+  add_glassbrain(opacity = 0.1) |>
+  set_background("black")
+```
+
+![plot of chunk wt-tracula-orientation](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-orientation-1.png)
+
+### Tube appearance
+
+Control tube geometry with `tube_radius` and `tube_segments`:
+
+
+``` r
+ggseg3d(atlas = tracula(), tube_radius = 4, tube_segments = 16) |>
+  add_glassbrain(opacity = 0.1)
+```
+
+Larger `tube_radius` makes tracts thicker. More `tube_segments` makes them
+smoother but increases rendering time.
 
 ## Saving images
 
@@ -229,7 +274,7 @@ For journal figures, increase resolution:
 
 
 ``` r
-ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
   pan_camera("left lateral") |>
   set_background("white") |>
   snapshot_brain(
@@ -253,7 +298,7 @@ Save individual views and combine them:
 ``` r
 library(magick)
 
-base_plot <- ggseg3d(.data = some_data, atlas = dk, colour = "p") |>
+base_plot <- ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
   set_background("white")
 
 base_plot |>
@@ -311,10 +356,7 @@ ggseg3d() |>
 
 
 
-<div class="figure">
-<img src="figures/flat-shading.png" alt="Flat shading disables lighting for exact colour reproduction." width="1600" />
-<p class="caption">Flat shading disables lighting for exact colour reproduction.</p>
-</div>
+![Flat shading disables lighting for exact colour reproduction.](img/wt-flat-shading.png)
 
 This is useful when creating atlases or when you need colours to match exactly.
 
@@ -330,21 +372,18 @@ ggseg3d() |>
 
 
 
-<div class="figure">
-<img src="figures/orthographic.png" alt="Orthographic projection --- regions appear the same size regardless of distance." width="1600" />
-<p class="caption">Orthographic projection --- regions appear the same size regardless of distance.</p>
-</div>
+![Orthographic projection --- regions appear the same size regardless of distance.](img/wt-orthographic.png)
 
 ## Same atlas for 2D and 3D
 
-The `brain_atlas` class works with both ggseg and ggseg3d.
+The `ggseg_atlas` class works with both ggseg and ggseg3d.
 Use the same atlas object for both:
 
 
 ``` r
 library(ggseg)
 
-plot(dk)
+plot(dk())
 
-ggseg3d(atlas = dk)
+ggseg3d(atlas = dk())
 ```

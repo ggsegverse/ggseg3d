@@ -1,5 +1,3 @@
-utils::globalVariables("dk")
-
 #' Render brain atlas with rgl
 #'
 #' Creates an rgl 3D scene from a brain atlas. Uses the same atlas
@@ -37,7 +35,7 @@ utils::globalVariables("dk")
 #' ggsegray(hemisphere = "left") |>
 #'   pan_camera("left lateral")
 #'
-#' ggsegray(atlas = aseg) |>
+#' ggsegray(atlas = aseg()) |>
 #'   add_glassbrain(opacity = 0.15) |>
 #'   pan_camera("right lateral") |>
 #'   set_background("black")
@@ -46,16 +44,39 @@ utils::globalVariables("dk")
 #' @export
 ggsegray <- function(
   .data = NULL,
-  atlas = dk, # nolint [object_usage_linter]
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  atlas = dk(), # nolint [object_usage_linter]
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
   material = list(),
-  ...
+  ...,
+  label = deprecated(),
+  text = deprecated(),
+  colour = deprecated()
 ) {
+  if (lifecycle::is_present(label)) {
+    lifecycle::deprecate_warn(
+      "2.1.0",
+      "ggsegray(label=)",
+      "ggsegray(label_by=)"
+    )
+    label_by <- label
+  }
+  if (lifecycle::is_present(text)) {
+    lifecycle::deprecate_warn("2.1.0", "ggsegray(text=)", "ggsegray(text_by=)")
+    text_by <- text
+  }
+  if (lifecycle::is_present(colour)) {
+    lifecycle::deprecate_warn(
+      "2.1.0",
+      "ggsegray(colour=)",
+      "ggsegray(colour_by=)"
+    )
+    colour_by <- colour
+  }
   rlang::check_installed("rgl", reason = "to render 3D brain scenes with rgl")
 
   if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {
@@ -76,9 +97,9 @@ ggsegray <- function(
   prepared <- prepare_brain_meshes(
     atlas,
     .data = .data,
-    label = label,
-    text = text,
-    colour = colour,
+    label_by = label_by,
+    text_by = text_by,
+    colour_by = colour_by,
     palette = palette,
     na_colour = na_colour,
     na_alpha = na_alpha,
@@ -303,7 +324,8 @@ print.ggsegray <- function(x, ...) {
 
 #' @importFrom knitr knit_print
 #' @export
-knit_print.ggsegray <- function(x, ...) { # nocov start
+knit_print.ggsegray <- function(x, ...) {
+  # nocov start
   invisible(x)
 } # nocov end
 

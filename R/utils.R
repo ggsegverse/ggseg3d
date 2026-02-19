@@ -66,7 +66,8 @@ make_mesh_entry <- function(
   boundary_edges = NULL,
   edge_color = NULL,
   edge_width = NULL,
-  vertex_labels = NULL
+  vertex_labels = NULL,
+  vertex_texts = NULL
 ) {
   entry <- list(
     name = name,
@@ -99,6 +100,10 @@ make_mesh_entry <- function(
     entry$vertexLabels <- unname(vertex_labels)
   }
 
+  if (!is.null(vertex_texts)) {
+    entry$vertexTexts <- unname(vertex_texts)
+  }
+
   entry
 }
 
@@ -114,6 +119,7 @@ find_boundary_edges <- function(faces, vertex_colors) {
   color1 <- vertex_colors[all_v1]
   color2 <- vertex_colors[all_v2]
   is_boundary <- color1 != color2
+  is_boundary[is.na(is_boundary)] <- FALSE
 
   boundary_v1 <- all_v1[is_boundary]
   boundary_v2 <- all_v2[is_boundary]

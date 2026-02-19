@@ -39,10 +39,10 @@ rgl (`ggsegray`) objects.
 }
 \examples{
 \dontrun{
-ggseg3d(atlas = aseg) |>
+ggseg3d(atlas = aseg()) |>
   add_glassbrain("left", opacity = 0.2)
 
-ggsegray(atlas = aseg) |>
+ggsegray(atlas = aseg()) |>
   add_glassbrain(opacity = 0.15) |>
   pan_camera("right lateral")
 }

@@ -6,7 +6,9 @@ test_that("Check that ggseg3d is working", {
   expect_true(length(p$x$meshes) > 0)
   rm(p)
 
-  p <- ggseg3d(atlas = "aseg")
+  lifecycle::expect_deprecated(
+    p <- ggseg3d(atlas = "aseg")
+  )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
   expect_true(length(p$x$meshes) > 0)
 
@@ -24,7 +26,7 @@ test_that("Check that ggseg3d is working", {
         p = sample(seq(0, .5, .001), 4),
         stringsAsFactors = FALSE
       ),
-      colour = "p"
+      colour_by = "p"
     )
   )
 
@@ -41,16 +43,16 @@ test_that("Check that ggseg3d is working", {
 
   p <- ggseg3d(
     .data = some_data,
-    colour = "p",
-    text = "p",
+    colour_by = "p",
+    text_by = "p",
     palette = c("black", "white")
   )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 
   p <- ggseg3d(
     .data = some_data,
-    colour = "p",
-    text = "p",
+    colour_by = "p",
+    text_by = "p",
     palette = c("black", "white")
   )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
@@ -66,7 +68,7 @@ test_that("Check that ggseg3d is working", {
 })
 
 test_that("ggseg3d works with aseg subcortical atlas", {
-  p <- ggseg3d(atlas = aseg)
+  p <- ggseg3d(atlas = aseg())
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
   expect_true(length(p$x$meshes) > 0)
 })
@@ -117,7 +119,7 @@ test_that("ggseg3d with custom palette", {
   p <- ggseg3d(
     .data = some_data,
     hemisphere = "left",
-    colour = "p",
+    colour_by = "p",
     palette = c("blue" = 0, "white" = 0.5, "red" = 1)
   )
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
@@ -129,9 +131,27 @@ test_that("ggseg3d with na_colour and na_alpha", {
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })
 
-test_that("ggseg3d with label parameter", {
-  p <- ggseg3d(hemisphere = "left", label = "label")
+test_that("ggseg3d with label_by parameter", {
+  p <- ggseg3d(hemisphere = "left", label_by = "label")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
+})
+
+test_that("deprecated params trigger warnings", {
+  some_data <- data.frame(
+    region = c("precentral", "insula"),
+    p = c(0.1, 0.5),
+    stringsAsFactors = FALSE
+  )
+
+  lifecycle::expect_deprecated(
+    ggseg3d(hemisphere = "left", colour = "colour")
+  )
+  lifecycle::expect_deprecated(
+    ggseg3d(hemisphere = "left", label = "label")
+  )
+  lifecycle::expect_deprecated(
+    ggseg3d(.data = some_data, text = "p")
+  )
 })
 
 test_that("ggseg3d with both hemispheres", {
@@ -141,17 +161,17 @@ test_that("ggseg3d with both hemispheres", {
 })
 
 test_that("ggseg3d with atlas object instead of string", {
-  p <- ggseg3d(atlas = dk, hemisphere = "left")
+  p <- ggseg3d(atlas = dk(), hemisphere = "left")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })
 
 test_that("ggseg3d unified atlas without user data", {
-  p <- ggseg3d(atlas = dk, hemisphere = "left", .data = NULL)
+  p <- ggseg3d(atlas = dk(), hemisphere = "left", .data = NULL)
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })
 
 test_that("ggseg3d with aseg mesh atlas", {
-  p <- ggseg3d(atlas = aseg, hemisphere = "subcort")
+  p <- ggseg3d(atlas = aseg(), hemisphere = "subcort")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
   expect_true(length(p$x$meshes) > 0)
 })
@@ -293,4 +313,63 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
   fake <- structure(list(), class = "weird_atlas")
   expect_error(prepare_brain_meshes(fake), "No method")
+})
+
+test_that("ggseg3d errors on nonexistent string atlas name", {
+  expect_error(
+    lifecycle::expect_deprecated(
+      ggseg3d(atlas = "nonexistent_atlas_xyz")
+    ),
+    "Could not find atlas"
+  )
+})
+
+test_that("vertices_to_text returns NA vector when column is missing", {
+  atlas_data <- data.frame(
+    label = "a",
+    region = "r",
+    stringsAsFactors = FALSE
+  )
+  atlas_data$vertices <- list(c(0L, 1L))
+
+  result <- vertices_to_text(atlas_data, 3, "nonexistent")
+
+  expect_equal(length(result), 3)
+  expect_true(all(is.na(result)))
+})
+
+test_that("text_by works with subcortical atlas", {
+  some_data <- data.frame(
+    region = c("Thalamus", "Caudate"),
+    p = c(0.1, 0.5),
+    stringsAsFactors = FALSE
+  )
+
+  p <- ggseg3d(.data = some_data, atlas = aseg(), text_by = "p")
+  expect_s3_class(p, c("ggseg3d", "htmlwidget"))
+
+  hover_texts <- vapply(
+    p$x$meshes,
+    function(m) m$hoverText %||% "",
+    character(1)
+  )
+  expect_true(any(grepl("p:", hover_texts)))
+})
+
+test_that("text_by works with tract atlas", {
+  some_data <- data.frame(
+    region = c("arcuate fasciculus", "corticospinal tract"),
+    fa = c(0.45, 0.55),
+    stringsAsFactors = FALSE
+  )
+
+  p <- ggseg3d(.data = some_data, atlas = tracula(), text_by = "fa")
+  expect_s3_class(p, c("ggseg3d", "htmlwidget"))
+
+  hover_texts <- vapply(
+    p$x$meshes,
+    function(m) m$hoverText %||% "",
+    character(1)
+  )
+  expect_true(any(grepl("fa:", hover_texts)))
 })

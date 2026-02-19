@@ -17,7 +17,7 @@ vertices_to_colors(atlas_data, n_vertices, na_colour = "#CCCCCC")
 Character vector of colors, one per mesh vertex
 }
 \description{
-Given a brain_atlas with vertices column and a brain mesh, creates a color
+Given a ggseg_atlas with vertices column and a brain mesh, creates a color
 vector for each mesh vertex based on which region it belongs to.
 }
 \keyword{internal}

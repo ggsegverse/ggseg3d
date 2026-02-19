@@ -15,8 +15,8 @@
 #' @noRd
 #' @keywords internal
 #' \dontrun{
-#' is_unified_atlas(dk)
-#' is_unified_atlas(ggseg.formats::dk)
+#' is_unified_atlas(dk())
+#' is_unified_atlas(ggseg.formats::dk())
 #' }
 is_unified_atlas <- function(atlas) {
   if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {

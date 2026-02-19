@@ -19,7 +19,7 @@ apply_colour_palette(atlas_data, colour, palette, na_colour)
 List with data, fill column name, palette, and colour metadata
 }
 \description{
-Processes colour mapping for brain_atlas objects using
+Processes colour mapping for ggseg_atlas objects using
 vertex-based colouring.
 }
 \keyword{internal}

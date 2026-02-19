@@ -8,14 +8,14 @@
 #'
 #' @param .data A data.frame to use for plot aesthetics. Must include a
 #'   column called "region" corresponding to regions.
-#' @param atlas Either a string with the name of a 3d atlas to use, or a
-#'   `brain_atlas` object containing 3D vertex mappings.
-#' @param label String. Quoted name of column in atlas/data that should
-#'   be used to name traces
-#' @param text String. Quoted name of column in atlas/data that should be
-#'   added as extra information in the hover text.
-#' @param colour String. Quoted name of column from which colour should
-#'   be supplied
+#' @param atlas A `ggseg_atlas` object containing 3D vertex mappings, or a
+#'   string naming an atlas function (deprecated).
+#' @param label_by String. Column name used as hover label for each region.
+#' @param text_by String. Column name for extra hover text shown below the
+#'   region label.
+#' @param colour_by String. Column name mapped to mesh colours.
+#' @param label,text,colour `r lifecycle::badge("deprecated")` Use
+#'   `label_by`, `text_by`, and `colour_by` instead.
 #' @param palette String. Vector of colour names or HEX colours. Can also
 #'   be a named numeric vector, with colours as names, and breakpoint for
 #'   that colour as the value
@@ -37,7 +37,7 @@
 #' @importFrom scales colour_ramp brewer_pal rescale gradient_n_pal
 #' @importFrom tidyr unite
 #' @importFrom htmlwidgets createWidget sizingPolicy
-#' @importFrom lifecycle deprecate_warn
+#' @importFrom lifecycle deprecate_warn deprecated
 #' @importFrom rlang %||%
 #'
 #' @examples
@@ -51,31 +51,60 @@
 #' @export
 ggseg3d <- function(
   .data = NULL,
-  atlas = "dk",
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  atlas = dk(),
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
-  ...
+  ...,
+  label = deprecated(),
+  text = deprecated(),
+  colour = deprecated()
 ) {
-  atlas <- if (is.character(atlas)) get(atlas) else atlas
+  if (lifecycle::is_present(label)) {
+    lifecycle::deprecate_warn("2.1.0", "ggseg3d(label=)", "ggseg3d(label_by=)")
+    label_by <- label
+  }
+  if (lifecycle::is_present(text)) {
+    lifecycle::deprecate_warn("2.1.0", "ggseg3d(text=)", "ggseg3d(text_by=)")
+    text_by <- text
+  }
+  if (lifecycle::is_present(colour)) {
+    lifecycle::deprecate_warn(
+      "2.1.0", "ggseg3d(colour=)", "ggseg3d(colour_by=)"
+    )
+    colour_by <- colour
+  }
+
+  atlas <- if (is.character(atlas)) {
+    lifecycle::deprecate_warn(
+      "2.0.0",
+      "ggseg3d(atlas = 'must be a ggseg_atlas object')",
+      details = "Pass atlas objects directly, e.g. `atlas = dk()`."
+    )
+    tryCatch(match.fun(atlas)(), error = function(e) {
+      cli::cli_abort("Could not find atlas {.val {atlas}}.")
+    })
+  } else {
+    atlas
+  }
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
       "Atlas must be a {.cls ggseg_atlas} object with 3D data.",
       "i" = "Use atlases from {.pkg ggseg.formats}.",
-      "i" = "Create atlases with {.fn ggsegExtra::create_cortical_atlas}."
+      "i" = "Create atlases with {.fn ggseg.extra::create_cortical_atlas}."
     ))
   }
 
   prepared <- prepare_brain_meshes(
     atlas,
     .data = .data,
-    label = label,
-    text = text,
-    colour = colour,
+    label_by = label_by,
+    text_by = text_by,
+    colour_by = colour_by,
     palette = palette,
     na_colour = na_colour,
     na_alpha = na_alpha,
@@ -91,9 +120,9 @@ ggseg3d <- function(
 #' Prepare brain meshes and legend data
 #'
 #' S3 generic that dispatches to atlas-type-specific preparation methods.
-#' Builds mesh data structures and legend data from a `brain_atlas`.
+#' Builds mesh data structures and legend data from a `ggseg_atlas`.
 #'
-#' @param atlas A `brain_atlas` object
+#' @param atlas A `ggseg_atlas` object
 #' @param ... Type-specific arguments passed to methods
 #'
 #' @return List with `meshes` (list of mesh entries) and `legend_data`
@@ -118,9 +147,9 @@ prepare_brain_meshes.default <- function(atlas, ...) {
 #' @param surface Surface type: `"inflated"` (default), `"semi-inflated"`,
 #'   `"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.
 #' @param hemisphere Character vector of hemispheres: `"right"`, `"left"`.
-#' @param label Column name for trace labels
-#' @param text Column name for hover text
-#' @param colour Column name for colour values
+#' @param label_by Column name for region hover labels
+#' @param text_by Column name for extra hover text
+#' @param colour_by Column name for colour values
 #' @param palette Colour palette specification
 #' @param na_colour Colour for NA values
 #' @param na_alpha Transparency for NA regions
@@ -134,9 +163,9 @@ prepare_brain_meshes.cortical_atlas <- function(
   .data = NULL,
   surface = "LCBC",
   hemisphere = c("right", "left"),
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
@@ -149,10 +178,10 @@ prepare_brain_meshes.cortical_atlas <- function(
   atlas_data <- prepare_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
     atlas_data,
-    colour,
+    colour_by,
     palette,
     na_colour,
-    label
+    label_by
   )
   meshes <- build_cortical_meshes(
     result$atlas_data,
@@ -160,7 +189,9 @@ prepare_brain_meshes.cortical_atlas <- function(
     surface,
     na_colour,
     edge_by,
-    brain_meshes
+    brain_meshes,
+    text_by = text_by,
+    label_by = label_by
   )
 
   list(meshes = meshes, legend_data = result$legend_data)
@@ -173,9 +204,9 @@ prepare_brain_meshes.cortical_atlas <- function(
 prepare_brain_meshes.subcortical_atlas <- function(
   atlas,
   .data = NULL,
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
@@ -184,13 +215,16 @@ prepare_brain_meshes.subcortical_atlas <- function(
   atlas_data <- prepare_mesh_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
     atlas_data,
-    colour,
+    colour_by,
     palette,
     na_colour,
-    label
+    label_by
   )
   atlas_data <- to_native_coords(result$atlas_data)
-  meshes <- build_subcortical_meshes(atlas_data, na_colour)
+  meshes <- build_subcortical_meshes(
+    atlas_data, na_colour,
+    text_by = text_by, label_by = label_by
+  )
 
   list(meshes = meshes, legend_data = result$legend_data)
 }
@@ -206,10 +240,9 @@ prepare_brain_meshes.subcortical_atlas <- function(
 prepare_brain_meshes.tract_atlas <- function(
   atlas,
   .data = NULL,
-  label = "region",
-  text = NULL,
-
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
@@ -224,10 +257,10 @@ prepare_brain_meshes.tract_atlas <- function(
   atlas_data <- prepare_mesh_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
     atlas_data,
-    colour,
+    colour_by,
     palette,
     na_colour,
-    label
+    label_by
   )
   atlas_data <- to_native_coords(result$atlas_data)
   atlas_centerlines <- build_centerline_data(atlas, tube_radius, tube_segments)
@@ -235,7 +268,9 @@ prepare_brain_meshes.tract_atlas <- function(
     atlas_data,
     na_colour,
     color_by,
-    atlas_centerlines
+    atlas_centerlines,
+    text_by = text_by,
+    label_by = label_by
   )
 
   list(meshes = meshes, legend_data = result$legend_data)
@@ -250,23 +285,23 @@ prepare_brain_meshes.tract_atlas <- function(
 #' atlas data and builds the legend data structure.
 #'
 #' @param atlas_data Prepared atlas data frame
-#' @param colour Column name for colour values
+#' @param colour_by Column name for colour values
 #' @param palette Colour palette specification
 #' @param na_colour Colour for NA values
-#' @param label Column name for labels
+#' @param label_by Column name for labels
 #'
 #' @return List with `atlas_data` and `legend_data`
 #' @keywords internal
 apply_colours_and_legend <- function(
   atlas_data,
-  colour,
+  colour_by,
   palette,
   na_colour,
-  label
+  label_by
 ) {
   colour_result <- apply_colour_palette(
     atlas_data,
-    colour,
+    colour_by,
     palette,
     na_colour
   )
@@ -279,8 +314,8 @@ apply_colours_and_legend <- function(
     data_max = colour_result$data_max,
     palette = palette,
     pal_colours = colour_result$palette,
-    colour_col = colour,
-    label_col = label,
+    colour_col = colour_by,
+    label_col = label_by,
     fill_col = colour_result$fill,
     data = atlas_data
   )

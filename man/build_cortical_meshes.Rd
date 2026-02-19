@@ -10,7 +10,9 @@ build_cortical_meshes(
   surface,
   na_colour,
   edge_by,
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  text_by = NULL,
+  label_by = "region"
 )
 }
 \arguments{
@@ -30,7 +32,7 @@ build_cortical_meshes(
 List of mesh data structures
 }
 \description{
-Creates mesh data structures for cortical brain_atlas objects using
+Creates mesh data structures for cortical ggseg_atlas objects using
 shared brain meshes with vertex-based colouring.
 }
 \keyword{internal}

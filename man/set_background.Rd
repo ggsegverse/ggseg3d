@@ -21,6 +21,6 @@ Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 \dontrun{
 ggseg3d() |> set_background("black")
 
-ggsegray(atlas = dk) |> set_background("black")
+ggsegray(atlas = dk()) |> set_background("black")
 }
 }

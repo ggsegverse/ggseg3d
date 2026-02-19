@@ -51,6 +51,7 @@ HTMLWidgets.widget({
               opacity: meshData.opacity !== undefined ? meshData.opacity : 1.0,
               hoverText: meshData.hoverText || null,
               vertexLabels: meshData.vertexLabels || null,
+              vertexTexts: meshData.vertexTexts || null,
               edgeColor: meshData.edgeColor || null,
               edgeWidth: meshData.edgeWidth || null,
               boundaryEdges: meshData.boundaryEdges || null

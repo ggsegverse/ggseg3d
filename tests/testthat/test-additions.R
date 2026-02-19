@@ -124,7 +124,7 @@ test_that("set_positioning anatomical offsets hemispheres", {
 })
 
 test_that("set_positioning skips meshes without left/right in name", {
-  p <- ggseg3d(atlas = aseg)
+  p <- ggseg3d(atlas = aseg())
   original_meshes <- p$x$meshes
 
   p_positioned <- p |> set_positioning("centered")
@@ -143,7 +143,7 @@ test_that("set_positioning rejects non-ggseg3d objects", {
 
 test_that("add_glassbrain warns for unavailable mesh", {
   expect_warning(
-    ggseg3d(atlas = aseg) |>
+    ggseg3d(atlas = aseg()) |>
       add_glassbrain(
         hemisphere = "left",
         surface = "pial",

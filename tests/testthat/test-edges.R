@@ -52,3 +52,27 @@ test_that("find_boundary_edges deduplicates shared edges", {
   )
   expect_equal(length(edge_keys), length(unique(edge_keys)))
 })
+
+test_that("find_boundary_edges skips NA groups without NAs in output", {
+  faces <- data.frame(
+    i = c(1, 2, 3),
+    j = c(2, 3, 4),
+    k = c(3, 4, 5)
+  )
+  vertex_colors <- c(NA, NA, "A", "B", NA)
+
+  edges <- find_boundary_edges(faces, vertex_colors)
+
+  expect_true(length(edges) > 0)
+  edge_verts <- unlist(edges)
+  expect_false(any(is.na(edge_verts)))
+})
+
+test_that("find_boundary_edges returns empty for all-NA groups", {
+  faces <- data.frame(i = 1, j = 2, k = 3)
+  vertex_colors <- c(NA, NA, NA)
+
+  edges <- find_boundary_edges(faces, vertex_colors)
+
+  expect_equal(length(edges), 0)
+})

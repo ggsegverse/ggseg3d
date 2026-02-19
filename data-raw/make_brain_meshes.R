@@ -3,16 +3,16 @@
 # Creates brain_mesh_pial, brain_mesh_white, and brain_mesh_semi_inflated
 # for unified atlas rendering and glassbrain.
 # The inflated surface lives in ggseg.formats.
-# Requires ggsegExtra and FreeSurfer.
+# Requires ggseg.extra and FreeSurfer.
 #
 # Run with: source("data-raw/make_brain_meshes.R")
 
 library(dplyr)
 
-if (!requireNamespace("ggsegExtra", quietly = TRUE)) {
+if (!requireNamespace("ggseg.extra", quietly = TRUE)) {
   stop(
-    "ggsegExtra is required.",
-    " Install with: remotes::install_github('ggseg/ggsegExtra')"
+    "ggseg.extra is required.",
+    " Install with: remotes::install_github('ggsegverse/ggseg.extra')"
   )
 }
 
@@ -32,7 +32,7 @@ for (hemi in hemispheres) {
 
     cli::cli_alert_info("Generating {mesh_name}...")
 
-    mesh <- ggsegExtra:::read_fs_mesh(
+    mesh <- ggseg.extra:::read_fs_mesh(
       subject = subject,
       hemisphere = hemi,
       surface = surf

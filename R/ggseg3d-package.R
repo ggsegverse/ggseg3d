@@ -11,15 +11,23 @@
 #' a brain-plot using interactive 3D mesh visualizations powered
 #' by Three.js via htmlwidgets.
 #'
-#' The package uses `brain_atlas` objects from ggseg.formats
+#' The package uses `ggseg_atlas` objects from ggseg.formats
 #' that contain 3D vertex mappings.
 #'
 #' @name ggseg3d-package
 #' @docType package
 #' @keywords internal
 #' @import ggseg.formats
-#' @importFrom cli cli_abort cli_warn cli_inform
 "_PACKAGE"
+
+#' @export
+ggseg.formats::dk
+
+#' @export
+ggseg.formats::aseg
+
+#' @export
+ggseg.formats::tracula
 
 # nocov start
 #' @noRd
@@ -35,18 +43,24 @@ knit_vignettes <- function() {
   orig <- list.files(
     "vignettes",
     pattern = "\\.Rmd\\.orig$",
-    full.names = TRUE
-  )
+    full.names = TRUE,
+    recursive = TRUE
+  ) |>
+    normalizePath()
   if (length(orig) == 0L) {
     cli::cli_inform("No .Rmd.orig files found in vignettes/")
     return(invisible())
   }
-  old_wd <- getwd() # nolint: undesirable_function_linter
-  setwd("vignettes") # nolint: undesirable_function_linter
-  on.exit(setwd(old_wd)) # nolint: undesirable_function_linter
-  invisible(lapply(basename(orig), function(f) {
+  invisible(lapply(orig, function(f) {
     out <- sub("\\.orig$", "", f)
-    cli::cli_inform("Knitting {f} -> {out}")
+    old_root <- knitr::opts_knit$get("root.dir")
+    knitr::opts_knit$set(root.dir = dirname(f))
+    knitr::opts_chunk$set(
+      fig.path = file.path(dirname(f), "img/")
+    )
+    on.exit(
+      knitr::opts_knit$set(root.dir = old_root)
+    )
     knitr::knit(f, output = out)
   }))
   cli::cli_inform("Done. Commit the .Rmd files and any generated figures.")

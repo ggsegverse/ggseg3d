@@ -19,10 +19,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' ggseg3d(atlas = aseg) |>
+#' ggseg3d(atlas = aseg()) |>
 #'   add_glassbrain("left", opacity = 0.2)
 #'
-#' ggsegray(atlas = aseg) |>
+#' ggsegray(atlas = aseg()) |>
 #'   add_glassbrain(opacity = 0.15) |>
 #'   pan_camera("right lateral")
 #' }
@@ -117,7 +117,7 @@ add_glassbrain <- function(
 #' \dontrun{
 #' ggseg3d() |> pan_camera("right lateral")
 #'
-#' ggsegray(atlas = dk, hemisphere = "left") |>
+#' ggsegray(atlas = dk(), hemisphere = "left") |>
 #'   pan_camera("left lateral")
 #' }
 pan_camera <- function(p, camera) {
@@ -167,7 +167,7 @@ pan_camera <- function(p, camera) {
 #' \dontrun{
 #' ggseg3d() |> set_background("black")
 #'
-#' ggsegray(atlas = dk) |> set_background("black")
+#' ggsegray(atlas = dk()) |> set_background("black")
 #' }
 set_background <- function(p, colour = "#ffffff") {
   if (inherits(p, "ggsegray")) {

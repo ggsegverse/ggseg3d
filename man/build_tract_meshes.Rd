@@ -8,7 +8,9 @@ build_tract_meshes(
   atlas_data,
   na_colour,
   color_by = "colour",
-  atlas_centerlines = NULL
+  atlas_centerlines = NULL,
+  text_by = NULL,
+  label_by = "region"
 )
 }
 \arguments{

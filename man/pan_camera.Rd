@@ -39,7 +39,7 @@ to standard anatomical views or custom positions.
 \dontrun{
 ggseg3d() |> pan_camera("right lateral")
 
-ggsegray(atlas = dk, hemisphere = "left") |>
+ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 }
 }

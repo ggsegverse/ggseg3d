@@ -92,7 +92,7 @@ to_native_coords <- function(mesh_data_df) {
 
 #' Map atlas vertex indices to mesh colors
 #'
-#' Given a brain_atlas with vertices column and a brain mesh, creates a color
+#' Given a ggseg_atlas with vertices column and a brain mesh, creates a color
 #' vector for each mesh vertex based on which region it belongs to.
 #'
 #' @param atlas_data Data frame with region, colour, and vertices columns
@@ -125,7 +125,7 @@ vertices_to_colors <- function(
 
 #' Map atlas vertex indices to region labels
 #'
-#' Given a brain_atlas with vertices column and a brain mesh, creates a label
+#' Given a ggseg_atlas with vertices column and a brain mesh, creates a label
 #' vector for each mesh vertex based on which region it belongs to.
 #'
 #' @param atlas_data Data frame with region and vertices columns
@@ -153,6 +153,37 @@ vertices_to_labels <- function(
   }
 
   vertex_labels
+}
+
+
+#' Map vertices to text values for hover display
+#'
+#' Assigns text values to mesh vertices based on a column in atlas data.
+#' Used for per-vertex hover text in the Three.js tooltip.
+#'
+#' @param atlas_data Data frame with vertices list column
+#' @param n_vertices Number of vertices in the mesh
+#' @param text_col Name of the column containing text values
+#'
+#' @return Character vector of text values, one per mesh vertex
+#' @keywords internal
+vertices_to_text <- function(atlas_data, n_vertices, text_col) {
+  vertex_text <- rep(NA_character_, n_vertices)
+
+  if (!text_col %in% names(atlas_data)) return(vertex_text)
+
+  for (i in seq_len(nrow(atlas_data))) {
+    region_vertices <- atlas_data$vertices[[i]]
+    val <- as.character(atlas_data[[text_col]][i])
+
+    if (length(region_vertices) > 0 && !is.na(val)) {
+      idx <- region_vertices + 1L
+      idx <- idx[idx >= 1 & idx <= n_vertices]
+      vertex_text[idx] <- paste0(text_col, ": ", val)
+    }
+  }
+
+  vertex_text
 }
 
 
@@ -201,7 +232,7 @@ vertices_to_groups <- function(
 
 #' Build mesh list for cortical atlases
 #'
-#' Creates mesh data structures for cortical brain_atlas objects using
+#' Creates mesh data structures for cortical ggseg_atlas objects using
 #' shared brain meshes with vertex-based colouring.
 #'
 #' @param atlas_data Prepared atlas data frame
@@ -220,7 +251,9 @@ build_cortical_meshes <- function(
   surface,
   na_colour,
   edge_by,
-  brain_meshes = NULL
+  brain_meshes = NULL,
+  text_by = NULL,
+  label_by = "region"
 ) {
   hemi_map <- c("right" = "rh", "left" = "lh")
 
@@ -248,6 +281,10 @@ build_cortical_meshes <- function(
     vertex_colors <- vertices_to_colors(hemi_data, n_vertices, na_colour)
     vertex_labels <- vertices_to_labels(hemi_data, n_vertices, na_label = "")
 
+    vertex_texts <- if (!is.null(text_by)) {
+      vertices_to_text(hemi_data, n_vertices, text_by)
+    }
+
     if (!is.null(edge_by)) {
       edge_groups <- vertices_to_groups(hemi_data, n_vertices, edge_by)
       boundary <- find_boundary_edges(mesh$faces, edge_groups)
@@ -265,7 +302,8 @@ build_cortical_meshes <- function(
       color_mode = "vertexcolor",
       boundary_edges = boundary,
       edge_color = edge_color,
-      vertex_labels = vertex_labels
+      vertex_labels = vertex_labels,
+      vertex_texts = vertex_texts
     )
   })
 
@@ -308,7 +346,10 @@ position_hemisphere <- function(vertices, hemisphere) {
 #'
 #' @return List of mesh data structures
 #' @keywords internal
-build_subcortical_meshes <- function(atlas_data, na_colour) {
+build_subcortical_meshes <- function(
+  atlas_data, na_colour,
+  text_by = NULL, label_by = "region"
+) {
   meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
     mesh_data <- atlas_data$mesh[[i]]
     if (is.null(mesh_data)) return(NULL)
@@ -317,13 +358,25 @@ build_subcortical_meshes <- function(atlas_data, na_colour) {
     if (is.na(colour)) colour <- na_colour
     colour <- unname(ifelse(grepl("^#", colour), colour, col2hex(colour)))
 
+    region_name <- if (label_by %in% names(atlas_data)) {
+      atlas_data[[label_by]][i]
+    } else {
+      atlas_data$label[i]
+    }
+
+    hover <- NULL
+    if (!is.null(text_by) && text_by %in% names(atlas_data)) {
+      val <- atlas_data[[text_by]][i]
+      if (!is.na(val)) hover <- paste0(text_by, ": ", val)
+    }
+
     make_mesh_entry(
-      name = atlas_data$label[i],
+      name = region_name,
       vertices = mesh_data$vertices,
       faces = mesh_data$faces,
       colors = rep(colour, nrow(mesh_data$faces)),
       color_mode = "facecolor",
-      hover_text = paste0("Region: ", atlas_data$label[i])
+      hover_text = hover
     )
   })
 
@@ -349,7 +402,9 @@ build_tract_meshes <- function(
   atlas_data,
   na_colour,
   color_by = "colour",
-  atlas_centerlines = NULL
+  atlas_centerlines = NULL,
+  text_by = NULL,
+  label_by = "region"
 ) {
   has_centerlines <- !is.null(atlas_centerlines) &&
     !is.null(atlas_centerlines$centerlines)
@@ -392,13 +447,25 @@ build_tract_meshes <- function(
       vertex_colors <- rep(colour, n_vertices)
     }
 
+    tract_name <- if (label_by %in% names(atlas_data)) {
+      atlas_data[[label_by]][i]
+    } else {
+      label
+    }
+
+    hover <- NULL
+    if (!is.null(text_by) && text_by %in% names(atlas_data)) {
+      val <- atlas_data[[text_by]][i]
+      if (!is.na(val)) hover <- paste0(text_by, ": ", val)
+    }
+
     make_mesh_entry(
-      name = label,
+      name = tract_name,
       vertices = mesh_data$vertices,
       faces = mesh_data$faces,
       colors = vertex_colors,
       color_mode = "vertexcolor",
-      hover_text = paste0("Tract: ", label)
+      hover_text = hover
     )
   })
 

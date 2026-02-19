@@ -17,7 +17,7 @@ vertices_to_labels(atlas_data, n_vertices, na_label = NA_character_)
 Character vector of labels, one per mesh vertex
 }
 \description{
-Given a brain_atlas with vertices column and a brain mesh, creates a label
+Given a ggseg_atlas with vertices column and a brain mesh, creates a label
 vector for each mesh vertex based on which region it belongs to.
 }
 \keyword{internal}

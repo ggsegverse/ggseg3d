@@ -14,9 +14,9 @@ prepare_brain_meshes(atlas, ...)
   .data = NULL,
   surface = "LCBC",
   hemisphere = c("right", "left"),
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
@@ -28,9 +28,9 @@ prepare_brain_meshes(atlas, ...)
 \method{prepare_brain_meshes}{subcortical_atlas}(
   atlas,
   .data = NULL,
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
@@ -40,20 +40,20 @@ prepare_brain_meshes(atlas, ...)
 \method{prepare_brain_meshes}{tract_atlas}(
   atlas,
   .data = NULL,
-  label = "region",
-  text = NULL,
-  colour = "colour",
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
   tract_color = c("palette", "orientation"),
-  tube_radius = 1,
-  tube_segments = NULL,
+  tube_radius = 2,
+  tube_segments = 10,
   ...
 )
 }
 \arguments{
-\item{atlas}{A `brain_atlas` object}
+\item{atlas}{A `ggseg_atlas` object}
 
 \item{...}{Type-specific arguments passed to methods}
 
@@ -64,11 +64,11 @@ prepare_brain_meshes(atlas, ...)
 
 \item{hemisphere}{Character vector of hemispheres: `"right"`, `"left"`.}
 
-\item{label}{Column name for trace labels}
+\item{label_by}{Column name for region hover labels}
 
-\item{text}{Column name for hover text}
+\item{text_by}{Column name for extra hover text}
 
-\item{colour}{Column name for colour values}
+\item{colour_by}{Column name for colour values}
 
 \item{palette}{Colour palette specification}
 
@@ -92,6 +92,6 @@ List with `meshes` (list of mesh entries) and `legend_data`
 }
 \description{
 S3 generic that dispatches to atlas-type-specific preparation methods.
-Builds mesh data structures and legend data from a `brain_atlas`.
+Builds mesh data structures and legend data from a `ggseg_atlas`.
 }
 \keyword{internal}

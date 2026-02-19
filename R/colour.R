@@ -1,6 +1,6 @@
 #' Apply colour palette
 #'
-#' Processes colour mapping for brain_atlas objects using
+#' Processes colour mapping for ggseg_atlas objects using
 #' vertex-based colouring.
 #'
 #' @param atlas_data Atlas data frame with vertices column
