@@ -23,7 +23,7 @@ ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![plot of chunk intro-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/img/intro-basic-1.png)
+![plot of chunk intro-basic](img/intro-basic-1.png)
 
 Call `ggseg3d()` without arguments to plot the default Desikan-Killiany atlas.
 The widget is interactive: rotate by clicking and dragging, zoom with the scroll

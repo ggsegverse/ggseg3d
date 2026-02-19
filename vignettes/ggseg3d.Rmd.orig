@@ -13,7 +13,8 @@ vignette: >
 knitr::opts_chunk$set(
   eval = TRUE,
   fig.width = 7,
-  fig.height = 5
+  fig.height = 5,
+  fig.path = "img/"
 )
 library(ggseg3d)
 library(dplyr)

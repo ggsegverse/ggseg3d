@@ -8,7 +8,8 @@ title: "Ray-traced brain renders with rayshader"
 knitr::opts_chunk$set(
   eval = TRUE,
   fig.width = 8,
-  fig.height = 6
+  fig.height = 6,
+  fig.path = "img/"
 )
 library(ggseg3d)
 library(dplyr)

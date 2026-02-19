@@ -18,7 +18,7 @@ ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![plot of chunk wt-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-basic-1.png)
+![plot of chunk wt-basic](img/wt-basic-1.png)
 
 The widget is interactive:
 - **Rotate**: click and drag
@@ -188,7 +188,7 @@ ggseg3d(
   add_glassbrain()
 ```
 
-![plot of chunk wt-subcortical](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-subcortical-1.png)
+![plot of chunk wt-subcortical](img/wt-subcortical-1.png)
 
 The glass brain adds a translucent cortical surface for anatomical context.
 
@@ -202,7 +202,7 @@ ggseg3d(atlas = tracula()) |>
   add_glassbrain(opacity = 0.1)
 ```
 
-![plot of chunk wt-tracula-basic](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-basic-1.png)
+![plot of chunk wt-tracula-basic](img/wt-tracula-basic-1.png)
 
 ### Mapping data to tracts
 
@@ -226,7 +226,7 @@ ggseg3d(
   add_glassbrain(opacity = 0.1)
 ```
 
-![plot of chunk wt-tracula-data](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-data-1.png)
+![plot of chunk wt-tracula-data](img/wt-tracula-data-1.png)
 
 ### Orientation colouring
 
@@ -240,7 +240,7 @@ ggseg3d(atlas = tracula(), tract_color = "orientation") |>
   set_background("black")
 ```
 
-![plot of chunk wt-tracula-orientation](/Users/athanasm/workspace/ggseg/ggseg3d/vignettes/articles/img/wt-tracula-orientation-1.png)
+![plot of chunk wt-tracula-orientation](img/wt-tracula-orientation-1.png)
 
 ### Tube appearance
 

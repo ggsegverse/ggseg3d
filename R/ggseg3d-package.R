@@ -55,9 +55,6 @@ knit_vignettes <- function() {
     out <- sub("\\.orig$", "", f)
     old_root <- knitr::opts_knit$get("root.dir")
     knitr::opts_knit$set(root.dir = dirname(f))
-    knitr::opts_chunk$set(
-      fig.path = file.path(dirname(f), "img/")
-    )
     on.exit(
       knitr::opts_knit$set(root.dir = old_root)
     )
