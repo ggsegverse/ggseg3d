@@ -10,7 +10,10 @@ vignette: >
 ```{r}
 #| label: intro-setup
 #| include: false
-knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(
+  message = FALSE,
+  eval = .Platform$OS.type != "windows"
+)
 library(ggseg3d)
 library(dplyr)
 dir.create("img", showWarnings = FALSE)
