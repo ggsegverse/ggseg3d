@@ -10,10 +10,11 @@ vignette: >
 ```{r}
 #| label: intro-setup
 #| include: false
-knitr::opts_chunk$set(
-  message = FALSE,
-  eval = .Platform$OS.type != "windows"
+can_snapshot <- !nzchar(Sys.getenv("CI")) && tryCatch(
+  nzchar(chromote::find_chrome()),
+  error = function(e) FALSE
 )
+knitr::opts_chunk$set(message = FALSE)
 library(ggseg3d)
 library(dplyr)
 dir.create("img", showWarnings = FALSE)
@@ -36,6 +37,7 @@ ggseg3d(hemisphere = "left") |>
 ```{r}
 #| label: intro-snap-basic
 #| echo: false
+#| eval: !expr can_snapshot
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
   snapshot_brain("img/intro-basic.png")
@@ -67,6 +69,7 @@ ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
 ```{r}
 #| label: intro-snap-plot-data
 #| echo: false
+#| eval: !expr can_snapshot
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
@@ -101,6 +104,7 @@ ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
 ```{r}
 #| label: intro-snap-subcortical
 #| echo: false
+#| eval: !expr can_snapshot
 subcort_data <- tibble(
   region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
@@ -129,6 +133,7 @@ ggseg3d(hemisphere = "left") |>
 ```{r}
 #| label: intro-snap-camera
 #| echo: false
+#| eval: !expr can_snapshot
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black") |>
