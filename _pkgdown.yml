@@ -28,7 +28,7 @@ reference:
   - title: Mesh Utilities
     desc: Work with brain surface meshes
     contents:
-      - get_brain_mesh
+      - resolve_brain_mesh
 
   - title: Shiny
     desc: Shiny integration

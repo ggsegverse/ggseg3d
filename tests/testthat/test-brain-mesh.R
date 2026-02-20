@@ -1,5 +1,5 @@
-test_that("get_brain_mesh returns mesh for inflated surface", {
-  mesh <- get_brain_mesh(hemisphere = "lh", surface = "inflated")
+test_that("resolve_brain_mesh returns mesh for inflated surface", {
+  mesh <- resolve_brain_mesh(hemisphere = "lh", surface = "inflated")
 
   expect_true(!is.null(mesh))
   expect_true("vertices" %in% names(mesh))
@@ -10,18 +10,18 @@ test_that("get_brain_mesh returns mesh for inflated surface", {
   expect_equal(ncol(mesh$faces), 3)
 })
 
-test_that("get_brain_mesh returns both hemispheres", {
-  lh <- get_brain_mesh(hemisphere = "lh", surface = "inflated")
-  rh <- get_brain_mesh(hemisphere = "rh", surface = "inflated")
+test_that("resolve_brain_mesh returns both hemispheres", {
+  lh <- resolve_brain_mesh(hemisphere = "lh", surface = "inflated")
+  rh <- resolve_brain_mesh(hemisphere = "rh", surface = "inflated")
 
   expect_true(!is.null(lh))
   expect_true(!is.null(rh))
   expect_equal(nrow(lh$vertices), nrow(rh$vertices))
 })
 
-test_that("get_brain_mesh validates arguments", {
-  expect_error(get_brain_mesh(hemisphere = "invalid"))
-  expect_error(get_brain_mesh(surface = "invalid"))
+test_that("resolve_brain_mesh validates arguments", {
+  expect_error(resolve_brain_mesh(hemisphere = "invalid"))
+  expect_error(resolve_brain_mesh(surface = "invalid"))
 })
 
 test_that("is_unified_atlas identifies unified atlases correctly", {
@@ -110,16 +110,16 @@ test_that("vertices_to_groups errors on missing column", {
   )
 })
 
-test_that("get_brain_mesh returns inflated surfaces", {
-  lh <- get_brain_mesh(hemisphere = "lh", surface = "inflated")
-  rh <- get_brain_mesh(hemisphere = "rh", surface = "inflated")
+test_that("resolve_brain_mesh returns inflated surfaces", {
+  lh <- resolve_brain_mesh(hemisphere = "lh", surface = "inflated")
+  rh <- resolve_brain_mesh(hemisphere = "rh", surface = "inflated")
 
   expect_true(!is.null(lh))
   expect_true(!is.null(rh))
 })
 
-test_that("get_brain_mesh returns white surface", {
-  mesh <- get_brain_mesh(hemisphere = "lh", surface = "white")
+test_that("resolve_brain_mesh returns white surface", {
+  mesh <- resolve_brain_mesh(hemisphere = "lh", surface = "white")
   expect_true(!is.null(mesh))
   expect_true("vertices" %in% names(mesh))
   expect_true("faces" %in% names(mesh))
@@ -403,8 +403,8 @@ test_that("build_tract_meshes with centerlines and orientation coloring", {
   expect_true(all(grepl("^#", meshes[[1]]$colors)))
 })
 
-test_that("get_brain_mesh returns NULL for empty brain_meshes", {
-  result <- get_brain_mesh(
+test_that("resolve_brain_mesh returns NULL for empty brain_meshes", {
+  result <- resolve_brain_mesh(
     hemisphere = "lh", surface = "pial", brain_meshes = list()
   )
   expect_null(result)

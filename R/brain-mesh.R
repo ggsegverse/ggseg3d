@@ -1,8 +1,10 @@
-#' Get brain surface mesh
+#' Resolve brain surface mesh
 #'
-#' Retrieves a brain surface mesh for the specified hemisphere and surface type.
-#' Inflated surfaces are provided by ggseg.formats; pial, white, and
-#' semi-inflated surfaces are stored in ggseg3d.
+#' Resolves and prepares a brain surface mesh for rendering. Delegates to
+#' [ggseg.formats::get_brain_mesh()] for inflated surfaces, provides pial,
+#' white, and semi-inflated surfaces from ggseg3d internal data, corrects
+#' 0-based face indices, and centers inflated/semi-inflated meshes on pial
+#' centroids.
 #'
 #' @param hemisphere `"lh"` or `"rh"`
 #' @param surface Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
@@ -13,7 +15,7 @@
 #' @return list with vertices (data.frame with x, y, z) and faces
 #'   (data.frame with i, j, k), or NULL if mesh not found
 #' @export
-get_brain_mesh <- function(
+resolve_brain_mesh <- function(
   hemisphere = c("lh", "rh"),
   surface = c("inflated", "semi-inflated", "white", "pial"),
   brain_meshes = NULL
@@ -259,7 +261,7 @@ build_cortical_meshes <- function(
 
   meshes <- lapply(hemisphere, function(current_hemi) {
     hemi_short <- hemi_map[current_hemi]
-    mesh <- get_brain_mesh(
+    mesh <- resolve_brain_mesh(
       hemisphere = hemi_short,
       surface = surface,
       brain_meshes = brain_meshes

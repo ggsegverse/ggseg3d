@@ -48,7 +48,7 @@ add_glassbrain <- function(
 
   entries <- lapply(cortical_hemis, function(hemi) {
     hemi_short <- hemi_map[hemi]
-    mesh <- get_brain_mesh(
+    mesh <- resolve_brain_mesh(
       hemisphere = hemi_short,
       surface = surface,
       brain_meshes = brain_meshes
