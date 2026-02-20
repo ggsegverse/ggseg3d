@@ -10,7 +10,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  echo = TRUE
+  echo = TRUE,
+  message = FALSE
 )
 
 library(ggseg3d)
@@ -72,7 +73,7 @@ Additional atlases are available through the
 
 ```{r}
 #| label: dk-plot
-#| results: hide
+#| eval: false
 ggseg3d(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 ```
@@ -90,7 +91,7 @@ Subcortical structures with a translucent glass brain overlay:
 
 ```{r}
 #| label: aseg-plot
-#| results: hide
+#| eval: false
 ggseg3d(atlas = aseg()) |>
   add_glassbrain() |>
   pan_camera("right lateral")

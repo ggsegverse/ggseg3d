@@ -7,35 +7,49 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r}
+#| label: intro-setup
+#| include: false
+knitr::opts_chunk$set(message = FALSE)
+library(ggseg3d)
+library(dplyr)
+dir.create("img", showWarnings = FALSE)
+```
 
-
-ggseg3d renders interactive 3D brain atlases using WebGL via Three.js.
-It provides a pipe-friendly API and unified brain atlases that work with both
-ggseg (2D) and ggseg3d (3D).
+Brain segmentation results are easier to interpret when they look like a brain.
+ggseg3d takes a data frame with region names and renders it as an interactive 3D mesh — rotate, zoom, hover for labels — right in the browser.
 
 ## Getting started
 
-
-``` r
+```{r}
+#| label: intro-basic
+#| eval: false
 library(ggseg3d)
 
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![plot of chunk intro-basic](img/intro-basic-1.png)
+```{r}
+#| label: intro-snap-basic
+#| echo: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  snapshot_brain("img/intro-basic.png")
+```
 
-Call `ggseg3d()` without arguments to plot the default Desikan-Killiany atlas.
-The widget is interactive: rotate by clicking and dragging, zoom with the scroll
-wheel, and hover over regions to see their names.
+![Left hemisphere of the Desikan-Killiany atlas, each cortical region in a distinct colour, viewed from the lateral side.](img/intro-basic.png "Default DK atlas, left lateral view")
+
+With no arguments, `ggseg3d()` plots the Desikan-Killiany atlas.
+The output is an htmlwidget: click and drag to rotate, scroll to zoom, hover to see region names.
 
 ## Mapping data
 
-Provide a data frame with a `region` column matching the atlas, and map a
-variable to `colour_by`:
+Match your data to the atlas by region name, then point `colour_by` at the variable you care about:
 
-
-``` r
+```{r}
+#| label: intro-plot-data
+#| eval: false
 library(dplyr)
 
 some_data <- tibble(
@@ -47,17 +61,31 @@ ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
+```{r}
+#| label: intro-snap-plot-data
+#| echo: false
+some_data <- tibble(
+  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  p = c(0.01, 0.04, 0.2, 0.5)
+)
 
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
+  pan_camera("right lateral") |>
+  snapshot_brain("img/intro-plot-data.png")
+```
 
-![Brain regions coloured by p-value.](img/intro-plot-data.png)
+![Right hemisphere with four cortical regions coloured on a blue-to-red scale by p-value; unmatched regions shown in grey.](img/intro-plot-data.png "Four regions mapped by p-value")
+
+`text_by = "p"` adds the p-value to the hover tooltip so you can inspect individual regions without a separate table.
 
 ## Subcortical atlases
 
-For subcortical structures, use the `aseg` atlas and add a translucent glass
-brain for anatomical context:
+Cortical surfaces are only half the story.
+The `aseg` atlas covers subcortical structures, and `add_glassbrain()` wraps them in a translucent cortex for anatomical context:
 
-
-``` r
+```{r}
+#| label: intro-subcortical
+#| eval: false
 subcort_data <- tibble(
   region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
@@ -67,28 +95,44 @@ ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
   add_glassbrain()
 ```
 
+```{r}
+#| label: intro-snap-subcortical
+#| echo: false
+subcort_data <- tibble(
+  region = c("Thalamus", "Caudate", "Hippocampus"),
+  p = c(0.2, 0.5, 0.8)
+)
 
+ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
+  add_glassbrain() |>
+  snapshot_brain("img/intro-subcortical.png")
+```
 
-![Subcortical structures with a translucent glass brain overlay.](img/intro-subcortical.png)
+![Thalamus, caudate, and hippocampus coloured by p-value, visible through a semi-transparent cortical shell.](img/intro-subcortical.png "Subcortical structures inside a glass brain")
 
 ## Camera and background
 
-Use `pan_camera()` to set the viewing angle and `set_background()` to change
-the background colour:
+`pan_camera()` sets the viewing angle.
+`set_background()` changes the canvas colour — handy for dark-themed slides:
 
-
-``` r
+```{r}
+#| label: intro-camera
+#| eval: false
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black")
 ```
 
+```{r}
+#| label: intro-snap-camera
+#| echo: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  set_background("black") |>
+  snapshot_brain("img/intro-background.png")
+```
 
+![Left hemisphere on a black background, cortical regions visible in their default atlas colours.](img/intro-background.png "Dark background for slides or posters")
 
-![Brain atlas with a black background.](img/intro-background.png)
-
-Available presets include `"left lateral"`, `"right medial"`,
-`"left superior"`, and more. For custom positions, pass a list with
-`eye` coordinates.
-
-
+Camera presets cover the standard anatomical views: `"left lateral"`, `"right medial"`, `"left superior"`, and so on.
+For anything else, pass a list with `eye` coordinates.

@@ -32,6 +32,7 @@ Imports:
     tidyr,
     webshot2
 Suggests:
+    png,
     rayshader,
     rgl,
     rmarkdown,

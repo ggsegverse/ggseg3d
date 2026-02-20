@@ -61,10 +61,6 @@ ggseg3d(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![](man/figures/README-dk-plot-1.png)
-
-    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpnGyPQf/file117da284139d2.html screenshot completed
-
 ![](man/figures/README-dk_3d-plot.png)
 
 Subcortical structures with a translucent glass brain overlay:
@@ -74,10 +70,6 @@ ggseg3d(atlas = aseg()) |>
   add_glassbrain() |>
   pan_camera("right lateral")
 ```
-
-![](man/figures/README-aseg-plot-1.png)
-
-    #> file:////private/var/folders/y5/zlbbcqn56gx1tcg6xfb425100000gp/T/RtmpnGyPQf/file117dac5dfd80.html screenshot completed
 
 ![](man/figures/README-aseg_3d-plot.png)
 
