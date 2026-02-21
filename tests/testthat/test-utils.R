@@ -1,89 +1,108 @@
 test_that("get_palette works", {
-
-  expect_equal(get_palette("blue"),
-               data.frame(values = c(0,1),
-                          norm = c(0,1),
-                          orig = "blue",
-                          hex = "#0000FF",
-                          stringsAsFactors = FALSE
-                          )
+  expect_equal(
+    get_palette("blue"),
+    data.frame(
+      values = c(0, 1),
+      norm = c(0, 1),
+      orig = "blue",
+      hex = "#0000FF",
+      stringsAsFactors = FALSE
+    )
   )
 
-
-  expect_equal(get_palette(c("blue"=1)),
-               data.frame(values = c(1,2),
-                          norm = c(0,1),
-                          orig = "blue",
-                          hex = "#0000FF",
-                          stringsAsFactors = FALSE
-               )
+  expect_equal(
+    get_palette(c("blue" = 1)),
+    data.frame(
+      values = c(1, 2),
+      norm = c(0, 1),
+      orig = "blue",
+      hex = "#0000FF",
+      stringsAsFactors = FALSE
+    )
   )
 
-  expect_equal(get_palette(NULL),
-               structure(list(values = c(0, 1),
-                              norm = c(0, 1),
-                              orig = c("skyblue", "dodgerblue"),
-                              hex = c("#87CEEB", "#1E90FF")),
-                         row.names = c(NA, -2L),
-                         class = "data.frame")
+  expect_equal(
+    get_palette(NULL),
+    structure(
+      list(
+        values = c(0, 0.5, 1),
+        norm = c(0, 0.5, 1),
+        orig = c("#440154", "#21918c", "#fde725"),
+        hex = c("#440154", "#21918C", "#FDE725")
+      ),
+      row.names = c(NA, -3L),
+      class = "data.frame"
+    )
   )
 
-  expect_equal(get_palette(c("firebrick", "white", "goldenrod")),
-               structure(list(values = c(0, 0.5, 1),
-                              norm = c(0, 0.5, 1),
-                              orig = c("firebrick", "white", "goldenrod"),
-                              hex = c("#B22222", "#FFFFFF", "#DAA520")),
-                         row.names = c(NA, -3L),
-                         class = "data.frame")
+  expect_equal(
+    get_palette(c("firebrick", "white", "goldenrod")),
+    structure(
+      list(
+        values = c(0, 0.5, 1),
+        norm = c(0, 0.5, 1),
+        orig = c("firebrick", "white", "goldenrod"),
+        hex = c("#B22222", "#FFFFFF", "#DAA520")
+      ),
+      row.names = c(NA, -3L),
+      class = "data.frame"
+    )
   )
 
-  expect_equal(get_palette(c("#ffffff", "#d3d3d3", "#32f303")),
-               structure(list(values = c(0, 0.5, 1),
-                              norm = c(0, 0.5, 1),
-                              orig = c("#ffffff", "#d3d3d3", "#32f303"),
-                              hex = c("#FFFFFF", "#D3D3D3", "#32F303")),
-                         row.names = c(NA, -3L),
-                         class = "data.frame")
+  expect_equal(
+    get_palette(c("#ffffff", "#d3d3d3", "#32f303")),
+    structure(
+      list(
+        values = c(0, 0.5, 1),
+        norm = c(0, 0.5, 1),
+        orig = c("#ffffff", "#d3d3d3", "#32f303"),
+        hex = c("#FFFFFF", "#D3D3D3", "#32F303")
+      ),
+      row.names = c(NA, -3L),
+      class = "data.frame"
+    )
   )
 
-  expect_equal(get_palette(c("#ffffff" = 0, "#d3d3d3" = 1, "#32f303" = 2)),
-               structure(list(values = c(0, 1, 2),
-                              norm = c(0, 0.5, 1),
-                              orig = c("#ffffff", "#d3d3d3", "#32f303"),
-                              hex = c("#FFFFFF", "#D3D3D3", "#32F303")),
-                         row.names = c(NA, -3L),
-                         class = "data.frame")
+  expect_equal(
+    get_palette(c("#ffffff" = 0, "#d3d3d3" = 1, "#32f303" = 2)),
+    structure(
+      list(
+        values = c(0, 1, 2),
+        norm = c(0, 0.5, 1),
+        orig = c("#ffffff", "#d3d3d3", "#32f303"),
+        hex = c("#FFFFFF", "#D3D3D3", "#32F303")
+      ),
+      row.names = c(NA, -3L),
+      class = "data.frame"
+    )
   )
-
 })
 
-test_that("get_atlas works", {
-
-  expect_error(get_atlas("dk3d"), "not found")
-  expect_error(get_atlas("dk_3d"), "surface")
-  expect_error(get_atlas("dk_3d", surface="LCBC"), "hemisphere")
-
-  k <- get_atlas("dk_3d", surface="LCBC", hemisphere = "left")
-  expect_equal(dim(k), c(36, 9))
-  expect_equal(names(k), c("atlas", "surf", "hemi", "region", "colour", "mesh", "label",
-                           "roi", "annot"))
-
-
-  expect_error(get_atlas("aseg3d"), "not found")
-  expect_error(get_atlas("aseg_3d", surface = "inflated"), "no surface")
-  expect_error(get_atlas("aseg_3d", surface="LCBC", hemisphere = "left"), "no data")
-
-  k <- get_atlas("aseg_3d", surface="LCBC", hemisphere = "subcort")
-  expect_equal(dim(k), c(32, 9))
-  expect_equal(names(k), c("atlas", "surf", "hemi", "region", "colour", "mesh", "label",
-                           "files", "roi"))
-
-})
-
-
-test_that("col2hex works",{
-
+test_that("col2hex works", {
   expect_equal(col2hex("red"), "#FF0000")
   expect_equal(col2hex("green"), "#00FF00")
+  expect_equal(col2hex("blue"), "#0000FF")
+  expect_equal(col2hex("white"), "#FFFFFF")
+  expect_equal(col2hex("black"), "#000000")
+})
 
+test_that("get_palette with named numeric palette", {
+  pal <- get_palette(c("blue" = 0, "white" = 50, "red" = 100))
+
+  expect_equal(pal$values, c(0, 50, 100))
+  expect_equal(pal$orig, c("blue", "white", "red"))
+  expect_equal(pal$norm, c(0, 0.5, 1))
+})
+
+test_that("get_palette handles two colors", {
+  pal <- get_palette(c("blue", "red"))
+
+  expect_equal(nrow(pal), 2)
+  expect_equal(pal$orig, c("blue", "red"))
+})
+
+test_that("range_norm normalizes correctly", {
+  expect_equal(range_norm(c(0, 50, 100)), c(0, 0.5, 1))
+  expect_equal(range_norm(c(10, 20)), c(0, 1))
+  expect_equal(range_norm(c(-10, 0, 10)), c(0, 0.5, 1))
 })

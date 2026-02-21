@@ -1,142 +1,141 @@
 ---
-title: "Plotting brain mesh atlases in plotly"
+title: "Introduction to ggseg3d"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Plotting brain mesh atlases in plotly}
+  %\VignetteIndexEntry{Introduction to ggseg3d}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
-  
-```{r setup, include=F}
-knitr::opts_chunk$set(eval=TRUE, fig.width=5)
-library(dplyr)
-library(tidyr)
-```
 
-## Introduction
-Some times, you want to plot the 3d-surfaces from FreeSurfer. Here, it is easier to use data from FreeSurfer (like annot and colorlut files) to create colours for the vectors. 
-The data is somewhat more complex than the 2d ggplot polygon version `ggseg`
-`ggseg3d()` will create a plotly plot, which is interactive, and provides another type of flexibility to the user. 
-A lot of credit goes to A.M.Winkler and his [Brainder](https://brainder.org/) work, which supplied us with the first examples of going from `.srf` to `.ply` files, and whose scripts massively aided us in making this work.
-
-## Basic use
-The function `ggseg3d()`, is based in the plotly, it is recommended to get a little familiarized with with [plotly](https://plotly-book.cpsievert.me/). 
-
-Out-of-the-box, `ggseg()` works without supplying any extra information. 
-It will create a base plot of the aparc (dk) brain segmentations.
-All `[...]_3d` atlases have a built in `colour` column for default colour plotting of the segments.
-
-```{r start}
+```{r}
+#| label: intro-setup
+#| include: false
+knitr::opts_chunk$set(
+  message = FALSE,
+  eval = interactive()
+)
 library(ggseg3d)
 library(dplyr)
-library(tidyr)
-```
-```{r starte, message=FALSE}
-ggseg3d() %>% 
-  remove_axes() %>% 
-  pan_camera("right medial")
+dir.create("img", showWarnings = FALSE)
 ```
 
+Brain segmentation results are easier to interpret when they look like a brain.
+ggseg3d takes a data frame with region names and renders it as an interactive 3D mesh — rotate, zoom, hover for labels — right in the browser.
 
-## Atlas data
-The data is stored in tibbles, and looks like so:
-```{r,fig.width=5}
-dk_3d
-```
+## Getting started
 
-To grab all the data for a surface and hemisphere, you should reduce the data to one line, and then `unnest()`
 ```{r}
-dk_3d %>% 
-  filter(surf == "inflated" & hemi == "right") %>% 
-  unnest(cols = ggseg_3d)
+#| label: intro-basic
+#| eval: false
+library(ggseg3d)
+
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral")
 ```
 
-## External data supply
-Particularly notice the `mesh` column, which is a list column of lists. In there is all the 6 vectors needed to create the mesh of the tri-surface plot. 
-You'll also need to notice the `label`, `annot` and `region` columns, which are likely the columns you will be matching on when providing with your own data for colours. 
-You need to be meticulous when fixing your data, be sure it matches.
-The function _should_ give you a warning if it's struggling to match something. 
-
-The column you want to use for colour, needs to be supplied to the `colour` option, and you'll likely want to supply it to the `text` option, as this will add another line to the plotly hover information.
-
-```{r,fig.width=5}
-someData = dk_3d %>% 
-  filter(surf == "inflated" & hemi == "right") %>% 
-  unnest(ggseg_3d) %>% 
-  ungroup() %>% 
-  select(region) %>% 
-  na.omit() %>% 
-  mutate(p = sample(seq(0,.5, length.out = 100 ), nrow(.)) %>% 
-           round(2)) 
-
-ggseg3d(.data = someData, 
-        atlas = dk_3d,
-        colour = "p", text = "p") %>% 
-  pan_camera("right medial")
+```{r}
+#| label: intro-snap-basic
+#| echo: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  snapshot_brain("img/intro-basic.png")
 ```
 
-## Colours
-<!-- You can also change the palette. Choose from ALL the paletteer palettes, just use their name. -->
-<!-- ```{r,fig.width=5} -->
-<!--   ggseg3d(.data = someData, atlas = dk_3d, colour = "p", text = "p", palette = "berlin") -->
-<!--   ggseg3d(.data = someData, atlas = dk_3d, colour = "p", text = "p", palette = "RdBu") -->
-<!--   ggseg3d(.data = someData, atlas = dk_3d, colour = "p", text = "p", palette = "GrandBudapest1") -->
-<!-- ``` -->
+![Left hemisphere of the Desikan-Killiany atlas, each cortical region in a distinct colour, viewed from the lateral side.](img/intro-basic.png "Default DK atlas, left lateral view")
 
-You can provide custom colour palettes either in hex or R-names
-```{r,fig.width=5, eval=FALSE}
-ggseg3d(.data = someData, atlas = dk_3d, 
-        colour = "p", text = "p", 
-        palette = c("forestgreen", "white", "firebrick"))
+With no arguments, `ggseg3d()` plots the Desikan-Killiany atlas.
+The output is an htmlwidget: click and drag to rotate, scroll to zoom, hover to see region names.
+
+## Mapping data
+
+Match your data to the atlas by region name, then point `colour_by` at the variable you care about:
+
+```{r}
+#| label: intro-plot-data
+#| eval: false
+library(dplyr)
+
+some_data <- tibble(
+  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  p = c(0.01, 0.04, 0.2, 0.5)
+)
+
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
+  pan_camera("right lateral")
 ```
 
-A new improvement now allows you to also supply a named vector as palette, to control the breakpoints of the palette values, and allow you to have a colour bar that exceeds the values that exist in the data plotted.
-```{r,fig.width=5, eval=TRUE}
-ggseg3d(.data = someData, atlas = dk_3d, 
-        colour = "p", text = "p", 
-        palette = c("forestgreen" = 0, "white" = .05, "firebrick" = 1))
+```{r}
+#| label: intro-snap-plot-data
+#| echo: false
+some_data <- tibble(
+  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  p = c(0.01, 0.04, 0.2, 0.5)
+)
+
+ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
+  pan_camera("right lateral") |>
+  snapshot_brain("img/intro-plot-data.png")
 ```
 
-If you are plotting the sub-cortical structures, you might want to reduce the opacity of the `NA` structures, so that you can see the more medial structures. you may also want to add the `glassbrain`.
-```{r,fig.width=5, warning=F, message=FALSE}
-somData_aseg = aseg_3d %>% 
-  unnest(cols = ggseg_3d) %>% 
-  select(label) %>% 
-  filter(!grepl("Ventricle|Putamen|Amygdala", label)) %>% 
-  mutate(p = seq(1, nrow(.))) 
+![Right hemisphere with four cortical regions coloured on a blue-to-red scale by p-value; unmatched regions shown in grey.](img/intro-plot-data.png "Four regions mapped by p-value")
 
-ggseg3d(.data = somData_aseg, atlas = aseg_3d, 
-        colour = "p", text = "p", 
-        na.alpha= .5) %>% 
+`text_by = "p"` adds the p-value to the hover tooltip so you can inspect individual regions without a separate table.
+
+## Subcortical atlases
+
+Cortical surfaces are only half the story.
+The `aseg` atlas covers subcortical structures, and `add_glassbrain()` wraps them in a translucent cortex for anatomical context:
+
+```{r}
+#| label: intro-subcortical
+#| eval: false
+subcort_data <- tibble(
+  region = c("Thalamus", "Caudate", "Hippocampus"),
+  p = c(0.2, 0.5, 0.8)
+)
+
+ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
   add_glassbrain()
 ```
 
-### Legend options
-A new feature now also allows you to control the colourbar appearance through the `colourbar` option in `plotly::add_trace`, through the `legend.option` argument. 
-This argument takes a list, and you can for instance change the title. 
+```{r}
+#| label: intro-snap-subcortical
+#| echo: false
+subcort_data <- tibble(
+  region = c("Thalamus", "Caudate", "Hippocampus"),
+  p = c(0.2, 0.5, 0.8)
+)
 
+ggseg3d(.data = subcort_data, atlas = aseg(), colour_by = "p", na_alpha = .5) |>
+  add_glassbrain() |>
+  snapshot_brain("img/intro-subcortical.png")
+```
+
+![Thalamus, caudate, and hippocampus coloured by p-value, visible through a semi-transparent cortical shell.](img/intro-subcortical.png "Subcortical structures inside a glass brain")
+
+## Camera and background
+
+`pan_camera()` sets the viewing angle.
+`set_background()` changes the canvas colour — handy for dark-themed slides:
 
 ```{r}
- ggseg3d(.data=someData,
-      colour = "p", text="p", 
-      options.legend = list(title=list(text="mm")))
+#| label: intro-camera
+#| eval: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  set_background("black")
 ```
 
-
-## Camera
-You can rotate away all you like. if you want to start from the medial view, you can use the `pan_camera` option
-```{r,fig.width=5, eval=FALSE}
-ggseg3d(.data = someData, atlas=dk_3d, colour = "p") %>% 
-  pan_camera("right medial")
+```{r}
+#| label: intro-snap-camera
+#| echo: false
+ggseg3d(hemisphere = "left") |>
+  pan_camera("left lateral") |>
+  set_background("black") |>
+  snapshot_brain("img/intro-background.png")
 ```
 
-There is much more you can do with the camera options, or by adding extra layout options to plotly. 
-You may want to have a look at these resources if you want to do more complex adaptations to the plots:
+![Left hemisphere on a black background, cortical regions visible in their default atlas colours.](img/intro-background.png "Dark background for slides or posters")
 
-https://plot.ly/r/axes/#modifying-axes-for-3d-plots  
-https://plot.ly/r/trisurf/  
-https://moderndata.plot.ly/trisurf-plots-in-r-using-plotly/
-
-
-
-
+Camera presets cover the standard anatomical views: `"left lateral"`, `"right medial"`, `"left superior"`, and so on.
+For anything else, pass a list with `eye` coordinates.

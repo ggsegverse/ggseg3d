@@ -1,103 +1,89 @@
 
+
 # ggseg3d <img src='man/figures/logo.png' align="right" height="138.5" />
 
 <!-- badges: start -->
-[![Coverage status](https://codecov.io/gh/ggseg/ggseg3d/branch/master/graph/badge.svg)](https://codecov.io/gh/ggseg/ggseg3d)
-[![CRAN status](https://www.r-pkg.org/badges/version/ggseg3d)](https://CRAN.R-project.org/package=ggseg3d)
-[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg?color=blue)](https://r-pkg.org/pkg/ggseg)
-[![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/LCBC-UiO/ggseg3d/workflows/R-CMD-check/badge.svg)](https://github.com/LCBC-UiO/ggseg3d/actions)
+
+[![Coverage
+Status](https://raw.githubusercontent.com/ggsegverse/ggseg3d/coverage/badges/coverage.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/test-coverage.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/ggseg3d.png)](https://CRAN.R-project.org/package=ggseg3d)
+[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue.png)](https://r-pkg.org/pkg/ggseg3d)
+[![Lifecycle:
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![code-quality](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml)
+[![R-CMD-check](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-This package mainly contains a plotting function `ggseg3d` and
-data.frames of different brain atlases for plotting. Plotting results of
-analyses on regions or networks often involves swapping between
-statistical tools, like R and Matlab, and software for brain imaging to
-correctly visualise analysis results.
-
-This package aims to make it possible to plot results directly through
-R.
-
-## Atlases
-
-There are currently four atlases available in the package:
-
-1.  `dk_3d` - Desikan-Killiany atlas (aparc).  
-2.  `aseg_3d` - Automatic sub-cortical segmentation.
-
-If you want to create your own custom atlas or discover other compatible
-atlases, please see the companion package
-[ggsegExtra](https://ggseg.github.io/ggsegExtra/).
+Interactive 3D brain atlas visualization in R. Plot brain parcellations
+as WebGL meshes powered by Three.js, or render publication-quality
+static images through rgl and rayshader. A pipe-friendly API lets you
+map data onto brain regions, control camera angles, toggle region edges,
+overlay glass brains, and snapshot the result.
 
 ## Installation
 
-ggseg3d can be installed from CRAN with:
+Install from CRAN:
 
 ``` r
 install.packages("ggseg3d")
 ```
 
-We recommend installing {ggsegExtra} through the ggseg r-universe.
+Or get the development version from the [ggsegverse
+r-universe](https://ggsegverse.r-universe.dev):
 
 ``` r
-# Enable this universe
-options(repos = c(
-    ggseg = 'https://ggseg.r-universe.dev',
-    CRAN = 'https://cloud.r-project.org'))
-
-# Install some packages
-install.packages('ggseg3d')
+options(
+  repos = c(
+    ggsegverse = "https://ggsegverse.r-universe.dev",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+install.packages("ggseg3d")
 ```
 
-The package can be installed using {remotes}. The package includes some
-large datasets for the brain coordinates. Please be patient during
-download and install, it will take some time.
+## Atlases
+
+Three atlases ship with the package (via
+[ggseg.formats](https://ggsegverse.github.io/ggseg.formats/)):
+
+1.  `dk` – Desikan-Killiany cortical atlas
+2.  `aseg` – Automatic subcortical segmentation
+3.  `tracula` – White-matter tract atlas
+
+Additional atlases are available through the [ggsegverse
+r-universe](https://ggsegverse.r-universe.dev).
+
+## Usage
 
 ``` r
-install.packages("remotes")
-remotes::install_github("ggseg/ggseg3d", build_vignettes = TRUE)
+ggseg3d(atlas = dk(), hemisphere = "left") |>
+  pan_camera("left lateral")
 ```
 
-The functions are now installed, and you may load them when you want to
-use them. All functions are documented in standard R fashion.
+![](man/figures/README-dk_3d-plot.png)
 
-## Use
-
-The package also has a vignette, to help you get started using it. You
-can access it
-[here](https://ggseg.github.io/ggseg3d/articles/ggseg3d.html), or via R:
+Subcortical structures with a translucent glass brain overlay:
 
 ``` r
-library(ggseg3d)
-vignette("ggseg3d")
-```
-
-``` r
-p <- ggseg3d(atlas=dk_3d) %>% 
-  remove_axes() %>% 
+ggseg3d(atlas = aseg()) |>
+  add_glassbrain() |>
   pan_camera("right lateral")
 ```
 
-![](man/img/README-dk_3d-plot.png)<!-- -->
+![](man/figures/README-aseg_3d-plot.png)
 
-``` r
-p <- ggseg3d(atlas=aseg_3d) %>% 
-  add_glassbrain() %>% 
-  remove_axes() %>% 
-  pan_camera("right lateral")
-```
+See the [package website](https://ggsegverse.github.io/ggseg3d/) for the
+full walkthrough, rayshader rendering, and Shiny integration.
 
-![](man/img/README-aseg_3d-plot.png)<!-- -->
+## Citation
 
-### Report bugs or requests
+Mowinckel & Vidal-Piñeiro (2020). *Visualization of Brain Statistics
+With R Packages ggseg and ggseg3d.* Advances in Methods and Practices in
+Psychological Science.
+[doi:10.1177/2515245920928009](https://doi.org/10.1177/2515245920928009)
 
-Don’t hesitate to ask for support using [github
-issues](https://github.com/ggseg/ggseg3d/issues), or requesting new
-atlases. While we would love getting help in creating new atlases, you
-may also request atlases through the issues, and we will try to get to
-it.
-
-# Funding
+## Funding
 
 This tool is partly funded by:
 

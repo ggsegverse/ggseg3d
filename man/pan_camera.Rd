@@ -4,28 +4,42 @@
 \alias{pan_camera}
 \title{Pan camera position of ggseg3d plot}
 \usage{
-pan_camera(p, camera, aspectratio = 1)
+pan_camera(p, camera)
 }
 \arguments{
-\item{p}{plotly object}
+\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
 
-\item{camera}{string or list.}
+\item{camera}{string, list, or numeric vector. Camera position preset
+  name, custom eye position list, or `c(x, y, z)` for rgl.
 
-\item{aspectratio}{camera aspect ratio}
+\strong{Available camera presets:}
+\itemize{
+\item `left lateral` or `left_lateral`
+\item `left medial` or `left_medial`
+\item `right lateral` or `right_lateral`
+\item `right medial` or `right_medial`
+\item `left superior` or `left_superior`
+\item `right superior` or `right_superior`
+\item `left inferior` or `left_inferior`
+\item `right inferior` or `right_inferior`
+\item `left anterior` or `left_anterior`
+\item `right anterior` or `right_anterior`
+\item `left posterior` or `left_posterior`
+\item `right posterior` or `right_posterior`
+}}
 }
 \value{
-plotly object
+The input object (modified), for piping.
 }
 \description{
-The default position for plotly
-mesh plots are not satisfying for
-brain plots. This convenience function
-can pan the camera to lateral or medial
-view, or to custom made views if you are
-plotly savvy.
+Sets the camera position for a ggseg3d widget or ggsegray rgl scene
+to standard anatomical views or custom positions.
 }
 \examples{
-library(dplyr)
-ggseg3d() \%>\%
-   pan_camera("right lateral")
+\dontrun{
+ggseg3d() |> pan_camera("right lateral")
+
+ggsegray(atlas = dk(), hemisphere = "left") |>
+  pan_camera("left lateral")
+}
 }

@@ -1,9 +1,17 @@
 Meta
 doc
 .Rproj.user
+node_modules/
+package-lock.json
 .Rhistory
 .RData
 .Ruserdata
 /**/.DS_Store
 inst/doc
 docs/
+*Rcheck
+
+/doc/
+/Meta/
+vignettes/**/figure/
+vignettes/articles/**/img/

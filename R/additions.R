@@ -1,139 +1,490 @@
 #' Add glass brain to ggseg3d plot
 #'
-#' Adds a translucent brain on top of a ggseg3d plot
-#' to create a point of reference, particularly
-#' important for sub-cortical plots.
+#' Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
+#' Particularly useful for subcortical and tract visualizations where spatial
+#' context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
+#' rgl (`ggsegray`) objects.
 #'
-#' @param p plotly object
-#' @param hemisphere string. hemisphere to plot ("left" or "right")
-#' @param colour string. colour to give the glass brain
-#' @param opacity numeric. transparency of the glass brain (0-1 float)
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @param hemisphere Character vector. Hemispheres to add: "left", "right",
+#'   or both.
+#' @param surface Character. Surface type: "inflated", "white", or "pial".
+#' @param colour Character. Colour for the glass brain surface (hex or named).
+#' @param opacity Numeric. Transparency of the glass brain (0-1).
+#' @param brain_meshes Optional user-supplied brain meshes. See
+#'   [ggseg.formats::get_brain_mesh()] for format details.
 #'
-#' @return plotly object with glass brain tri-surface mesh
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' ggseg3d(atlas="aseg_3d") %>%
-#'    add_glassbrain("left")
-add_glassbrain <- function(p,
-                           hemisphere = c("left", "right"),
-                           colour = "#cecece",
-                           opacity=.3){
+#' \dontrun{
+#' ggseg3d(atlas = aseg()) |>
+#'   add_glassbrain("left", opacity = 0.2)
+#'
+#' ggsegray(atlas = aseg()) |>
+#'   add_glassbrain(opacity = 0.15) |>
+#'   pan_camera("right lateral")
+#' }
+add_glassbrain <- function(
+  p,
+  hemisphere = c("left", "right"),
+  surface = "pial",
+  colour = "#CCCCCC",
+  opacity = 0.3,
+  brain_meshes = NULL
+) {
+  is_rgl <- inherits(p, "ggsegray")
 
-  cortex <- dplyr::filter(cortex_3d,
-                          hemi %in% hemisphere)
-  cortex <- tidyr::unnest(cortex, ggseg_3d)
-
-  colour <- if(grepl("^#", colour)){
-    colour
-  }else{
-    col2hex(colour)
+  if (is_rgl) {
+    check_ggsegray(p)
+  } else {
+    check_ggseg3d(p)
   }
 
-  # add one trace per file inputed
-  for(tt in 1:nrow(cortex)){
+  colour <- if (grepl("^#", colour)) colour else col2hex(colour)
+  hemi_map <- c("left" = "lh", "right" = "rh")
+  cortical_hemis <- intersect(hemisphere, c("left", "right"))
 
-    col = rep(colour, length(cortex$mesh[[tt]]$it[1,]))
+  entries <- lapply(cortical_hemis, function(hemi) {
+    hemi_short <- hemi_map[hemi]
+    mesh <- resolve_brain_mesh(
+      hemisphere = hemi_short,
+      surface = surface,
+      brain_meshes = brain_meshes
+    )
 
-    p = plotly::add_trace(
-      p,
-      x = cortex$mesh[[tt]]$vb["xpts",],
-      y = cortex$mesh[[tt]]$vb["ypts",],
-      z = cortex$mesh[[tt]]$vb["zpts",],
+    if (is.null(mesh)) {
+      cli::cli_warn(
+        "Brain mesh not available for {.val {hemi}} {.val {surface}}. Skipping."
+      )
+      return(NULL)
+    }
 
-      i = cortex$mesh[[tt]]$it[1,]-1,
-      j = cortex$mesh[[tt]]$it[2,]-1,
-      k = cortex$mesh[[tt]]$it[3,]-1,
-
-      facecolor = col,
-      type = "mesh3d",
-      showscale = FALSE,
-      name = "cerebral cortex",
+    make_mesh_entry(
+      name = paste("glass brain", hemi),
+      vertices = mesh$vertices,
+      faces = mesh$faces,
+      colors = rep(colour, nrow(mesh$vertices)),
+      color_mode = "vertexcolor",
       opacity = opacity
     )
+  })
+  entries <- Filter(Negate(is.null), entries)
+
+  if (is_rgl) {
+    lapply(entries, function(entry) {
+      mesh3d <- mesh_entry_to_mesh3d(entry) # nolint [object_usage_linter]
+      rgl::shade3d(mesh3d)
+    })
+  } else {
+    p$x$meshes <- c(entries, p$x$meshes)
   }
 
   p
 }
 
+
 #' Pan camera position of ggseg3d plot
 #'
-#' The default position for plotly
-#' mesh plots are not satisfying for
-#' brain plots. This convenience function
-#' can pan the camera to lateral or medial
-#' view, or to custom made views if you are
-#' plotly savvy.
+#' Sets the camera position for a ggseg3d widget or ggsegray rgl scene
+#' to standard anatomical views or custom positions.
 #'
-#' @param p plotly object
-#' @param camera string or list.
-#' @param aspectratio camera aspect ratio
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @param camera string, list, or numeric vector. Camera position preset
+#'   name, custom eye position list, or `c(x, y, z)` for rgl.
 #'
-#' @return plotly object
+#' \strong{Available camera presets:}
+#' \itemize{
+#' \item `left lateral` or `left_lateral`
+#' \item `left medial` or `left_medial`
+#' \item `right lateral` or `right_lateral`
+#' \item `right medial` or `right_medial`
+#' \item `left superior` or `left_superior`
+#' \item `right superior` or `right_superior`
+#' \item `left inferior` or `left_inferior`
+#' \item `right inferior` or `right_inferior`
+#' \item `left anterior` or `left_anterior`
+#' \item `right anterior` or `right_anterior`
+#' \item `left posterior` or `left_posterior`
+#' \item `right posterior` or `right_posterior`
+#' }
+#'
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' ggseg3d() %>%
-#'    pan_camera("right lateral")
-pan_camera <- function(p, camera, aspectratio = 1){
+#' \dontrun{
+#' ggseg3d() |> pan_camera("right lateral")
+#'
+#' ggsegray(atlas = dk(), hemisphere = "left") |>
+#'   pan_camera("left lateral")
+#' }
+pan_camera <- function(p, camera) {
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
 
-  stopifnot(is.character(camera)|is.list(camera))
+    cam_pos <- if (is.numeric(camera)) {
+      camera
+    } else if (is.character(camera)) {
+      camera_preset_to_position(camera) # nolint [object_usage_linter]
+    } else {
+      cli::cli_abort(c(
+        "{.arg camera} must be a character string or numeric vector,",
+        "not {.obj_type_friendly {camera}}."
+      ))
+    }
 
-  views = if(class(camera) != "list"){
-    camera <- match.arg(camera, c("left lateral", "left medial",
-                                  "right lateral", "right medial"))
-    switch(camera,
-           "left lateral" = list(eye = list(x = -2.5, y = 0, z = 0)),
-           "left medial" = list(eye = list(x = 2, y = 0, z = 0)),
-           "right lateral" = list(eye = list(x = 2, y = 0, z = 0)),
-           "right medial" = list(eye = list(x = -2.5, y = 0, z = 0))
-    )
-  }else{
-    camera
+    um <- look_at_origin(cam_pos) # nolint [object_usage_linter]
+    rgl::view3d(userMatrix = um, fov = 0)
+    return(p)
   }
 
-  # create final plotly plot
-  plotly::layout(p,
-                 scene = list(camera = views,
-                              aspectratio = aspectratio)
-  )
+  check_ggseg3d(p)
+  if (!is.character(camera) && !is.list(camera)) {
+    cli::cli_abort(c(
+      "{.arg camera} must be a character string or list,",
+      "not {.obj_type_friendly {camera}}."
+    ))
+  }
+
+  p$x$options$camera <- camera
+  p
 }
 
 
-#' Remove axis information from ggseg3d plot
+#' Set background color of ggseg3d plot
 #'
-#' When publishing data visualisation in 3d mesh plots
-#' in general the axes are not important, at least
-#' they are not for ggseg3d, where the axis values
-#' are arbitrary.
+#' Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 #'
-#' @param p plotly object
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @param colour string. Background color (hex or named color)
 #'
-#' @return plotly object without axes
+#' @return The input object (modified), for piping.
 #' @export
 #'
 #' @examples
-#' library(magrittr)
-#' ggseg3d() %>%
-#'    remove_axes()
-remove_axes <- function(p){
-  ax <- list(
-    title = "",
-    zeroline = FALSE,
-    showline = FALSE,
-    showticklabels = FALSE,
-    showgrid = FALSE,
-    showbackground = FALSE
-  )
+#' \dontrun{
+#' ggseg3d() |> set_background("black")
+#'
+#' ggsegray(atlas = dk()) |> set_background("black")
+#' }
+set_background <- function(p, colour = "#ffffff") {
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
+    if (!grepl("^#", colour)) {
+      colour <- col2hex(colour)
+    }
+    rgl::bg3d(color = colour)
+    return(p)
+  }
 
-  plotly::layout(p,
-                 scene = list(
-                   xaxis=ax,
-                   yaxis=ax,
-                   zaxis=ax,
-                   plot_bgcolor='transparent',
-                   paper_bgcolor='transparent'))
+  check_ggseg3d(p)
+
+  if (!grepl("^#", colour)) {
+    colour <- col2hex(colour)
+  }
+
+  p$x$options$backgroundColor <- colour
+  p
 }
 
+
+#' Set legend visibility
+#'
+#' For htmlwidget output, toggles legend visibility. For rgl output,
+#' draws or removes the legend overlay.
+#'
+#' @param p A ggseg3d or ggsegray object
+#' @param show logical. Whether to show the legend (default: TRUE)
+#'
+#' @return The input object, modified
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |> set_legend(FALSE)
+#' ggsegray(hemisphere = "left") |> set_legend()
+#' }
+set_legend <- function(p, show = TRUE) {
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
+    if (show && !is.null(p$legend_data)) {
+      render_legend_rgl(p$legend_data)
+    }
+    return(p)
+  }
+
+  check_ggseg3d(p)
+  p$x$options$showLegend <- show
+  p
+}
+
+
+#' Set widget dimensions
+#'
+#' Changes the width and height of a ggseg3d widget.
+#'
+#' @param p ggseg3d widget object
+#' @param width numeric. Widget width in pixels (NULL for default)
+#' @param height numeric. Widget height in pixels (NULL for default)
+#'
+#' @return ggseg3d widget object with updated dimensions
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |>
+#'   set_dimensions(width = 800, height = 600)
+#' }
+set_dimensions <- function(p, width = NULL, height = NULL) {
+  check_ggseg3d(p)
+  if (!is.null(width)) {
+    p$width <- width
+  }
+  if (!is.null(height)) {
+    p$height <- height
+  }
+  p
+}
+
+
+#' Set region boundary edges
+#'
+#' Adds coloured outlines around brain regions. This is useful for
+#' highlighting region boundaries in figures. Works with both
+#' htmlwidget (`ggseg3d`) and rgl (`ggsegray`) objects. For rgl,
+#' edges must have been computed at creation time via `edge_by`.
+#'
+#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @param colour string. Edge colour (hex or named color). Set to NULL to
+#'   hide edges.
+#' @param width numeric. Width of edge lines (default: 1). Note: line width > 1
+#'   may not render on all systems due to WebGL limitations.
+#'
+#' @return The input object (modified), for piping.
+#' @export
+#'
+#' @section Lifecycle:
+#' `r lifecycle::badge("experimental")`
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d(hemisphere = "left", edge_by = "region") |>
+#'   set_edges("black") |>
+#'   pan_camera("left lateral")
+#'
+#' ggsegray(hemisphere = "left", edge_by = "region") |>
+#'   set_edges("red", width = 2) |>
+#'   pan_camera("left lateral")
+#' }
+set_edges <- function(p, colour = "black", width = 1) {
+  lifecycle::signal_stage("experimental", "set_edges()")
+
+  if (inherits(p, "ggsegray")) {
+    check_ggsegray(p)
+
+    if (length(p$edge_ids) > 0) {
+      lapply(p$edge_ids, function(eid) rgl::pop3d(id = eid))
+      p$edge_ids <- integer(0)
+    }
+
+    if (!is.null(colour)) {
+      edge_col <- if (grepl("^#", colour)) colour else col2hex(colour)
+      p$edge_ids <- unlist(lapply(p$meshes, function(mesh_entry) {
+        render_edges_rgl(mesh_entry, colour = edge_col, width = width)
+      }))
+    }
+
+    return(p)
+  }
+
+  check_ggseg3d(p)
+
+  if (is.null(colour)) {
+    p$x$meshes <- lapply(p$x$meshes, function(mesh) {
+      mesh$edgeColor <- NULL
+      mesh$edgeWidth <- NULL
+      mesh
+    })
+  } else {
+    edge_col <- if (grepl("^#", colour)) colour else col2hex(colour)
+    p$x$meshes <- lapply(p$x$meshes, function(mesh) {
+      mesh$edgeColor <- edge_col
+      mesh$edgeWidth <- width
+      mesh
+    })
+  }
+  p
+}
+
+
+#' Enable flat shading for ggseg3d plot
+#'
+#' Disables lighting effects to show colors exactly as specified.
+#' Useful for screenshots where accurate color reproduction is needed,
+#' such as atlas creation pipelines that extract contours from images.
+#'
+#' @param p ggseg3d widget object
+#' @param flat logical. Enable flat shading (default: TRUE)
+#'
+#' @return ggseg3d widget object with updated shading
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |>
+#'   set_flat_shading()
+#' }
+set_flat_shading <- function(p, flat = TRUE) {
+  check_ggseg3d(p)
+  p$x$options$flatShading <- flat
+  p
+}
+
+
+#' Enable orthographic camera for ggseg3d plot
+#'
+#' Uses orthographic projection instead of perspective. This eliminates
+#' perspective distortion and ensures consistent sizing across all views.
+#'
+#' @param p ggseg3d widget object
+#' @param ortho logical. Enable orthographic mode (default: TRUE)
+#' @param frustum_size numeric. Size of the orthographic frustum. Controls
+#'   how much of the scene is visible. Default 220 works well for brain meshes.
+#'   Use the same value across all views for consistent sizing.
+#'
+#' @return ggseg3d widget object with updated camera mode
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |>
+#'   set_orthographic()
+#' }
+set_orthographic <- function(p, ortho = TRUE, frustum_size = 220) {
+  check_ggseg3d(p)
+  p$x$options$orthographic <- ortho
+  p$x$options$frustumSize <- frustum_size
+  p
+}
+
+
+#' Set hemisphere positioning mode
+#'
+#' Repositions meshes in a ggseg3d widget to either anatomical or centered mode.
+#' This modifies the x-coordinates of all meshes in the widget.
+#'
+#' @param p ggseg3d widget object
+#' @param positioning How to position hemispheres:
+#'   - "anatomical": Offset so medial surfaces are adjacent at midline.
+#'     Left at negative x, right at positive x. Best for displaying both
+#'     hemispheres together.
+#'   - "centered": Center each hemisphere at the origin. Best for
+#'     single-hemisphere snapshots where consistent sizing is needed.
+#'
+#' @return ggseg3d widget object with repositioned meshes
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # View both hemispheres anatomically positioned
+#' ggseg3d(hemisphere = c("left", "right")) |>
+#'   set_positioning("anatomical") |>
+#'   pan_camera("left lateral")
+#'
+#' # Atlas creation: centered (default) for consistent sizing
+#' ggseg3d(hemisphere = "left") |>
+#'   set_orthographic() |>
+#'   pan_camera("left lateral") |>
+#'   snapshot_brain("left_lateral.png")
+#' }
+set_positioning <- function(p, positioning = c("anatomical", "centered")) {
+  check_ggseg3d(p)
+  positioning <- match.arg(positioning)
+
+  p$x$meshes <- lapply(p$x$meshes, function(mesh) {
+    name <- mesh$name %||% ""
+    is_left <- grepl("left", name, ignore.case = TRUE)
+    is_right <- grepl("right", name, ignore.case = TRUE)
+
+    if (!is_left && !is_right) return(mesh)
+
+    vertices <- mesh$vertices
+    x_range <- range(vertices$x)
+    half_width <- (x_range[2] - x_range[1]) / 2
+    x_center <- mean(x_range)
+
+    if (positioning == "centered") {
+      vertices$x <- vertices$x - x_center
+    } else {
+      vertices$x <- vertices$x - x_center
+      if (is_left) {
+        vertices$x <- vertices$x - half_width
+      } else if (is_right) {
+        vertices$x <- vertices$x + half_width
+      }
+    }
+
+    mesh$vertices <- vertices
+    mesh
+  })
+
+  p
+}
+
+
+#' Save ggseg3d widget as image
+#'
+#' Takes a screenshot of a ggseg3d widget and saves it as a PNG image.
+#' Requires a Chrome-based browser to be installed.
+#'
+#' @param p ggseg3d widget object
+#' @param file string. Output file path (should end in .png)
+#' @param width numeric. Image width in pixels (default: 600)
+#' @param height numeric. Image height in pixels (default: 500)
+#' @param delay numeric. Seconds to wait for widget to render before capture
+#'   (default: 1)
+#' @param zoom numeric. Zoom factor for higher resolution (default: 2)
+#' @param ... Additional arguments passed to webshot2::webshot
+#'
+#' @return The file path (invisibly)
+#' @export
+#' @importFrom webshot2 webshot
+#'
+#' @examples
+#' \dontrun{
+#' ggseg3d() |>
+#'   pan_camera("left lateral") |>
+#'   snapshot_brain("brain.png")
+#' }
+# nocov start
+snapshot_brain <- function(
+  p,
+  file,
+  width = 600,
+  height = 500,
+  delay = 1,
+  zoom = 2,
+  ...
+) {
+  check_ggseg3d(p)
+
+  tmpfile <- tempfile(fileext = ".html")
+  on.exit(unlink(tmpfile), add = TRUE)
+
+  htmlwidgets::saveWidget(p, tmpfile, selfcontained = TRUE)
+
+  webshot2::webshot(
+    url = tmpfile,
+    file = file,
+    vwidth = width,
+    vheight = height,
+    delay = delay,
+    zoom = zoom,
+    ...
+  )
+
+  invisible(file)
+}
+# nocov end

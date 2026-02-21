@@ -1,4 +1,4 @@
-#' ggseg3d: Plot brain segmentations with plotly
+#' ggseg3d: Plot brain segmentations in 3D
 #'
 #' Plotting results from analyses done on data derived from brain
 #' segmentations is a common need, but may be quite laborious.
@@ -8,9 +8,24 @@
 #'
 #' This package contains data from various brain parcellations,
 #' with convenient functions to inspect the results directly on
-#' a brain-plot wither with plotly in 3d meshes.
+#' a brain-plot using interactive 3D mesh visualizations powered
+#' by Three.js via htmlwidgets.
 #'
-#' @name ggseg3d
+#' The package uses `ggseg_atlas` objects from ggseg.formats
+#' that contain 3D vertex mappings.
+#'
+#' @name ggseg3d-package
 #' @docType package
 #' @keywords internal
+#' @import ggseg.formats
 "_PACKAGE"
+
+#' @export
+ggseg.formats::dk
+
+#' @export
+ggseg.formats::aseg
+
+#' @export
+ggseg.formats::tracula
+

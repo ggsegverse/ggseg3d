@@ -1,29 +1,20 @@
-test_that("data_merge works", {
-  atlas3d <- get_atlas("dk_3d", "LCBC", "left")
+test_that("data_merge works with unified atlas", {
+  atlas_data <- ggseg.formats::atlas_sf(dk())
 
-  someData <- data.frame(
-    region = c("transverse temporal", "insula",
-             "precentral","superior parietal"),
-    p = sample(seq(0,.5,.001), 4),
-    stringsAsFactors = F)
+  some_data <- data.frame(
+    region = c(
+      "transverse temporal",
+      "insula",
+      "precentral",
+      "superior parietal"
+    ),
+    p = sample(seq(0, .5, .001), 4),
+    stringsAsFactors = FALSE
+  )
 
-  k <- data_merge(someData, atlas3d)
+  merged <- dplyr::left_join(atlas_data, some_data, by = "region")
 
-  expect_equal(names(k),
-               c("atlas", "surf", "hemi", "region", "colour", "mesh", "label",
-                 "roi", "annot", "p"))
-
-  someData <- data.frame(
-    region = c("transverse templral", "insula",
-             "precentral","superior parietal"),
-    p = sample(seq(0,.5,.001), 4),
-    stringsAsFactors = F)
-
-  k <- expect_warning(data_merge(someData, atlas3d),
-                      "transverse templral")
-
-  expect_equal(names(k),
-               c("atlas", "surf", "hemi", "region", "colour", "mesh", "label",
-                 "roi", "annot", "p"))
-
+  expect_true("p" %in% names(merged))
+  expect_true("region" %in% names(merged))
+  expect_true("hemi" %in% names(merged))
 })
