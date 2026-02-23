@@ -1,33 +1,59 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//index.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/add_glassbrain.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/aseg_3d.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/dk_3d.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/ggseg3d.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/ggseg3d_atlas-class.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/is_ggseg3d_atlas.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/pan_camera.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//reference/remove_axes.html</loc>
-  </url>
-  <url>
-    <loc>https://lcbc-uio.github.io/ggseg3d//articles/ggseg3d.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://ggsegverse.github.io/ggseg3d/404.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/LICENSE-text.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/LICENSE.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/articles/ggseg3d-walkthrough.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/articles/ggseg3d.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/articles/index.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/articles/rayshader.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/articles/shiny.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/authors.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/index.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/news/index.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/apply_colour_palette.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/apply_colours_and_legend.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_centerline_data.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_continuous_legend.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_cortical_meshes.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_discrete_legend.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_legend_data.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_subcortical_meshes.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_tract_meshes.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/camera_preset_to_position.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/compute_parallel_transp_fr.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/create_ggseg3d_widget.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/cross_product.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/data_merge_mesh.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/generate_tube_mesh.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/ggseg3d-package.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/ggseg3d-shiny.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/ggsegray.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/index.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/look_at_origin.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/mesh_entry_to_mesh3d.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/pan_camera.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/position_hemisphere.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_atlas_data.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_brain_meshes.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_mesh_atlas_data.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/reexports.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/resolve_brain_mesh.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/rotate_vector.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_background.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_dimensions.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_edges.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_flat_shading.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_legend.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_orthographic.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/set_positioning.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/snapshot_brain.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/tangents_to_colors.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/updateGgseg3dBackground.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/updateGgseg3dCamera.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/vertices_to_colors.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/vertices_to_labels.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/vertices_to_text.html</loc></url>
 </urlset>
+

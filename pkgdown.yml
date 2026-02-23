@@ -1,10 +1,12 @@
-pandoc: 2.7.3
-pkgdown: 1.6.1
+pandoc: 3.1.11
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  articles/ggseg3d-walkthrough: ggseg3d-walkthrough.html
   ggseg3d: ggseg3d.html
-last_built: 2021-06-01T07:31Z
+  articles/rayshader: rayshader.html
+  shiny: shiny.html
+last_built: 2026-02-23T19:41Z
 urls:
-  reference: https://lcbc-uio.github.io/ggseg3d//reference
-  article: https://lcbc-uio.github.io/ggseg3d//articles
-
+  reference: https://ggsegverse.github.io/ggseg3d/reference
+  article: https://ggsegverse.github.io/ggseg3d/articles

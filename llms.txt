@@ -1,0 +1,148 @@
+# ggseg3d
+
+Interactive 3D brain atlas visualization in R. Plot brain parcellations
+as WebGL meshes powered by Three.js, or render publication-quality
+static images through rgl and rayshader. A pipe-friendly API lets you
+map data onto brain regions, control camera angles, toggle region edges,
+overlay glass brains, and snapshot the result.
+
+## Installation
+
+Install from CRAN:
+
+``` r
+install.packages("ggseg3d")
+```
+
+Or get the development version from the [ggsegverse
+r-universe](https://ggsegverse.r-universe.dev):
+
+``` r
+options(
+  repos = c(
+    ggsegverse = "https://ggsegverse.r-universe.dev",
+    CRAN = "https://cloud.r-project.org"
+  )
+)
+install.packages("ggseg3d")
+```
+
+## Atlases
+
+Three atlases ship with the package (via
+[ggseg.formats](https://ggsegverse.github.io/ggseg.formats/)):
+
+1.  `dk` – Desikan-Killiany cortical atlas
+2.  `aseg` – Automatic subcortical segmentation
+3.  `tracula` – White-matter tract atlas
+
+Additional atlases are available through the [ggsegverse
+r-universe](https://ggsegverse.r-universe.dev).
+
+## Usage
+
+``` r
+ggseg3d(atlas = dk(), hemisphere = "left") |>
+  pan_camera("left lateral")
+```
+
+![](reference/figures/README-dk_3d-plot.png)
+
+Subcortical structures with a translucent glass brain overlay:
+
+``` r
+ggseg3d(atlas = aseg()) |>
+  add_glassbrain() |>
+  pan_camera("right lateral")
+```
+
+![](reference/figures/README-aseg_3d-plot.png)
+
+See the [package website](https://ggsegverse.github.io/ggseg3d/) for the
+full walkthrough, rayshader rendering, and Shiny integration.
+
+## Citation
+
+Mowinckel & Vidal-Piñeiro (2020). *Visualization of Brain Statistics
+With R Packages ggseg and ggseg3d.* Advances in Methods and Practices in
+Psychological Science.
+[doi:10.1177/2515245920928009](https://doi.org/10.1177/2515245920928009)
+
+## Funding
+
+This tool is partly funded by:
+
+**EU Horizon 2020 Grant:** Healthy minds 0-100 years: Optimising the use
+of European brain imaging cohorts (Lifebrain).
+
+**Grant agreement number:** 732592.
+
+**Call:** Societal challenges: Health, demographic change and well-being
+
+# Package index
+
+## Plotting
+
+Core 3D visualization function
+
+- [`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md)
+  : Plot 3D brain parcellations
+- [`ggsegray()`](https://ggsegverse.github.io/ggseg3d/reference/ggsegray.md)
+  : Render brain atlas with rgl
+
+## Widget Customization
+
+Pipe-friendly functions to modify the 3D widget
+
+- [`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md)
+  : Pan camera position of ggseg3d plot
+- [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md)
+  : Add glass brain to ggseg3d plot
+- [`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md)
+  : Set background color of ggseg3d plot
+- [`set_dimensions()`](https://ggsegverse.github.io/ggseg3d/reference/set_dimensions.md)
+  : Set widget dimensions
+- [`set_edges()`](https://ggsegverse.github.io/ggseg3d/reference/set_edges.md)
+  : Set region boundary edges
+- [`set_flat_shading()`](https://ggsegverse.github.io/ggseg3d/reference/set_flat_shading.md)
+  : Enable flat shading for ggseg3d plot
+- [`set_legend()`](https://ggsegverse.github.io/ggseg3d/reference/set_legend.md)
+  : Set legend visibility
+- [`set_orthographic()`](https://ggsegverse.github.io/ggseg3d/reference/set_orthographic.md)
+  : Enable orthographic camera for ggseg3d plot
+- [`set_positioning()`](https://ggsegverse.github.io/ggseg3d/reference/set_positioning.md)
+  : Set hemisphere positioning mode
+- [`snapshot_brain()`](https://ggsegverse.github.io/ggseg3d/reference/snapshot_brain.md)
+  : Save ggseg3d widget as image
+
+## Mesh Utilities
+
+Work with brain surface meshes
+
+- [`resolve_brain_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/resolve_brain_mesh.md)
+  : Resolve brain surface mesh
+
+## Shiny
+
+Shiny integration
+
+- [`ggseg3dOutput()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d-shiny.md)
+  [`renderGgseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d-shiny.md)
+  : Shiny bindings for ggseg3d
+- [`updateGgseg3dCamera()`](https://ggsegverse.github.io/ggseg3d/reference/updateGgseg3dCamera.md)
+  : Update camera in Shiny
+- [`updateGgseg3dBackground()`](https://ggsegverse.github.io/ggseg3d/reference/updateGgseg3dBackground.md)
+  : Update background in Shiny
+
+# Articles
+
+### All vignettes
+
+- [ggseg3d
+  walkthrough](https://ggsegverse.github.io/ggseg3d/articles/ggseg3d-walkthrough.md):
+- [Introduction to
+  ggseg3d](https://ggsegverse.github.io/ggseg3d/articles/ggseg3d.md):
+- [Ray-traced brain renders with
+  rayshader](https://ggsegverse.github.io/ggseg3d/articles/rayshader.md):
+- [Using ggseg3d in
+  Shiny](https://ggsegverse.github.io/ggseg3d/articles/shiny.md):
