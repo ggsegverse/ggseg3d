@@ -61,6 +61,8 @@ HTMLWidgets.widget({
 
         renderer.centerOnMeshes();
 
+        el._ggseg3d_renderer = renderer;
+
         if (options.camera) {
           renderer.setCamera(options.camera);
         }
