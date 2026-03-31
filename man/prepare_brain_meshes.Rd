@@ -4,6 +4,7 @@
 \alias{prepare_brain_meshes}
 \alias{prepare_brain_meshes.cortical_atlas}
 \alias{prepare_brain_meshes.subcortical_atlas}
+\alias{prepare_brain_meshes.cerebellar_atlas}
 \alias{prepare_brain_meshes.tract_atlas}
 \title{Prepare brain meshes and legend data}
 \usage{
@@ -26,6 +27,18 @@ prepare_brain_meshes(atlas, ...)
 )
 
 \method{prepare_brain_meshes}{subcortical_atlas}(
+  atlas,
+  .data = NULL,
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  ...
+)
+
+\method{prepare_brain_meshes}{cerebellar_atlas}(
   atlas,
   .data = NULL,
   label_by = "region",

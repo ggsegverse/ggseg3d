@@ -310,6 +310,82 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
   expect_true(all(grepl("^#", prepared$meshes[[1]]$colors)))
 })
 
+test_that("prepare_brain_meshes handles cerebellar atlas", {
+  meshes_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  meshes_data$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "suit_lobules",
+      type = "cerebellar",
+      core = data.frame(
+        label = "left_I-IV",
+        region = "I-IV",
+        hemi = "left",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(meshes = meshes_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c("left_I-IV" = "#FF0000")
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+
+  expect_type(prepared, "list")
+  expect_true(length(prepared$meshes) > 0)
+  expect_equal(prepared$meshes[[1]]$colorMode, "facecolor")
+  expect_equal(prepared$meshes[[1]]$name, "I-IV")
+})
+
+test_that("prepare_brain_meshes cerebellar does not apply native coords offset", {
+  meshes_data <- data.frame(
+    label = "vermis_VI",
+    stringsAsFactors = FALSE
+  )
+  meshes_data$mesh <- list(
+    list(
+      vertices = data.frame(x = c(10, 20, 30), y = c(10, 20, 30), z = c(10, 20, 30)),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "test_cer",
+      type = "cerebellar",
+      core = data.frame(
+        label = "vermis_VI", region = "VI", hemi = "vermis",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(meshes = meshes_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(vermis_VI = "#00FF00")
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+  verts <- prepared$meshes[[1]]$vertices
+
+  expect_equal(verts$x, c(10, 20, 30))
+  expect_equal(verts$y, c(10, 20, 30))
+  expect_equal(verts$z, c(10, 20, 30))
+})
+
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
   fake <- structure(list(), class = "weird_atlas")
   expect_error(prepare_brain_meshes(fake), "No method")

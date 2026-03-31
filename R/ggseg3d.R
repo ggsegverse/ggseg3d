@@ -138,7 +138,7 @@ prepare_brain_meshes.default <- function(atlas, ...) {
   cli::cli_abort(c(
     "No method for atlas of class {.val {cls}}.",
     "i" = "Expected {.cls cortical_atlas}, {.cls subcortical_atlas},
-    or {.cls tract_atlas}."
+    {.cls tract_atlas}, or {.cls cerebellar_atlas}."
   ))
 }
 
@@ -223,6 +223,37 @@ prepare_brain_meshes.subcortical_atlas <- function(
   atlas_data <- to_native_coords(result$atlas_data)
   meshes <- build_subcortical_meshes(
     atlas_data, na_colour,
+    text_by = text_by, label_by = label_by
+  )
+
+  list(meshes = meshes, legend_data = result$legend_data)
+}
+
+#' @method prepare_brain_meshes cerebellar_atlas
+#' @export
+#' @rdname prepare_brain_meshes
+#' @keywords internal
+prepare_brain_meshes.cerebellar_atlas <- function(
+  atlas,
+  .data = NULL,
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  ...
+) {
+  atlas_data <- prepare_mesh_atlas_data(atlas, .data)
+  result <- apply_colours_and_legend(
+    atlas_data,
+    colour_by,
+    palette,
+    na_colour,
+    label_by
+  )
+  meshes <- build_subcortical_meshes(
+    result$atlas_data, na_colour,
     text_by = text_by, label_by = label_by
   )
 
