@@ -32,6 +32,7 @@ Imports:
     tidyr,
     webshot2
 Suggests:
+    ggseg.meshes,
     png,
     rayshader,
     rgl,

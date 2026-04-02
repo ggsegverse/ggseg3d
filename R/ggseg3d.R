@@ -244,7 +244,9 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   na_alpha = 1,
   ...
 ) {
-  atlas_data <- prepare_mesh_atlas_data(atlas, .data)
+  has_deep <- !is.null(atlas$data$meshes)
+
+  atlas_data <- prepare_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
     atlas_data,
     colour_by,
@@ -252,12 +254,31 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     na_colour,
     label_by
   )
-  meshes <- build_subcortical_meshes(
+  surface_meshes <- build_cerebellar_meshes(
     result$atlas_data, na_colour,
-    text_by = text_by, label_by = label_by
+    text_by = text_by, label_by = label_by,
+    opacity = if (has_deep) 0.3 else 1
   )
 
-  list(meshes = meshes, legend_data = result$legend_data)
+  if (has_deep) {
+    deep_data <- prepare_deep_cerebellar_data(atlas, .data)
+    deep_result <- apply_colours_and_legend(
+      deep_data, colour_by, palette, na_colour, label_by
+    )
+    deep_meshes <- build_subcortical_meshes(
+      deep_result$atlas_data, na_colour,
+      text_by = text_by, label_by = label_by
+    )
+    all_meshes <- c(surface_meshes, deep_meshes)
+    legend_data <- merge_legend_data(
+      result$legend_data, deep_result$legend_data
+    )
+  } else {
+    all_meshes <- surface_meshes
+    legend_data <- result$legend_data
+  }
+
+  list(meshes = all_meshes, legend_data = legend_data)
 }
 
 #' @method prepare_brain_meshes tract_atlas

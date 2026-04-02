@@ -310,17 +310,12 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
   expect_true(all(grepl("^#", prepared$meshes[[1]]$colors)))
 })
 
-test_that("prepare_brain_meshes handles cerebellar atlas", {
-  meshes_data <- data.frame(
+test_that("prepare_brain_meshes handles cerebellar atlas with vertices", {
+  vertices_data <- data.frame(
     label = "left_I-IV",
     stringsAsFactors = FALSE
   )
-  meshes_data$mesh <- list(
-    list(
-      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
-      faces = data.frame(i = 1L, j = 2L, k = 3L)
-    )
-  )
+  vertices_data$vertices <- list(0L:99L)
 
   atlas <- structure(
     list(
@@ -333,7 +328,7 @@ test_that("prepare_brain_meshes handles cerebellar atlas", {
         stringsAsFactors = FALSE
       ),
       data = structure(
-        list(meshes = meshes_data),
+        list(vertices = vertices_data),
         class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
       ),
       palette = c("left_I-IV" = "#FF0000")
@@ -345,45 +340,49 @@ test_that("prepare_brain_meshes handles cerebellar atlas", {
 
   expect_type(prepared, "list")
   expect_true(length(prepared$meshes) > 0)
-  expect_equal(prepared$meshes[[1]]$colorMode, "facecolor")
-  expect_equal(prepared$meshes[[1]]$name, "I-IV")
+  expect_equal(prepared$meshes[[1]]$colorMode, "vertexcolor")
+  expect_equal(prepared$meshes[[1]]$name, "cerebellum")
+  expect_equal(
+    length(prepared$meshes[[1]]$vertices$x),
+    nrow(ggseg.formats::get_cerebellar_mesh()$vertices)
+  )
 })
 
-test_that("prepare_brain_meshes cerebellar does not apply native coords offset", {
-  meshes_data <- data.frame(
-    label = "vermis_VI",
+test_that("cerebellar atlas colors correct vertices", {
+  vertices_data <- data.frame(
+    label = c("left_I-IV", "right_V"),
     stringsAsFactors = FALSE
   )
-  meshes_data$mesh <- list(
-    list(
-      vertices = data.frame(x = c(10, 20, 30), y = c(10, 20, 30), z = c(10, 20, 30)),
-      faces = data.frame(i = 1L, j = 2L, k = 3L)
-    )
-  )
+  vertices_data$vertices <- list(0L:4L, 100L:104L)
 
   atlas <- structure(
     list(
       atlas = "test_cer",
       type = "cerebellar",
       core = data.frame(
-        label = "vermis_VI", region = "VI", hemi = "vermis",
+        label = c("left_I-IV", "right_V"),
+        region = c("I-IV", "V"),
+        hemi = c("left", "right"),
         stringsAsFactors = FALSE
       ),
       data = structure(
-        list(meshes = meshes_data),
+        list(vertices = vertices_data),
         class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
       ),
-      palette = c(vermis_VI = "#00FF00")
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "right_V" = "#00FF00"
+      )
     ),
     class = c("cerebellar_atlas", "ggseg_atlas", "list")
   )
 
   prepared <- prepare_brain_meshes(atlas)
-  verts <- prepared$meshes[[1]]$vertices
+  colors <- prepared$meshes[[1]]$colors
 
-  expect_equal(verts$x, c(10, 20, 30))
-  expect_equal(verts$y, c(10, 20, 30))
-  expect_equal(verts$z, c(10, 20, 30))
+  expect_equal(colors[1:5], rep("#FF0000", 5))
+  expect_equal(colors[101:105], rep("#00FF00", 5))
+  expect_equal(colors[50], "darkgrey")
 })
 
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
