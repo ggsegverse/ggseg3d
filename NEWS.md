@@ -1,3 +1,13 @@
+# ggseg3d 2.0.0.9001
+
+## Deep cerebellar nuclei in 3D
+
+- Cerebellar atlases with deep nuclei now render the SUIT surface at 30%
+  opacity with opaque per-region meshes for deep structures visible inside.
+- `build_cerebellar_meshes()` gains an `opacity` parameter.
+- `prepare_brain_meshes.cerebellar_atlas()` handles mixed vertex-based
+  (surface) and mesh-based (deep nuclei) rendering in a single scene.
+
 # ggseg3d 2.0.0
 
 ## Major changes
