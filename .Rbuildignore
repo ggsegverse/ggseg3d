@@ -26,3 +26,4 @@ ggseg3d.Rcheck
 man-roxygen/
 ^inst/sticker\.png$
 
+^codemeta\.json$
