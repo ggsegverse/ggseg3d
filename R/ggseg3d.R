@@ -230,6 +230,8 @@ prepare_brain_meshes.subcortical_atlas <- function(
 }
 
 #' @method prepare_brain_meshes cerebellar_atlas
+#' @param surface_opacity Numeric opacity for the cerebellar surface mesh.
+#'   Defaults to `0.3` when deep nuclei are present and `1` otherwise.
 #' @export
 #' @rdname prepare_brain_meshes
 #' @keywords internal
@@ -242,9 +244,11 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
+  surface_opacity = NULL,
   ...
 ) {
   has_deep <- !is.null(atlas$data$meshes)
+  surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
 
   atlas_data <- prepare_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
@@ -257,11 +261,11 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   surface_meshes <- build_cerebellar_meshes(
     result$atlas_data, na_colour,
     text_by = text_by, label_by = label_by,
-    opacity = if (has_deep) 0.3 else 1
+    opacity = surface_opacity
   )
 
   if (has_deep) {
-    deep_data <- prepare_deep_cerebellar_data(atlas, .data)
+    deep_data <- prepare_mesh_atlas_data(atlas, .data)
     deep_result <- apply_colours_and_legend(
       deep_data, colour_by, palette, na_colour, label_by
     )

@@ -14,6 +14,12 @@
 #'
 #' @return list with vertices (data.frame with x, y, z) and faces
 #'   (data.frame with i, j, k), or NULL if mesh not found
+#'
+#' @examples
+#' \dontrun{
+#' resolve_brain_mesh("lh", "inflated")
+#' }
+#'
 #' @export
 resolve_brain_mesh <- function(
   hemisphere = c("lh", "rh"),
@@ -40,7 +46,7 @@ resolve_brain_mesh <- function(
   }
 
   if (surface %in% c("inflated", "semi-inflated")) {
-    pial <- resolve_brain_mesh(hemisphere, "pial")
+    pial <- resolve_brain_mesh(hemisphere, "pial", brain_meshes)
     mesh$vertices$x <- mesh$vertices$x +
       (mean(pial$vertices$x) - mean(mesh$vertices$x))
     mesh$vertices$y <- mesh$vertices$y +
@@ -328,6 +334,7 @@ build_cortical_meshes <- function(
 #' @param na_colour Colour for NA values
 #' @param text_by Column for hover text (or NULL)
 #' @param label_by Column for vertex labels
+#' @param opacity Numeric opacity for the mesh (0 = transparent, 1 = opaque)
 #'
 #' @return List of mesh data structures
 #' @keywords internal
@@ -344,11 +351,11 @@ build_cerebellar_meshes <- function(
     cli::cli_abort("SUIT cerebellar mesh not available.")
   }
 
-  faces_1based <- data.frame(
-    i = mesh$faces$i + 1L,
-    j = mesh$faces$j + 1L,
-    k = mesh$faces$k + 1L
-  )
+  if (min(mesh$faces$i) == 0) {
+    mesh$faces$i <- mesh$faces$i + 1L
+    mesh$faces$j <- mesh$faces$j + 1L
+    mesh$faces$k <- mesh$faces$k + 1L
+  }
 
   n_vertices <- nrow(mesh$vertices)
   vertex_colors <- vertices_to_colors(atlas_data, n_vertices, na_colour)
@@ -360,12 +367,12 @@ build_cerebellar_meshes <- function(
     vertices_to_text(atlas_data, n_vertices, text_by)
   }
 
-  boundary <- find_boundary_edges(faces_1based, vertex_colors)
+  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
 
   entry <- make_mesh_entry(
     name = "cerebellum",
     vertices = mesh$vertices,
-    faces = faces_1based,
+    faces = mesh$faces,
     colors = vertex_colors,
     color_mode = "vertexcolor",
     opacity = opacity,

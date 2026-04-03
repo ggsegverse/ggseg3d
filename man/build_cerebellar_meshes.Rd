@@ -8,7 +8,8 @@ build_cerebellar_meshes(
   atlas_data,
   na_colour,
   text_by = NULL,
-  label_by = "region"
+  label_by = "region",
+  opacity = 1
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ build_cerebellar_meshes(
 \item{text_by}{Column for hover text (or NULL)}
 
 \item{label_by}{Column for vertex labels}
+
+\item{opacity}{Numeric opacity for the mesh (0 = transparent, 1 = opaque)}
 }
 \value{
 List of mesh data structures

@@ -30,3 +30,9 @@ Resolves and prepares a brain surface mesh for rendering. Delegates to
 other surfaces. Corrects 0-based face indices and centers
 inflated/semi-inflated meshes on pial centroids.
 }
+\examples{
+\dontrun{
+resolve_brain_mesh("lh", "inflated")
+}
+
+}

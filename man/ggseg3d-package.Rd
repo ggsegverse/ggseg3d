@@ -37,5 +37,10 @@ Authors:
   \item Didac Vidal-Piñeiro \email{d.v.pineiro@psykologi.uio.no} (\href{https://orcid.org/0000-0001-9997-9156}{ORCID})
 }
 
+Other contributors:
+\itemize{
+  \item Center for Lifespan Changes in Brain and Cognition (LCBC), University of Oslo [copyright holder]
+}
+
 }
 \keyword{internal}

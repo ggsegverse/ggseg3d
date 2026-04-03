@@ -142,39 +142,6 @@ data_merge_mesh <- function(.data, atlas_data) {
 }
 
 
-#' Prepare deep cerebellar nuclei data for 3D rendering
-#'
-#' Extracts per-region meshes from a cerebellar atlas's `meshes` component
-#' and joins with core metadata and palette colours.
-#'
-#' @param atlas A cerebellar ggseg_atlas with `data$meshes`
-#' @param .data Optional user data to merge
-#' @return Data frame with label, hemi, region, colour, and mesh columns
-#' @keywords internal
-prepare_deep_cerebellar_data <- function(atlas, .data) {
-  meshes <- atlas$data$meshes
-
-  atlas_data <- dplyr::left_join(
-    meshes,
-    atlas$core,
-    by = "label",
-    relationship = "many-to-many"
-  )
-
-  if (!is.null(atlas$palette)) {
-    atlas_data$colour <- atlas$palette[atlas_data$label]
-  } else {
-    atlas_data$colour <- NA_character_
-  }
-
-  if (!is.null(.data)) {
-    atlas_data <- data_merge_mesh(.data, atlas_data)
-  }
-
-  atlas_data
-}
-
-
 #' Merge legend data from surface and deep cerebellar components
 #' @noRd
 merge_legend_data <- function(surface_legend, deep_legend) {

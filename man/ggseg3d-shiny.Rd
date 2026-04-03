@@ -24,7 +24,21 @@ string and have \code{'px'} appended.}
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 }
+\value{
+`ggseg3dOutput` returns an HTML widget output element for use in
+  a Shiny UI. `renderGgseg3d` returns a render function for use in a
+  Shiny server.
+}
 \description{
 Output and render functions for using ggseg3d within Shiny
 applications and interactive R Markdown documents.
+}
+\examples{
+\dontshow{if (rlang::is_installed("shiny") && interactive()) withAutoprint(\{ # examplesIf}
+library(shiny)
+ui <- fluidPage(ggseg3dOutput("brain"))
+server <- function(input, output) {
+  output$brain <- renderGgseg3d(ggseg3d())
+}
+\dontshow{\}) # examplesIf}
 }

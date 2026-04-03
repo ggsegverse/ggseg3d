@@ -385,6 +385,103 @@ test_that("cerebellar atlas colors correct vertices", {
   expect_equal(colors[50], "darkgrey")
 })
 
+test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  deep_meshes <- data.frame(
+    label = "Left-Dentate",
+    stringsAsFactors = FALSE
+  )
+  deep_meshes$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "suit_deep",
+      type = "cerebellar",
+      core = data.frame(
+        label = c("left_I-IV", "Left-Dentate"),
+        region = c("I-IV", "Dentate"),
+        hemi = c("left", "left"),
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data, meshes = deep_meshes),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "Left-Dentate" = "#0000FF"
+      )
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+
+  expect_true(length(prepared$meshes) >= 2)
+  surface <- prepared$meshes[[1]]
+  expect_equal(surface$name, "cerebellum")
+  expect_equal(surface$colorMode, "vertexcolor")
+  expect_equal(surface$opacity, 0.3)
+
+  deep <- prepared$meshes[[2]]
+  expect_equal(deep$name, "Dentate")
+  expect_equal(deep$colorMode, "facecolor")
+})
+
+test_that("cerebellar surface_opacity can be overridden", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  deep_meshes <- data.frame(
+    label = "Left-Dentate",
+    stringsAsFactors = FALSE
+  )
+  deep_meshes$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "suit_deep",
+      type = "cerebellar",
+      core = data.frame(
+        label = c("left_I-IV", "Left-Dentate"),
+        region = c("I-IV", "Dentate"),
+        hemi = c("left", "left"),
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data, meshes = deep_meshes),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "Left-Dentate" = "#0000FF"
+      )
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas, surface_opacity = 0.5)
+  expect_equal(prepared$meshes[[1]]$opacity, 0.5)
+})
+
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
   fake <- structure(list(), class = "weird_atlas")
   expect_error(prepare_brain_meshes(fake), "No method")

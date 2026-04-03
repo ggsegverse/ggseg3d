@@ -13,7 +13,17 @@ updateGgseg3dBackground(session, outputId, colour)
 
 \item{colour}{Background color (hex or named color)}
 }
+\value{
+None, called for side effects (sends message to client)
+}
 \description{
 Sends a message to update the background color of a ggseg3d widget
 in a Shiny app.
+}
+\examples{
+\dontshow{if (rlang::is_installed("shiny") && interactive()) withAutoprint(\{ # examplesIf}
+\dontrun{
+updateGgseg3dBackground(session, "brain", "black")
+}
+\dontshow{\}) # examplesIf}
 }

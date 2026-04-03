@@ -47,6 +47,7 @@ prepare_brain_meshes(atlas, ...)
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
+  surface_opacity = NULL,
   ...
 )
 
@@ -92,6 +93,9 @@ prepare_brain_meshes(atlas, ...)
 \item{edge_by}{Column name for region boundary edge grouping}
 
 \item{brain_meshes}{Optional user-supplied brain meshes}
+
+\item{surface_opacity}{Numeric opacity for the cerebellar surface mesh.
+Defaults to `0.3` when deep nuclei are present and `1` otherwise.}
 
 \item{tract_color}{`"palette"` (default) or `"orientation"`
 (direction-based RGB colouring)}

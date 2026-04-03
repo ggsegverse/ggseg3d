@@ -12,9 +12,20 @@
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
 #'
+#' @return `ggseg3dOutput` returns an HTML widget output element for use in
+#'   a Shiny UI. `renderGgseg3d` returns a render function for use in a
+#'   Shiny server.
+#'
 #' @name ggseg3d-shiny
 #'
 #' @importFrom htmlwidgets shinyWidgetOutput shinyRenderWidget
+#'
+#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' library(shiny)
+#' ui <- fluidPage(ggseg3dOutput("brain"))
+#' server <- function(input, output) {
+#'   output$brain <- renderGgseg3d(ggseg3d())
+#' }
 #'
 #' @export
 # nolint start: object_name_linter
@@ -47,6 +58,13 @@ renderGgseg3d <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @param outputId The output ID of the ggseg3d widget
 #' @param camera Camera position preset or custom position
 #'
+#' @return None, called for side effects (sends message to client)
+#'
+#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' \dontrun{
+#' updateGgseg3dCamera(session, "brain", "left lateral")
+#' }
+#'
 #' @export
 updateGgseg3dCamera <- function(session, outputId, camera) {
   session$sendCustomMessage(paste0("ggseg3d-camera-", outputId), camera)
@@ -61,6 +79,13 @@ updateGgseg3dCamera <- function(session, outputId, camera) {
 #' @param session The Shiny session object
 #' @param outputId The output ID of the ggseg3d widget
 #' @param colour Background color (hex or named color)
+#'
+#' @return None, called for side effects (sends message to client)
+#'
+#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' \dontrun{
+#' updateGgseg3dBackground(session, "brain", "black")
+#' }
 #'
 #' @export
 updateGgseg3dBackground <- function(session, outputId, colour) {
