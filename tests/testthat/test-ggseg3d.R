@@ -482,6 +482,69 @@ test_that("cerebellar surface_opacity can be overridden", {
   expect_equal(prepared$meshes[[1]]$opacity, 0.5)
 })
 
+test_that("merge_legend_data handles NULL inputs", {
+  legend <- data.frame(label = "a", colour = "#FF0000")
+
+  expect_null(merge_legend_data(NULL, NULL))
+  expect_equal(merge_legend_data(NULL, legend), legend)
+  expect_equal(merge_legend_data(legend, NULL), legend)
+
+  combined <- merge_legend_data(legend, legend)
+  expect_equal(nrow(combined), 1)
+})
+
+test_that("build_cerebellar_meshes errors when mesh unavailable", {
+  local_mocked_bindings(
+    get_cerebellar_mesh = function(...) NULL,
+    .package = "ggseg.formats"
+  )
+  expect_error(
+    build_cerebellar_meshes(data.frame(), "darkgrey"),
+    "SUIT cerebellar mesh"
+  )
+})
+
+test_that("check_ggseg_meshes errors when package missing", {
+  local_mocked_bindings(
+    requireNamespace = function(...) FALSE,
+    .package = "base"
+  )
+  expect_error(check_ggseg_meshes("pial"), "ggseg.meshes")
+})
+
+test_that("cerebellar atlas with text_by populates vertex texts", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  atlas <- structure(
+    list(
+      atlas = "suit_text",
+      type = "cerebellar",
+      core = data.frame(
+        label = "left_I-IV",
+        region = "I-IV",
+        hemi = "left",
+        score = 0.75,
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c("left_I-IV" = "#FF0000")
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas, text_by = "score")
+  texts <- prepared$meshes[[1]]$vertexTexts
+  expect_true(!is.null(texts))
+  expect_match(texts[1], "score")
+})
+
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
   fake <- structure(list(), class = "weird_atlas")
   expect_error(prepare_brain_meshes(fake), "No method")
