@@ -310,6 +310,241 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
   expect_true(all(grepl("^#", prepared$meshes[[1]]$colors)))
 })
 
+test_that("prepare_brain_meshes handles cerebellar atlas with vertices", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:99L)
+
+  atlas <- structure(
+    list(
+      atlas = "suit_lobules",
+      type = "cerebellar",
+      core = data.frame(
+        label = "left_I-IV",
+        region = "I-IV",
+        hemi = "left",
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c("left_I-IV" = "#FF0000")
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+
+  expect_type(prepared, "list")
+  expect_true(length(prepared$meshes) > 0)
+  expect_equal(prepared$meshes[[1]]$colorMode, "vertexcolor")
+  expect_equal(prepared$meshes[[1]]$name, "cerebellum")
+  expect_equal(
+    length(prepared$meshes[[1]]$vertices$x),
+    nrow(ggseg.formats::get_cerebellar_mesh()$vertices)
+  )
+})
+
+test_that("cerebellar atlas colors correct vertices", {
+  vertices_data <- data.frame(
+    label = c("left_I-IV", "right_V"),
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L, 100L:104L)
+
+  atlas <- structure(
+    list(
+      atlas = "test_cer",
+      type = "cerebellar",
+      core = data.frame(
+        label = c("left_I-IV", "right_V"),
+        region = c("I-IV", "V"),
+        hemi = c("left", "right"),
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "right_V" = "#00FF00"
+      )
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+  colors <- prepared$meshes[[1]]$colors
+
+  expect_equal(colors[1:5], rep("#FF0000", 5))
+  expect_equal(colors[101:105], rep("#00FF00", 5))
+  expect_equal(colors[50], "darkgrey")
+})
+
+test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  deep_meshes <- data.frame(
+    label = "Left-Dentate",
+    stringsAsFactors = FALSE
+  )
+  deep_meshes$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "suit_deep",
+      type = "cerebellar",
+      core = data.frame(
+        label = c("left_I-IV", "Left-Dentate"),
+        region = c("I-IV", "Dentate"),
+        hemi = c("left", "left"),
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data, meshes = deep_meshes),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "Left-Dentate" = "#0000FF"
+      )
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas)
+
+  expect_true(length(prepared$meshes) >= 2)
+  surface <- prepared$meshes[[1]]
+  expect_equal(surface$name, "cerebellum")
+  expect_equal(surface$colorMode, "vertexcolor")
+  expect_equal(surface$opacity, 0.3)
+
+  deep <- prepared$meshes[[2]]
+  expect_equal(deep$name, "Dentate")
+  expect_equal(deep$colorMode, "facecolor")
+})
+
+test_that("cerebellar surface_opacity can be overridden", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  deep_meshes <- data.frame(
+    label = "Left-Dentate",
+    stringsAsFactors = FALSE
+  )
+  deep_meshes$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- structure(
+    list(
+      atlas = "suit_deep",
+      type = "cerebellar",
+      core = data.frame(
+        label = c("left_I-IV", "Left-Dentate"),
+        region = c("I-IV", "Dentate"),
+        hemi = c("left", "left"),
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data, meshes = deep_meshes),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c(
+        "left_I-IV" = "#FF0000",
+        "Left-Dentate" = "#0000FF"
+      )
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas, surface_opacity = 0.5)
+  expect_equal(prepared$meshes[[1]]$opacity, 0.5)
+})
+
+test_that("merge_legend_data handles NULL inputs", {
+  legend <- data.frame(label = "a", colour = "#FF0000")
+
+  expect_null(merge_legend_data(NULL, NULL))
+  expect_equal(merge_legend_data(NULL, legend), legend)
+  expect_equal(merge_legend_data(legend, NULL), legend)
+
+  combined <- merge_legend_data(legend, legend)
+  expect_equal(nrow(combined), 1)
+})
+
+test_that("build_cerebellar_meshes errors when mesh unavailable", {
+  local_mocked_bindings(
+    get_cerebellar_mesh = function(...) NULL,
+    .package = "ggseg.formats"
+  )
+  expect_error(
+    build_cerebellar_meshes(data.frame(), "darkgrey"),
+    "SUIT cerebellar mesh"
+  )
+})
+
+test_that("check_ggseg_meshes errors when package missing", {
+  local_mocked_bindings(
+    requireNamespace = function(...) FALSE,
+    .package = "base"
+  )
+  expect_error(check_ggseg_meshes("pial"), "ggseg.meshes")
+})
+
+test_that("cerebellar atlas with text_by populates vertex texts", {
+  vertices_data <- data.frame(
+    label = "left_I-IV",
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:4L)
+
+  atlas <- structure(
+    list(
+      atlas = "suit_text",
+      type = "cerebellar",
+      core = data.frame(
+        label = "left_I-IV",
+        region = "I-IV",
+        hemi = "left",
+        score = 0.75,
+        stringsAsFactors = FALSE
+      ),
+      data = structure(
+        list(vertices = vertices_data),
+        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
+      ),
+      palette = c("left_I-IV" = "#FF0000")
+    ),
+    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+  )
+
+  prepared <- prepare_brain_meshes(atlas, text_by = "score")
+  texts <- prepared$meshes[[1]]$vertexTexts
+  expect_true(!is.null(texts))
+  expect_match(texts[1], "score")
+})
+
 test_that("prepare_brain_meshes.default errors on unknown atlas class", {
   fake <- structure(list(), class = "weird_atlas")
   expect_error(prepare_brain_meshes(fake), "No method")

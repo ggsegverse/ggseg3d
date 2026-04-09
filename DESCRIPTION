@@ -1,11 +1,13 @@
 Package: ggseg3d
 Title: Interactive 3D Brain Atlas Visualization
-Version: 2.0.0.9000
+Version: 2.1.0
 Authors@R: c(
     person("Athanasia Mo", "Mowinckel", , "a.m.mowinckel@psykologi.uio.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5756-0223")),
     person("Didac", "Vidal-Piñeiro", , "d.v.pineiro@psykologi.uio.no", role = "aut",
-           comment = c(ORCID = "0000-0001-9997-9156"))
+           comment = c(ORCID = "0000-0001-9997-9156")),
+    person("Center for Lifespan Changes in Brain and Cognition (LCBC), University of Oslo",
+           role = "cph")
   )
 Description: Plot brain atlases as interactive 3D meshes using 'Three.js'
     via 'htmlwidgets', or render publication-quality static images through
@@ -32,6 +34,7 @@ Imports:
     tidyr,
     webshot2
 Suggests:
+    ggseg.meshes,
     png,
     rayshader,
     rgl,

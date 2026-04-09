@@ -1,5 +1,4 @@
 
-
 # ggseg3d <img src='man/figures/logo.png' align="right" height="138.5" />
 
 <!-- badges: start -->
@@ -7,8 +6,8 @@
 [![Coverage
 Status](https://raw.githubusercontent.com/ggsegverse/ggseg3d/coverage/badges/coverage.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/test-coverage.yaml)
 [![CRAN
-status](https://www.r-pkg.org/badges/version/ggseg3d.png)](https://CRAN.R-project.org/package=ggseg3d)
-[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue.png)](https://r-pkg.org/pkg/ggseg3d)
+status](https://www.r-pkg.org/badges/version/ggseg3d)](https://CRAN.R-project.org/package=ggseg3d)
+[![downloads](https://cranlogs.r-pkg.org/badges/last-month/ggseg3d?color=blue)](https://r-pkg.org/pkg/ggseg3d)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![code-quality](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/code-quality.yaml)
@@ -61,7 +60,7 @@ ggseg3d(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 ```
 
-![](man/figures/README-dk_3d-plot.png)
+<img src="man/figures/README-dk_3d-plot.png" alt="" width="1200" />
 
 Subcortical structures with a translucent glass brain overlay:
 
@@ -71,7 +70,7 @@ ggseg3d(atlas = aseg()) |>
   pan_camera("right lateral")
 ```
 
-![](man/figures/README-aseg_3d-plot.png)
+<img src="man/figures/README-aseg_3d-plot.png" alt="" width="1200" />
 
 See the [package website](https://ggsegverse.github.io/ggseg3d/) for the
 full walkthrough, rayshader rendering, and Shiny integration.

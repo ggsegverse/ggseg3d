@@ -1,23 +1,30 @@
 #' Resolve brain surface mesh
 #'
 #' Resolves and prepares a brain surface mesh for rendering. Delegates to
-#' [ggseg.formats::get_brain_mesh()] for inflated surfaces, provides pial,
-#' white, and semi-inflated surfaces from ggseg3d internal data, corrects
-#' 0-based face indices, and centers inflated/semi-inflated meshes on pial
-#' centroids.
+#' [ggseg.formats::get_brain_mesh()] for inflated surfaces and to
+#' [ggseg.meshes::get_cortical_mesh()] for pial, white, semi-inflated, and
+#' other surfaces. Corrects 0-based face indices and centers
+#' inflated/semi-inflated meshes on pial centroids.
 #'
 #' @param hemisphere `"lh"` or `"rh"`
 #' @param surface Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
-#'   `"pial"`
+#'   `"pial"`, `"sphere"`, `"smoothwm"`, `"orig"`
 #' @param brain_meshes Optional user-supplied mesh data. Passed through to
 #'   [ggseg.formats::get_brain_mesh()] for format details.
 #'
 #' @return list with vertices (data.frame with x, y, z) and faces
 #'   (data.frame with i, j, k), or NULL if mesh not found
+#'
+#' @examples
+#' \dontrun{
+#' resolve_brain_mesh("lh", "inflated")
+#' }
+#'
 #' @export
 resolve_brain_mesh <- function(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial"),
+  surface = c("inflated", "semi-inflated", "white", "pial",
+              "sphere", "smoothwm", "orig"),
   brain_meshes = NULL
 ) {
   hemisphere <- match.arg(hemisphere)
@@ -26,13 +33,8 @@ resolve_brain_mesh <- function(
   if (!is.null(brain_meshes) || surface == "inflated") {
     mesh <- ggseg.formats::get_brain_mesh(hemisphere, surface, brain_meshes)
   } else {
-    mesh_data <- switch(
-      surface,
-      "pial" = brain_mesh_pial,
-      "white" = brain_mesh_white,
-      "semi-inflated" = brain_mesh_semi_inflated
-    )
-    mesh <- mesh_data[[hemisphere]]
+    check_ggseg_meshes(surface)
+    mesh <- ggseg.meshes::get_cortical_mesh(hemisphere, surface)
   }
 
   if (is.null(mesh)) return(NULL)
@@ -44,7 +46,7 @@ resolve_brain_mesh <- function(
   }
 
   if (surface %in% c("inflated", "semi-inflated")) {
-    pial <- brain_mesh_pial[[hemisphere]]
+    pial <- resolve_brain_mesh(hemisphere, "pial", brain_meshes)
     mesh$vertices$x <- mesh$vertices$x +
       (mean(pial$vertices$x) - mean(mesh$vertices$x))
     mesh$vertices$y <- mesh$vertices$y +
@@ -57,9 +59,19 @@ resolve_brain_mesh <- function(
 }
 
 
+check_ggseg_meshes <- function(surface) {
+  if (!requireNamespace("ggseg.meshes", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg ggseg.meshes} is required for {.val {surface}}.",
+      "i" = "Install with: {.run install.packages('ggseg.meshes')}"
+    ))
+  }
+}
+
+
 native_offset <- function() {
-  pial_lh <- brain_mesh_pial[["lh"]]
-  pial_rh <- brain_mesh_pial[["rh"]]
+  pial_lh <- resolve_brain_mesh("lh", "pial")
+  pial_rh <- resolve_brain_mesh("rh", "pial")
   inf_lh <- ggseg.formats::get_brain_mesh("lh", "inflated")
   inf_rh <- ggseg.formats::get_brain_mesh("rh", "inflated")
 
@@ -310,6 +322,66 @@ build_cortical_meshes <- function(
   })
 
   Filter(Negate(is.null), meshes)
+}
+
+
+#' Build mesh list for cerebellar atlases
+#'
+#' Creates mesh data structures for cerebellar ggseg_atlas objects using
+#' the shared SUIT cerebellar surface with vertex-based colouring.
+#'
+#' @param atlas_data Prepared atlas data frame with vertices column
+#' @param na_colour Colour for NA values
+#' @param text_by Column for hover text (or NULL)
+#' @param label_by Column for vertex labels
+#' @param opacity Numeric opacity for the mesh (0 = transparent, 1 = opaque)
+#'
+#' @return List of mesh data structures
+#' @keywords internal
+build_cerebellar_meshes <- function(
+  atlas_data,
+  na_colour,
+  text_by = NULL,
+  label_by = "region",
+  opacity = 1
+) {
+  mesh <- ggseg.formats::get_cerebellar_mesh()
+
+  if (is.null(mesh)) {
+    cli::cli_abort("SUIT cerebellar mesh not available.")
+  }
+
+  if (min(mesh$faces$i) == 0) {
+    mesh$faces$i <- mesh$faces$i + 1L
+    mesh$faces$j <- mesh$faces$j + 1L
+    mesh$faces$k <- mesh$faces$k + 1L
+  }
+
+  n_vertices <- nrow(mesh$vertices)
+  vertex_colors <- vertices_to_colors(atlas_data, n_vertices, na_colour)
+  vertex_labels <- vertices_to_labels(
+    atlas_data, n_vertices, na_label = ""
+  )
+
+  vertex_texts <- if (!is.null(text_by)) {
+    vertices_to_text(atlas_data, n_vertices, text_by)
+  }
+
+  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
+
+  entry <- make_mesh_entry(
+    name = "cerebellum",
+    vertices = mesh$vertices,
+    faces = mesh$faces,
+    colors = vertex_colors,
+    color_mode = "vertexcolor",
+    opacity = opacity,
+    boundary_edges = boundary,
+    vertex_labels = vertex_labels,
+    vertex_texts = vertex_texts
+  )
+
+  list(entry)
 }
 
 

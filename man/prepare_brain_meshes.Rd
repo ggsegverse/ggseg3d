@@ -4,6 +4,7 @@
 \alias{prepare_brain_meshes}
 \alias{prepare_brain_meshes.cortical_atlas}
 \alias{prepare_brain_meshes.subcortical_atlas}
+\alias{prepare_brain_meshes.cerebellar_atlas}
 \alias{prepare_brain_meshes.tract_atlas}
 \title{Prepare brain meshes and legend data}
 \usage{
@@ -34,6 +35,19 @@ prepare_brain_meshes(atlas, ...)
   palette = NULL,
   na_colour = "darkgrey",
   na_alpha = 1,
+  ...
+)
+
+\method{prepare_brain_meshes}{cerebellar_atlas}(
+  atlas,
+  .data = NULL,
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  surface_opacity = NULL,
   ...
 )
 
@@ -79,6 +93,9 @@ prepare_brain_meshes(atlas, ...)
 \item{edge_by}{Column name for region boundary edge grouping}
 
 \item{brain_meshes}{Optional user-supplied brain meshes}
+
+\item{surface_opacity}{Numeric opacity for the cerebellar surface mesh.
+Defaults to `0.3` when deep nuclei are present and `1` otherwise.}
 
 \item{tract_color}{`"palette"` (default) or `"orientation"`
 (direction-based RGB colouring)}

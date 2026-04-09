@@ -138,7 +138,7 @@ prepare_brain_meshes.default <- function(atlas, ...) {
   cli::cli_abort(c(
     "No method for atlas of class {.val {cls}}.",
     "i" = "Expected {.cls cortical_atlas}, {.cls subcortical_atlas},
-    or {.cls tract_atlas}."
+    {.cls tract_atlas}, or {.cls cerebellar_atlas}."
   ))
 }
 
@@ -227,6 +227,62 @@ prepare_brain_meshes.subcortical_atlas <- function(
   )
 
   list(meshes = meshes, legend_data = result$legend_data)
+}
+
+#' @method prepare_brain_meshes cerebellar_atlas
+#' @param surface_opacity Numeric opacity for the cerebellar surface mesh.
+#'   Defaults to `0.3` when deep nuclei are present and `1` otherwise.
+#' @export
+#' @rdname prepare_brain_meshes
+#' @keywords internal
+prepare_brain_meshes.cerebellar_atlas <- function(
+  atlas,
+  .data = NULL,
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  surface_opacity = NULL,
+  ...
+) {
+  has_deep <- !is.null(atlas$data$meshes)
+  surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
+
+  atlas_data <- prepare_atlas_data(atlas, .data)
+  result <- apply_colours_and_legend(
+    atlas_data,
+    colour_by,
+    palette,
+    na_colour,
+    label_by
+  )
+  surface_meshes <- build_cerebellar_meshes(
+    result$atlas_data, na_colour,
+    text_by = text_by, label_by = label_by,
+    opacity = surface_opacity
+  )
+
+  if (has_deep) {
+    deep_data <- prepare_mesh_atlas_data(atlas, .data)
+    deep_result <- apply_colours_and_legend(
+      deep_data, colour_by, palette, na_colour, label_by
+    )
+    deep_meshes <- build_subcortical_meshes(
+      deep_result$atlas_data, na_colour,
+      text_by = text_by, label_by = label_by
+    )
+    all_meshes <- c(surface_meshes, deep_meshes)
+    legend_data <- merge_legend_data(
+      result$legend_data, deep_result$legend_data
+    )
+  } else {
+    all_meshes <- surface_meshes
+    legend_data <- result$legend_data
+  }
+
+  list(meshes = all_meshes, legend_data = legend_data)
 }
 
 #' @method prepare_brain_meshes tract_atlas

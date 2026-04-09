@@ -6,7 +6,7 @@
 \usage{
 resolve_brain_mesh(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial"),
+  surface = c("inflated", "semi-inflated", "white", "pial", "sphere", "smoothwm", "orig"),
   brain_meshes = NULL
 )
 }
@@ -14,7 +14,7 @@ resolve_brain_mesh(
 \item{hemisphere}{`"lh"` or `"rh"`}
 
 \item{surface}{Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
-`"pial"`}
+`"pial"`, `"sphere"`, `"smoothwm"`, `"orig"`}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
 [ggseg.formats::get_brain_mesh()] for format details.}
@@ -25,8 +25,14 @@ list with vertices (data.frame with x, y, z) and faces
 }
 \description{
 Resolves and prepares a brain surface mesh for rendering. Delegates to
-[ggseg.formats::get_brain_mesh()] for inflated surfaces, provides pial,
-white, and semi-inflated surfaces from ggseg3d internal data, corrects
-0-based face indices, and centers inflated/semi-inflated meshes on pial
-centroids.
+[ggseg.formats::get_brain_mesh()] for inflated surfaces and to
+[ggseg.meshes::get_cortical_mesh()] for pial, white, semi-inflated, and
+other surfaces. Corrects 0-based face indices and centers
+inflated/semi-inflated meshes on pial centroids.
+}
+\examples{
+\dontrun{
+resolve_brain_mesh("lh", "inflated")
+}
+
 }

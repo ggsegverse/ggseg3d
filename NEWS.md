@@ -1,3 +1,16 @@
+# ggseg3d 2.1.0
+
+## Cerebellar atlas support
+
+- New `cerebellar_atlas` class with `prepare_brain_meshes.cerebellar_atlas()`
+  method for rendering SUIT cerebellar surfaces with vertex-based colouring.
+- Mixed vertex+mesh rendering for deep cerebellar nuclei: the SUIT surface
+  renders at 30% opacity with opaque per-region meshes for deep structures.
+- `surface_opacity` parameter controls cerebellar surface transparency when
+  deep nuclei are present.
+- Cortical mesh data moved to the 'ggseg.meshes' package, removing bundled
+  `sysdata.rda`.
+
 # ggseg3d 2.0.0
 
 ## Major changes
