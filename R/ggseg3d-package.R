@@ -28,4 +28,3 @@ ggseg.formats::aseg
 
 #' @export
 ggseg.formats::tracula
-

@@ -62,8 +62,8 @@ resolve_brain_mesh <- function(
 check_ggseg_meshes <- function(surface) {
   if (!requireNamespace("ggseg.meshes", quietly = TRUE)) {
     cli::cli_abort(c(
-      "The {.pkg ggseg.meshes} package is required for the {.val {surface}} surface.",
-      "i" = "Install with: {.code remotes::install_github('ggsegverse/ggseg.meshes')}"
+      "{.pkg ggseg.meshes} is required for {.val {surface}}.",
+      "i" = "Install with: {.run install.packages('ggseg.meshes')}"
     ))
   }
 }
