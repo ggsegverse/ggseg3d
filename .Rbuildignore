@@ -27,3 +27,4 @@ man-roxygen/
 ^inst/sticker\.png$
 
 ^codemeta\.json$
+^CRAN-SUBMISSION$
