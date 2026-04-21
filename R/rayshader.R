@@ -30,8 +30,9 @@
 #'
 #' @importFrom graphics par plot.new plot.window rect text
 #'
-#' @examplesIf rlang::is_installed("rgl")
-#' \donttest{
+#' @examples
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(hemisphere = "left") |>
 #'   pan_camera("left lateral")
 #'

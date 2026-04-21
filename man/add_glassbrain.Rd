@@ -44,12 +44,10 @@ rgl (`ggsegray`) objects.
 ggseg3d(atlas = aseg()) |>
   add_glassbrain("left", opacity = 0.2)
 }
-
-\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
-\donttest{
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(atlas = aseg()) |>
   add_glassbrain(opacity = 0.15) |>
   pan_camera("right lateral")
 }
-\dontshow{\}) # examplesIf}
 }

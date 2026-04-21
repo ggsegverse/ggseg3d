@@ -21,7 +21,7 @@ Sends a message to update the background color of a ggseg3d widget
 in a Shiny app.
 }
 \examples{
-\dontshow{if (rlang::is_installed("shiny") && interactive()) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() && rlang::is_installed("shiny")) withAutoprint(\{ # examplesIf}
 \dontrun{
 updateGgseg3dBackground(session, "brain", "black")
 }

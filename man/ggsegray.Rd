@@ -101,8 +101,8 @@ Tract atlases (`tract_atlas`):
 }
 
 \examples{
-\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
-\donttest{
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -111,5 +111,5 @@ ggsegray(atlas = aseg()) |>
   pan_camera("right lateral") |>
   set_background("black")
 }
-\dontshow{\}) # examplesIf}
+
 }

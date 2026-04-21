@@ -24,9 +24,8 @@
 #' ggseg3d(atlas = aseg()) |>
 #'   add_glassbrain("left", opacity = 0.2)
 #' }
-#'
-#' @examplesIf rlang::is_installed("rgl")
-#' \donttest{
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(atlas = aseg()) |>
 #'   add_glassbrain(opacity = 0.15) |>
 #'   pan_camera("right lateral")
@@ -129,10 +128,11 @@ add_glassbrain <- function(
 #'
 #' @examples
 #' ggseg3d() |> pan_camera("right lateral")
-#'
-#' @examplesIf rlang::is_installed("rgl")
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(atlas = dk(), hemisphere = "left") |>
 #'   pan_camera("left lateral")
+#' }
 pan_camera <- function(p, camera) {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -178,9 +178,10 @@ pan_camera <- function(p, camera) {
 #'
 #' @examples
 #' ggseg3d() |> set_background("black")
-#'
-#' @examplesIf rlang::is_installed("rgl")
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(atlas = dk()) |> set_background("black")
+#' }
 set_background <- function(p, colour = "#ffffff") {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -215,9 +216,10 @@ set_background <- function(p, colour = "#ffffff") {
 #'
 #' @examples
 #' ggseg3d() |> set_legend(FALSE)
-#'
-#' @examplesIf rlang::is_installed("rgl")
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(hemisphere = "left") |> set_legend()
+#' }
 set_legend <- function(p, show = TRUE) {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -282,11 +284,12 @@ set_dimensions <- function(p, width = NULL, height = NULL) {
 #' ggseg3d(hemisphere = "left", edge_by = "region") |>
 #'   set_edges("black") |>
 #'   pan_camera("left lateral")
-#'
-#' @examplesIf rlang::is_installed("rgl")
+#' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(hemisphere = "left", edge_by = "region") |>
 #'   set_edges("red", width = 2) |>
 #'   pan_camera("left lateral")
+#' }
 set_edges <- function(p, colour = "black", width = 1) {
   lifecycle::signal_stage("experimental", "set_edges()")
 

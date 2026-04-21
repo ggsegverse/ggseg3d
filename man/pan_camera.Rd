@@ -37,9 +37,9 @@ to standard anatomical views or custom positions.
 }
 \examples{
 ggseg3d() |> pan_camera("right lateral")
-
-\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
-\dontshow{\}) # examplesIf}
+}
 }

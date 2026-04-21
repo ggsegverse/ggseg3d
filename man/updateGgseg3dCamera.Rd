@@ -21,7 +21,7 @@ Sends a message to update the camera position of a ggseg3d widget
 in a Shiny app.
 }
 \examples{
-\dontshow{if (rlang::is_installed("shiny") && interactive()) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() && rlang::is_installed("shiny")) withAutoprint(\{ # examplesIf}
 \dontrun{
 updateGgseg3dCamera(session, "brain", "left lateral")
 }

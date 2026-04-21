@@ -19,8 +19,8 @@ Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 }
 \examples{
 ggseg3d() |> set_background("black")
-
-\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(atlas = dk()) |> set_background("black")
-\dontshow{\}) # examplesIf}
+}
 }

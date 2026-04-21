@@ -20,8 +20,8 @@ draws or removes the legend overlay.
 }
 \examples{
 ggseg3d() |> set_legend(FALSE)
-
-\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(hemisphere = "left") |> set_legend()
-\dontshow{\}) # examplesIf}
+}
 }
