@@ -79,12 +79,10 @@ Tract atlases (`tract_atlas`):
 }
 
 \examples{
-\dontrun{
 ggseg3d()
 ggseg3d(hemisphere = "left") |> pan_camera("left lateral")
 ggseg3d() |> set_legend(FALSE)
 ggseg3d() |> set_background("black")
-}
 
 }
 \seealso{

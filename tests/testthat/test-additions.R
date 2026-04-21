@@ -123,22 +123,41 @@ test_that("set_positioning anatomical offsets hemispheres", {
   expect_true(mean(range(right_mesh$vertices$x)) > 0)
 })
 
-test_that("set_positioning skips meshes without left/right in name", {
+test_that("set_positioning leaves subcortical region meshes untouched", {
   p <- ggseg3d(atlas = aseg())
   original_meshes <- p$x$meshes
 
   p_positioned <- p |> set_positioning("centered")
   for (i in seq_along(p_positioned$x$meshes)) {
-    m <- p_positioned$x$meshes[[i]]
-    name <- m$name %||% ""
-    if (!grepl("left|right", name, ignore.case = TRUE)) {
-      expect_equal(m$vertices, original_meshes[[i]]$vertices)
-    }
+    expect_equal(
+      p_positioned$x$meshes[[i]]$vertices,
+      original_meshes[[i]]$vertices
+    )
   }
 })
 
 test_that("set_positioning rejects non-ggseg3d objects", {
   expect_error(set_positioning(list()), "ggseg3d")
+})
+
+test_that("ggseg3d produces anatomically positioned hemispheres by default", {
+  p <- ggseg3d(hemisphere = c("left", "right"))
+  left <- NULL
+  right <- NULL
+  for (m in p$x$meshes) {
+    if (m$name == "left inflated") left <- m
+    if (m$name == "right inflated") right <- m
+  }
+  expect_lte(max(left$vertices$x), 1e-6)
+  expect_gte(min(right$vertices$x), -1e-6)
+})
+
+test_that("add_glassbrain warns and returns unchanged when widget is flat", {
+  p <- ggseg3d(hemisphere = "left")
+  p$x$meshes[[1]]$isFlatmap <- TRUE
+  n <- length(p$x$meshes)
+  expect_warning(result <- add_glassbrain(p), "flatmap|flat")
+  expect_equal(length(result$x$meshes), n)
 })
 
 test_that("add_glassbrain warns for unavailable mesh", {

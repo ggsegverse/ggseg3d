@@ -36,10 +36,10 @@ Sets the camera position for a ggseg3d widget or ggsegray rgl scene
 to standard anatomical views or custom positions.
 }
 \examples{
-\dontrun{
 ggseg3d() |> pan_camera("right lateral")
 
+\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
-}
+\dontshow{\}) # examplesIf}
 }

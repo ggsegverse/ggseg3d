@@ -8,7 +8,9 @@
 #' @param p A `ggseg3d` widget or `ggsegray` rgl object.
 #' @param hemisphere Character vector. Hemispheres to add: "left", "right",
 #'   or both.
-#' @param surface Character. Surface type: "inflated", "white", or "pial".
+#' @param surface Character. Surface type. Defaults to `"inflated"`, which
+#'   is supplied by `ggseg.formats` and requires no additional dependency.
+#'   Other surfaces (`"pial"`, `"white"`, etc.) are drawn from `ggseg.meshes`.
 #' @param colour Character. Colour for the glass brain surface (hex or named).
 #' @param opacity Numeric. Transparency of the glass brain (0-1).
 #' @param brain_meshes Optional user-supplied brain meshes. See
@@ -18,10 +20,13 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' ggseg3d(atlas = aseg()) |>
 #'   add_glassbrain("left", opacity = 0.2)
+#' }
 #'
+#' @examplesIf rlang::is_installed("rgl")
+#' \donttest{
 #' ggsegray(atlas = aseg()) |>
 #'   add_glassbrain(opacity = 0.15) |>
 #'   pan_camera("right lateral")
@@ -29,7 +34,7 @@
 add_glassbrain <- function(
   p,
   hemisphere = c("left", "right"),
-  surface = "pial",
+  surface = "inflated",
   colour = "#CCCCCC",
   opacity = 0.3,
   brain_meshes = NULL
@@ -40,6 +45,15 @@ add_glassbrain <- function(
     check_ggsegray(p)
   } else {
     check_ggseg3d(p)
+    existing <- p$x$meshes %||% list()
+    if (any(vapply(existing, function(m) isTRUE(m$isFlatmap), logical(1)))) {
+      cli::cli_warn(c(
+        "Skipping glassbrain: widget contains a flat (2D) mesh.",
+        "i" = "Flatmap surfaces share no coordinate frame with anatomical
+          meshes; combining them produces misaligned geometry."
+      ))
+      return(p)
+    }
   }
 
   colour <- if (grepl("^#", colour)) colour else col2hex(colour)
@@ -114,12 +128,11 @@ add_glassbrain <- function(
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |> pan_camera("right lateral")
 #'
+#' @examplesIf rlang::is_installed("rgl")
 #' ggsegray(atlas = dk(), hemisphere = "left") |>
 #'   pan_camera("left lateral")
-#' }
 pan_camera <- function(p, camera) {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -164,11 +177,10 @@ pan_camera <- function(p, camera) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |> set_background("black")
 #'
+#' @examplesIf rlang::is_installed("rgl")
 #' ggsegray(atlas = dk()) |> set_background("black")
-#' }
 set_background <- function(p, colour = "#ffffff") {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -202,10 +214,10 @@ set_background <- function(p, colour = "#ffffff") {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |> set_legend(FALSE)
+#'
+#' @examplesIf rlang::is_installed("rgl")
 #' ggsegray(hemisphere = "left") |> set_legend()
-#' }
 set_legend <- function(p, show = TRUE) {
   if (inherits(p, "ggsegray")) {
     check_ggsegray(p)
@@ -233,10 +245,8 @@ set_legend <- function(p, show = TRUE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |>
 #'   set_dimensions(width = 800, height = 600)
-#' }
 set_dimensions <- function(p, width = NULL, height = NULL) {
   check_ggseg3d(p)
   if (!is.null(width)) {
@@ -269,15 +279,14 @@ set_dimensions <- function(p, width = NULL, height = NULL) {
 #' `r lifecycle::badge("experimental")`
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d(hemisphere = "left", edge_by = "region") |>
 #'   set_edges("black") |>
 #'   pan_camera("left lateral")
 #'
+#' @examplesIf rlang::is_installed("rgl")
 #' ggsegray(hemisphere = "left", edge_by = "region") |>
 #'   set_edges("red", width = 2) |>
 #'   pan_camera("left lateral")
-#' }
 set_edges <- function(p, colour = "black", width = 1) {
   lifecycle::signal_stage("experimental", "set_edges()")
 
@@ -332,10 +341,8 @@ set_edges <- function(p, colour = "black", width = 1) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |>
 #'   set_flat_shading()
-#' }
 set_flat_shading <- function(p, flat = TRUE) {
   check_ggseg3d(p)
   p$x$options$flatShading <- flat
@@ -358,10 +365,8 @@ set_flat_shading <- function(p, flat = TRUE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d() |>
 #'   set_orthographic()
-#' }
 set_orthographic <- function(p, ortho = TRUE, frustum_size = 220) {
   check_ggseg3d(p)
   p$x$options$orthographic <- ortho
@@ -372,58 +377,60 @@ set_orthographic <- function(p, ortho = TRUE, frustum_size = 220) {
 
 #' Set hemisphere positioning mode
 #'
-#' Repositions meshes in a ggseg3d widget to either anatomical or centered mode.
-#' This modifies the x-coordinates of all meshes in the widget.
+#' Repositions cortical hemisphere meshes in a ggseg3d widget. Meshes are
+#' produced with anatomical positioning by default (medial edges at x = 0).
+#' Use this to centre each hemisphere at the origin for atlas-creation
+#' snapshots, or to reapply anatomical positioning after manual edits.
 #'
 #' @param p ggseg3d widget object
 #' @param positioning How to position hemispheres:
-#'   - "anatomical": Offset so medial surfaces are adjacent at midline.
-#'     Left at negative x, right at positive x. Best for displaying both
-#'     hemispheres together.
-#'   - "centered": Center each hemisphere at the origin. Best for
+#'   - "anatomical": Medial surfaces adjacent at midline. Left at negative
+#'     x, right at positive x. Default for displaying both hemispheres
+#'     together.
+#'   - "centered": Centre each hemisphere at the origin. Best for
 #'     single-hemisphere snapshots where consistent sizing is needed.
+#'
+#' @details Only cortical hemisphere meshes are repositioned (those named
+#'   `"<hemi> <surface>"`, e.g. `"left inflated"`). Subcortical, cerebellar
+#'   and glassbrain meshes are left untouched.
 #'
 #' @return ggseg3d widget object with repositioned meshes
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # View both hemispheres anatomically positioned
+#' # View both hemispheres anatomically positioned (default)
 #' ggseg3d(hemisphere = c("left", "right")) |>
-#'   set_positioning("anatomical") |>
 #'   pan_camera("left lateral")
 #'
-#' # Atlas creation: centered (default) for consistent sizing
+#' # Atlas creation: centered for consistent sizing
 #' ggseg3d(hemisphere = "left") |>
+#'   set_positioning("centered") |>
 #'   set_orthographic() |>
-#'   pan_camera("left lateral") |>
-#'   snapshot_brain("left_lateral.png")
-#' }
+#'   pan_camera("left lateral")
 set_positioning <- function(p, positioning = c("anatomical", "centered")) {
   check_ggseg3d(p)
   positioning <- match.arg(positioning)
 
+  surface_pattern <- paste0(
+    "^(left|right) ",
+    "(inflated|semi-inflated|white|pial|midthickness|",
+    "sphere|smoothwm|orig)$"
+  )
+
   p$x$meshes <- lapply(p$x$meshes, function(mesh) {
     name <- mesh$name %||% ""
-    is_left <- grepl("left", name, ignore.case = TRUE)
-    is_right <- grepl("right", name, ignore.case = TRUE)
+    if (!grepl(surface_pattern, name)) return(mesh)
 
-    if (!is_left && !is_right) return(mesh)
-
+    is_left <- startsWith(name, "left ")
     vertices <- mesh$vertices
     x_range <- range(vertices$x)
-    half_width <- (x_range[2] - x_range[1]) / 2
     x_center <- mean(x_range)
+    half_width <- (x_range[2] - x_range[1]) / 2
 
-    if (positioning == "centered") {
-      vertices$x <- vertices$x - x_center
-    } else {
-      vertices$x <- vertices$x - x_center
-      if (is_left) {
-        vertices$x <- vertices$x - half_width
-      } else if (is_right) {
-        vertices$x <- vertices$x + half_width
-      }
+    vertices$x <- vertices$x - x_center
+    if (positioning == "anatomical") {
+      vertices$x <- vertices$x +
+        if (is_left) -half_width else half_width
     }
 
     mesh$vertices <- vertices

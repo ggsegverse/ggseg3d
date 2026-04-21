@@ -7,7 +7,7 @@
 add_glassbrain(
   p,
   hemisphere = c("left", "right"),
-  surface = "pial",
+  surface = "inflated",
   colour = "#CCCCCC",
   opacity = 0.3,
   brain_meshes = NULL
@@ -19,7 +19,9 @@ add_glassbrain(
 \item{hemisphere}{Character vector. Hemispheres to add: "left", "right",
 or both.}
 
-\item{surface}{Character. Surface type: "inflated", "white", or "pial".}
+\item{surface}{Character. Surface type. Defaults to `"inflated"`, which
+is supplied by `ggseg.formats` and requires no additional dependency.
+Other surfaces (`"pial"`, `"white"`, etc.) are drawn from `ggseg.meshes`.}
 
 \item{colour}{Character. Colour for the glass brain surface (hex or named).}
 
@@ -38,12 +40,16 @@ context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
 rgl (`ggsegray`) objects.
 }
 \examples{
-\dontrun{
+\donttest{
 ggseg3d(atlas = aseg()) |>
   add_glassbrain("left", opacity = 0.2)
+}
 
+\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
+\donttest{
 ggsegray(atlas = aseg()) |>
   add_glassbrain(opacity = 0.15) |>
   pan_camera("right lateral")
 }
+\dontshow{\}) # examplesIf}
 }

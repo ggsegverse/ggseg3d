@@ -20,8 +20,6 @@ Useful for screenshots where accurate color reproduction is needed,
 such as atlas creation pipelines that extract contours from images.
 }
 \examples{
-\dontrun{
 ggseg3d() |>
   set_flat_shading()
-}
 }

@@ -30,13 +30,13 @@ edges must have been computed at creation time via `edge_by`.
 }
 
 \examples{
-\dontrun{
 ggseg3d(hemisphere = "left", edge_by = "region") |>
   set_edges("black") |>
   pan_camera("left lateral")
 
+\dontshow{if (rlang::is_installed("rgl")) withAutoprint(\{ # examplesIf}
 ggsegray(hemisphere = "left", edge_by = "region") |>
   set_edges("red", width = 2) |>
   pan_camera("left lateral")
-}
+\dontshow{\}) # examplesIf}
 }

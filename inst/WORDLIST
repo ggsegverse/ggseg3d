@@ -1,5 +1,6 @@
 Athanasia
 CMD
+Centre
 Colour
 DK
 DTI
@@ -8,9 +9,11 @@ Desikan
 Gouraud
 Killiany
 LCBC
+LH
 Lifebrain
 Lifecycle
 ORCID
+OrbitControls
 Optimising
 Piñeiro
 Plotly
@@ -26,6 +29,7 @@ anisotropy
 caudate
 centerline
 centerlines
+centre
 chainable
 colorMode
 colorbar
@@ -37,6 +41,8 @@ dOutput
 doi
 dplyr
 fibre
+flatmap
+flatmaps
 ggseg
 ggsegray
 ggsegverse
@@ -54,10 +60,12 @@ lifecycle
 magick
 midline
 mimmick
+normalises
 occipital
 parcellation
 parcellations
 pial
+pkgdown
 plotly
 png
 precentral
@@ -66,6 +74,7 @@ rayshader's
 renderGgseg
 renderer
 repositioned
+repositions
 rgl
 rh
 segmentations

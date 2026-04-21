@@ -27,12 +27,13 @@ list with vertices (data.frame with x, y, z) and faces
 Resolves and prepares a brain surface mesh for rendering. Delegates to
 [ggseg.formats::get_brain_mesh()] for inflated surfaces and to
 [ggseg.meshes::get_cortical_mesh()] for pial, white, semi-inflated, and
-other surfaces. Corrects 0-based face indices and centers
-inflated/semi-inflated meshes on pial centroids.
+other surfaces. Returned meshes use the shared anatomical axis convention
+(`x` = left-right, `y` = anterior-posterior, `z` = superior-inferior) with
+`lh` positioned at `x <= 0` and `rh` at `x >= 0`, medial edges meeting at
+the midline (`x = 0`).
 }
 \examples{
-\dontrun{
-resolve_brain_mesh("lh", "inflated")
-}
+mesh <- resolve_brain_mesh("lh", "inflated")
+str(mesh, max.level = 1)
 
 }
