@@ -504,6 +504,33 @@ test_that("build_cerebellar_meshes errors when mesh unavailable", {
   )
 })
 
+test_that("build_cerebellar_meshes flags flatmap meshes", {
+  flat_mesh <- list(
+    vertices = data.frame(
+      x = c(0, 1, 2, 3),
+      y = c(0, 1, 0, 1),
+      z = c(0, 0, 0, 0)
+    ),
+    faces = data.frame(i = c(1L, 2L), j = c(2L, 3L), k = c(3L, 4L))
+  )
+  local_mocked_bindings(
+    get_cerebellar_mesh = function(...) flat_mesh,
+    .package = "ggseg.formats"
+  )
+
+  atlas_data <- data.frame(
+    label = "region1",
+    region = "region1",
+    colour = "#FF0000"
+  )
+  atlas_data$vertices <- list(0:3)
+
+  meshes <- build_cerebellar_meshes(atlas_data, "darkgrey")
+
+  expect_length(meshes, 1)
+  expect_true(isTRUE(meshes[[1]]$isFlatmap))
+})
+
 test_that("check_ggseg_meshes errors when package missing", {
   local_mocked_bindings(
     requireNamespace = function(...) FALSE,
