@@ -14,6 +14,7 @@
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/apply_colour_palette.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/apply_colours_and_legend.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_centerline_data.html</loc></url>
+<url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_cerebellar_meshes.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_continuous_legend.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_cortical_meshes.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/build_discrete_legend.html</loc></url>
@@ -34,7 +35,6 @@
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/look_at_origin.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/mesh_entry_to_mesh3d.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/pan_camera.html</loc></url>
-<url><loc>https://ggsegverse.github.io/ggseg3d/reference/position_hemisphere.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_atlas_data.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_brain_meshes.html</loc></url>
 <url><loc>https://ggsegverse.github.io/ggseg3d/reference/prepare_mesh_atlas_data.html</loc></url>

@@ -34,3 +34,11 @@ Authors:
 
 - Didac Vidal-Piñeiro <d.v.pineiro@psykologi.uio.no>
   ([ORCID](https://orcid.org/0000-0001-9997-9156))
+
+Other contributors:
+
+- Center for Lifespan Changes in Brain and Cognition (LCBC), University
+  of Oslo \[copyright holder\]
+
+- three.js authors (Three.js and OrbitControls libraries, see
+  LICENSE.note) \[contributor, copyright holder\]

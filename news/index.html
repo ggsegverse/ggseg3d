@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,39 @@
       <small>Source: <a href="https://github.com/ggsegverse/ggseg3d/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.1.1" id="ggseg3d-211">ggseg3d 2.1.1<a class="anchor" aria-label="anchor" href="#ggseg3d-211"></a></h2><p class="text-muted">CRAN release: 2026-04-22</p>
+<div class="section level3">
+<h3 id="bug-fixes-2-1-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-1-1"></a></h3>
+<ul><li>Cortical hemispheres are now rendered anatomically side-by-side (LH at negative x, RH at positive x, medial edges at the midline) regardless of the mesh source. Previously, both hemispheres overlapped at the origin because <code>ggseg.formats</code> inflated meshes and <code>ggseg.meshes</code> pial/white/etc. surfaces arrived in different axis conventions. <code><a href="../reference/resolve_brain_mesh.html">resolve_brain_mesh()</a></code> now normalises to the shared <code>x = LR</code>, <code>y = AP</code>, <code>z = SI</code> frame and separates hemispheres at <code>x = 0</code>.</li>
+<li>
+<code><a href="../reference/set_positioning.html">set_positioning()</a></code> no longer wrongly shifts subcortical meshes whose region names happen to contain “Left”/“Right” (e.g. <code>Left-Thalamus</code>); it only repositions cortical meshes named <code>"&lt;hemi&gt; &lt;surface&gt;"</code>.</li>
+<li>
+<code><a href="../reference/add_glassbrain.html">add_glassbrain()</a></code> warns and skips when the widget already contains a flat (2D) mesh such as a cerebellar flatmap, since flatmaps share no coordinate frame with anatomical 3D meshes.</li>
+<li>
+<code><a href="../reference/add_glassbrain.html">add_glassbrain()</a></code> now defaults to <code>surface = "inflated"</code> so it works without <code>ggseg.meshes</code> installed (inflated ships with <code>ggseg.formats</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-2-1-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-2-1-1"></a></h3>
+<ul><li>Replaced <code>\dontrun{}</code> wrappers in widget-construction examples with executable code so examples run under <code>R CMD check</code> and render inline in pkgdown. Examples that require <code>rgl</code> (Suggests) are now gated with <code>@examplesIf rlang::is_installed("rgl")</code>.</li>
+<li>Added <code>LICENSE.note</code> documenting the bundled Three.js and OrbitControls libraries and credited their authors in <code>Authors@R</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-2-1-1">Internal<a class="anchor" aria-label="anchor" href="#internal-2-1-1"></a></h3>
+<ul><li>Removed the <code>native_offset()</code> / <code>to_native_coords()</code> / <code>position_hemisphere()</code> helpers. They were workarounds for the previous axis-convention mismatch and are no longer needed now that all meshes share a single frame.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.1.0" id="ggseg3d-210">ggseg3d 2.1.0<a class="anchor" aria-label="anchor" href="#ggseg3d-210"></a></h2><p class="text-muted">CRAN release: 2026-04-09</p>
+<div class="section level3">
+<h3 id="cerebellar-atlas-support-2-1-0">Cerebellar atlas support<a class="anchor" aria-label="anchor" href="#cerebellar-atlas-support-2-1-0"></a></h3>
+<ul><li>New <code>cerebellar_atlas</code> class with <code><a href="../reference/prepare_brain_meshes.html">prepare_brain_meshes.cerebellar_atlas()</a></code> method for rendering SUIT cerebellar surfaces with vertex-based colouring.</li>
+<li>Mixed vertex+mesh rendering for deep cerebellar nuclei: the SUIT surface renders at 30% opacity with opaque per-region meshes for deep structures.</li>
+<li>
+<code>surface_opacity</code> parameter controls cerebellar surface transparency when deep nuclei are present.</li>
+<li>Cortical mesh data moved to the ‘ggseg.meshes’ package, removing bundled <code>sysdata.rda</code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.0" id="ggseg3d-200">ggseg3d 2.0.0<a class="anchor" aria-label="anchor" href="#ggseg3d-200"></a></h2><p class="text-muted">CRAN release: 2026-02-20</p>
 <div class="section level3">

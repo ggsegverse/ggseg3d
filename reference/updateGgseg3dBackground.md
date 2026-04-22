@@ -22,3 +22,17 @@ updateGgseg3dBackground(session, outputId, colour)
 - colour:
 
   Background color (hex or named color)
+
+## Value
+
+None, called for side effects (sends message to client)
+
+## Examples
+
+``` r
+if (FALSE) { # interactive() && rlang::is_installed("shiny")
+if (FALSE) { # \dontrun{
+updateGgseg3dBackground(session, "brain", "black")
+} # }
+}
+```

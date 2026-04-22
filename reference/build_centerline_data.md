@@ -1,7 +1,7 @@
 # Build centerline data for tract atlases
 
-Extracts centerline data from a tract atlas, applies native coordinate
-offsets, and assembles the tube generation parameters.
+Extracts centerline data from a tract atlas and assembles the tube
+generation parameters.
 
 ## Usage
 

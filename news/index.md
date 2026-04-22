@@ -1,5 +1,65 @@
 # Changelog
 
+## ggseg3d 2.1.1
+
+CRAN release: 2026-04-22
+
+### Bug fixes
+
+- Cortical hemispheres are now rendered anatomically side-by-side (LH at
+  negative x, RH at positive x, medial edges at the midline) regardless
+  of the mesh source. Previously, both hemispheres overlapped at the
+  origin because `ggseg.formats` inflated meshes and `ggseg.meshes`
+  pial/white/etc. surfaces arrived in different axis conventions.
+  [`resolve_brain_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/resolve_brain_mesh.md)
+  now normalises to the shared `x = LR`, `y = AP`, `z = SI` frame and
+  separates hemispheres at `x = 0`.
+- [`set_positioning()`](https://ggsegverse.github.io/ggseg3d/reference/set_positioning.md)
+  no longer wrongly shifts subcortical meshes whose region names happen
+  to contain “Left”/“Right” (e.g. `Left-Thalamus`); it only repositions
+  cortical meshes named `"<hemi> <surface>"`.
+- [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md)
+  warns and skips when the widget already contains a flat (2D) mesh such
+  as a cerebellar flatmap, since flatmaps share no coordinate frame with
+  anatomical 3D meshes.
+- [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md)
+  now defaults to `surface = "inflated"` so it works without
+  `ggseg.meshes` installed (inflated ships with `ggseg.formats`).
+
+### Documentation
+
+- Replaced `\dontrun{}` wrappers in widget-construction examples with
+  executable code so examples run under `R CMD check` and render inline
+  in pkgdown. Examples that require `rgl` (Suggests) are now gated with
+  `@examplesIf rlang::is_installed("rgl")`.
+- Added `LICENSE.note` documenting the bundled Three.js and
+  OrbitControls libraries and credited their authors in `Authors@R`.
+
+### Internal
+
+- Removed the `native_offset()` / `to_native_coords()` /
+  `position_hemisphere()` helpers. They were workarounds for the
+  previous axis-convention mismatch and are no longer needed now that
+  all meshes share a single frame.
+
+## ggseg3d 2.1.0
+
+CRAN release: 2026-04-09
+
+### Cerebellar atlas support
+
+- New `cerebellar_atlas` class with
+  [`prepare_brain_meshes.cerebellar_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/prepare_brain_meshes.md)
+  method for rendering SUIT cerebellar surfaces with vertex-based
+  colouring.
+- Mixed vertex+mesh rendering for deep cerebellar nuclei: the SUIT
+  surface renders at 30% opacity with opaque per-region meshes for deep
+  structures.
+- `surface_opacity` parameter controls cerebellar surface transparency
+  when deep nuclei are present.
+- Cortical mesh data moved to the ‘ggseg.meshes’ package, removing
+  bundled `sysdata.rda`.
+
 ## ggseg3d 2.0.0
 
 CRAN release: 2026-02-20

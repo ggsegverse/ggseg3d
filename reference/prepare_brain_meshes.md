@@ -38,6 +38,20 @@ prepare_brain_meshes(
   ...
 )
 
+# S3 method for class 'cerebellar_atlas'
+prepare_brain_meshes(
+  atlas,
+  .data = NULL,
+  label_by = "region",
+  text_by = NULL,
+  colour_by = "colour",
+  palette = NULL,
+  na_colour = "darkgrey",
+  na_alpha = 1,
+  surface_opacity = NULL,
+  ...
+)
+
 # S3 method for class 'tract_atlas'
 prepare_brain_meshes(
   atlas,
@@ -109,6 +123,11 @@ prepare_brain_meshes(
 - brain_meshes:
 
   Optional user-supplied brain meshes
+
+- surface_opacity:
+
+  Numeric opacity for the cerebellar surface mesh. Defaults to \`0.3\`
+  when deep nuclei are present and \`1\` otherwise.
 
 - tract_color:
 

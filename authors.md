@@ -8,6 +8,12 @@
 - **Didac Vidal-Piñeiro**. Author.
   [](https://orcid.org/0000-0001-9997-9156)
 
+- **Center for Lifespan Changes in Brain and Cognition (LCBC),
+  University of Oslo**. Copyright holder.
+
+- **three.js authors**. Contributor, copyright holder.  
+  Three.js and OrbitControls libraries, see LICENSE.note
+
 ## Citation
 
 Source:

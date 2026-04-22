@@ -35,3 +35,21 @@ renderGgseg3d(expr, env = parent.frame(), quoted = FALSE)
   Is `expr` a quoted expression (with
   [`quote()`](https://rdrr.io/r/base/substitute.html))? This is useful
   if you want to save an expression in a variable.
+
+## Value
+
+\`ggseg3dOutput\` returns an HTML widget output element for use in a
+Shiny UI. \`renderGgseg3d\` returns a render function for use in a Shiny
+server.
+
+## Examples
+
+``` r
+if (FALSE) { # interactive() && rlang::is_installed("shiny")
+library(shiny)
+ui <- fluidPage(ggseg3dOutput("brain"))
+server <- function(input, output) {
+  output$brain <- renderGgseg3d(ggseg3d())
+}
+}
+```

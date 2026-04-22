@@ -152,6 +152,7 @@ Tract atlases (\`tract_atlas\`):
 
 ``` r
 if (FALSE) { # \dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(hemisphere = "left") |>
   pan_camera("left lateral")
 
