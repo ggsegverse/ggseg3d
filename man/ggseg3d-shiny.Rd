@@ -34,7 +34,7 @@ Output and render functions for using ggseg3d within Shiny
 applications and interactive R Markdown documents.
 }
 \examples{
-\dontshow{if (rlang::is_installed("shiny") && interactive()) withAutoprint(\{ # examplesIf}
+\dontshow{if (interactive() && rlang::is_installed("shiny")) withAutoprint(\{ # examplesIf}
 library(shiny)
 ui <- fluidPage(ggseg3dOutput("brain"))
 server <- function(input, output) {

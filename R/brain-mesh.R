@@ -3,8 +3,10 @@
 #' Resolves and prepares a brain surface mesh for rendering. Delegates to
 #' [ggseg.formats::get_brain_mesh()] for inflated surfaces and to
 #' [ggseg.meshes::get_cortical_mesh()] for pial, white, semi-inflated, and
-#' other surfaces. Corrects 0-based face indices and centers
-#' inflated/semi-inflated meshes on pial centroids.
+#' other surfaces. Returned meshes use the shared anatomical axis convention
+#' (`x` = left-right, `y` = anterior-posterior, `z` = superior-inferior) with
+#' `lh` positioned at `x <= 0` and `rh` at `x >= 0`, medial edges meeting at
+#' the midline (`x = 0`).
 #'
 #' @param hemisphere `"lh"` or `"rh"`
 #' @param surface Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
@@ -16,9 +18,8 @@
 #'   (data.frame with i, j, k), or NULL if mesh not found
 #'
 #' @examples
-#' \dontrun{
-#' resolve_brain_mesh("lh", "inflated")
-#' }
+#' mesh <- resolve_brain_mesh("lh", "inflated")
+#' str(mesh, max.level = 1)
 #'
 #' @export
 resolve_brain_mesh <- function(
@@ -30,7 +31,9 @@ resolve_brain_mesh <- function(
   hemisphere <- match.arg(hemisphere)
   surface <- match.arg(surface)
 
-  if (!is.null(brain_meshes) || surface == "inflated") {
+  from_ggseg_meshes <- is.null(brain_meshes) && surface != "inflated"
+
+  if (!from_ggseg_meshes) {
     mesh <- ggseg.formats::get_brain_mesh(hemisphere, surface, brain_meshes)
   } else {
     check_ggseg_meshes(surface)
@@ -45,17 +48,7 @@ resolve_brain_mesh <- function(
     mesh$faces$k <- mesh$faces$k + 1L
   }
 
-  if (surface %in% c("inflated", "semi-inflated")) {
-    pial <- resolve_brain_mesh(hemisphere, "pial", brain_meshes)
-    mesh$vertices$x <- mesh$vertices$x +
-      (mean(pial$vertices$x) - mean(mesh$vertices$x))
-    mesh$vertices$y <- mesh$vertices$y +
-      (mean(pial$vertices$y) - mean(mesh$vertices$y))
-    mesh$vertices$z <- mesh$vertices$z +
-      (mean(pial$vertices$z) - mean(mesh$vertices$z))
-  }
-
-  mesh
+  normalize_cortical_mesh(mesh, hemisphere, from_ggseg_meshes)
 }
 
 
@@ -69,38 +62,27 @@ check_ggseg_meshes <- function(surface) {
 }
 
 
-native_offset <- function() {
-  pial_lh <- resolve_brain_mesh("lh", "pial")
-  pial_rh <- resolve_brain_mesh("rh", "pial")
-  inf_lh <- ggseg.formats::get_brain_mesh("lh", "inflated")
-  inf_rh <- ggseg.formats::get_brain_mesh("rh", "inflated")
-
-  c(
-    y = mean(c(
-      mean(pial_lh$vertices$y) - mean(inf_lh$vertices$y),
-      mean(pial_rh$vertices$y) - mean(inf_rh$vertices$y)
-    )),
-    z = mean(c(
-      mean(pial_lh$vertices$z) - mean(inf_lh$vertices$z),
-      mean(pial_rh$vertices$z) - mean(inf_rh$vertices$z)
-    ))
-  )
-}
-
-
-to_native_coords <- function(mesh_data_df) {
-  if (is.null(mesh_data_df) || is.null(mesh_data_df$mesh)) {
-    return(mesh_data_df)
+# ggseg.meshes surfaces are stored rotated 90 deg CCW relative to FreeSurfer
+# native axes (see ggseg.meshes/data-raw/make_cortical_meshes.R): stored
+# `x` = AP, stored `y` = -LR, stored `z` = SI. ggseg.formats inflated and
+# subcortical/cerebellar meshes already use native axes (x = LR, y = AP,
+# z = SI). After axis alignment we shift each hemisphere so medial edges sit
+# at x = 0 — LH occupies x <= 0, RH occupies x >= 0 — so both hemispheres
+# display side-by-side without overlap regardless of surface choice.
+normalize_cortical_mesh <- function(mesh, hemisphere, rotate_axes) {
+  if (rotate_axes) {
+    v <- mesh$vertices
+    mesh$vertices$x <- -v$y
+    mesh$vertices$y <- v$x
   }
 
-  offset <- native_offset()
-  mesh_data_df$mesh <- lapply(mesh_data_df$mesh, function(m) {
-    if (is.null(m)) return(m)
-    m$vertices$y <- m$vertices$y + offset[["y"]]
-    m$vertices$z <- m$vertices$z + offset[["z"]]
-    m
-  })
-  mesh_data_df
+  mesh$vertices$x <- if (hemisphere == "lh") {
+    mesh$vertices$x - max(mesh$vertices$x)
+  } else {
+    mesh$vertices$x - min(mesh$vertices$x)
+  }
+
+  mesh
 }
 
 
@@ -381,31 +363,25 @@ build_cerebellar_meshes <- function(
     vertex_texts = vertex_texts
   )
 
+  if (is_flat_mesh(mesh$vertices)) {
+    entry$isFlatmap <- TRUE
+  }
+
   list(entry)
 }
 
 
-#' Position hemisphere vertices for anatomical display
-#'
-#' Offsets hemisphere vertices so left is at negative x and right at positive x,
-#' with medial surfaces adjacent at the midline. Used by [add_glassbrain()]
-#' for anatomical context.
-#'
-#' @param vertices data.frame with x, y, z columns
-#' @param hemisphere "left" or "right"
-#' @return data.frame with adjusted x coordinates
-#' @keywords internal
-position_hemisphere <- function(vertices, hemisphere) {
-  x_range <- range(vertices$x)
-  half_width <- (x_range[2] - x_range[1]) / 2
-
-  if (hemisphere == "left") {
-    vertices$x <- vertices$x - half_width
-  } else if (hemisphere == "right") {
-    vertices$x <- vertices$x + half_width
-  }
-
-  vertices
+# A flatmap mesh has all vertices in a single plane (negligible extent on one
+# axis). Used to detect cerebellar flatmaps that cannot be combined with
+# other 3D meshes.
+is_flat_mesh <- function(vertices, tol = 1) {
+  any(
+    c(
+      diff(range(vertices$x)),
+      diff(range(vertices$y)),
+      diff(range(vertices$z))
+    ) < tol
+  )
 }
 
 

@@ -23,8 +23,6 @@ Uses orthographic projection instead of perspective. This eliminates
 perspective distortion and ensures consistent sizing across all views.
 }
 \examples{
-\dontrun{
 ggseg3d() |>
   set_orthographic()
-}
 }

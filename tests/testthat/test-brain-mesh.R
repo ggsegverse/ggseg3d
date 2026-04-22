@@ -410,39 +410,43 @@ test_that("resolve_brain_mesh returns NULL for empty brain_meshes", {
   expect_null(result)
 })
 
-test_that("position_hemisphere shifts left hemisphere left", {
-  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
-  result <- position_hemisphere(verts, "left")
-  expect_true(mean(result$x) < mean(verts$x))
+test_that("resolve_brain_mesh anatomically separates hemispheres on x", {
+  lh <- resolve_brain_mesh("lh", "inflated")
+  rh <- resolve_brain_mesh("rh", "inflated")
+
+  expect_lte(max(lh$vertices$x), 1e-6)
+  expect_gte(min(rh$vertices$x), -1e-6)
 })
 
-test_that("position_hemisphere shifts right hemisphere right", {
-  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
-  result <- position_hemisphere(verts, "right")
-  expect_true(mean(result$x) > mean(verts$x))
+test_that("resolve_brain_mesh separates hemispheres for pial surface", {
+  skip_if_not_installed("ggseg.meshes")
+  lh <- resolve_brain_mesh("lh", "pial")
+  rh <- resolve_brain_mesh("rh", "pial")
+
+  expect_lte(max(lh$vertices$x), 1e-6)
+  expect_gte(min(rh$vertices$x), -1e-6)
 })
 
-test_that("position_hemisphere passes through unknown hemisphere", {
-  verts <- data.frame(x = c(0, 10), y = c(0, 0), z = c(0, 0))
-  result <- position_hemisphere(verts, "subcort")
-  expect_equal(result, verts)
-})
+test_that("pial meshes use shared axis convention after normalization", {
+  skip_if_not_installed("ggseg.meshes")
+  pial_lh <- resolve_brain_mesh("lh", "pial")
+  infl_lh <- resolve_brain_mesh("lh", "inflated")
 
-test_that("to_native_coords handles NULL input", {
-  expect_null(to_native_coords(NULL))
-})
-
-test_that("to_native_coords skips NULL meshes in list", {
-  df <- data.frame(label = c("a", "b"), stringsAsFactors = FALSE)
-  mesh_a <- list(
-    vertices = data.frame(x = 1, y = 2, z = 3),
-    faces = data.frame(i = 0, j = 0, k = 0)
+  # Both surfaces should have LH medial edge at x = 0 and widest extent
+  # on the AP axis (y).
+  expect_equal(max(pial_lh$vertices$x), 0, tolerance = 1e-6)
+  expect_equal(max(infl_lh$vertices$x), 0, tolerance = 1e-6)
+  expect_gt(
+    diff(range(pial_lh$vertices$y)),
+    diff(range(pial_lh$vertices$x))
   )
-  df$mesh <- list(mesh_a, NULL)
+})
 
-  result <- to_native_coords(df)
-  expect_null(result$mesh[[2]])
-  expect_false(identical(result$mesh[[1]]$vertices$y, 2))
+test_that("is_flat_mesh detects flat surfaces", {
+  flat <- data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0))
+  vol <- data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 1))
+  expect_true(is_flat_mesh(flat))
+  expect_false(is_flat_mesh(vol))
 })
 
 test_that("build_tract_meshes with mesh data (no centerlines)", {

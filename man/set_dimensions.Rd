@@ -20,8 +20,6 @@ ggseg3d widget object with updated dimensions
 Changes the width and height of a ggseg3d widget.
 }
 \examples{
-\dontrun{
 ggseg3d() |>
   set_dimensions(width = 800, height = 600)
-}
 }

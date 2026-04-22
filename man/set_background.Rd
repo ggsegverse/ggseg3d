@@ -18,9 +18,9 @@ The input object (modified), for piping.
 Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 }
 \examples{
-\dontrun{
 ggseg3d() |> set_background("black")
-
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(atlas = dk()) |> set_background("black")
 }
 }

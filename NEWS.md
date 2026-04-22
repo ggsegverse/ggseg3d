@@ -1,3 +1,38 @@
+# ggseg3d 2.1.1
+
+## Bug fixes
+
+- Cortical hemispheres are now rendered anatomically side-by-side (LH at
+  negative x, RH at positive x, medial edges at the midline) regardless of
+  the mesh source. Previously, both hemispheres overlapped at the origin
+  because `ggseg.formats` inflated meshes and `ggseg.meshes` pial/white/etc.
+  surfaces arrived in different axis conventions. `resolve_brain_mesh()`
+  now normalises to the shared `x = LR`, `y = AP`, `z = SI` frame and
+  separates hemispheres at `x = 0`.
+- `set_positioning()` no longer wrongly shifts subcortical meshes whose
+  region names happen to contain "Left"/"Right" (e.g. `Left-Thalamus`); it
+  only repositions cortical meshes named `"<hemi> <surface>"`.
+- `add_glassbrain()` warns and skips when the widget already contains a
+  flat (2D) mesh such as a cerebellar flatmap, since flatmaps share no
+  coordinate frame with anatomical 3D meshes.
+- `add_glassbrain()` now defaults to `surface = "inflated"` so it works
+  without `ggseg.meshes` installed (inflated ships with `ggseg.formats`).
+
+## Documentation
+
+- Replaced `\dontrun{}` wrappers in widget-construction examples with
+  executable code so examples run under `R CMD check` and render inline
+  in pkgdown. Examples that require `rgl` (Suggests) are now gated with
+  `@examplesIf rlang::is_installed("rgl")`.
+- Added `LICENSE.note` documenting the bundled Three.js and OrbitControls
+  libraries and credited their authors in `Authors@R`.
+
+## Internal
+
+- Removed the `native_offset()` / `to_native_coords()` / `position_hemisphere()`
+  helpers. They were workarounds for the previous axis-convention mismatch
+  and are no longer needed now that all meshes share a single frame.
+
 # ggseg3d 2.1.0
 
 ## Cerebellar atlas support

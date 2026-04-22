@@ -30,11 +30,11 @@ edges must have been computed at creation time via `edge_by`.
 }
 
 \examples{
-\dontrun{
 ggseg3d(hemisphere = "left", edge_by = "region") |>
   set_edges("black") |>
   pan_camera("left lateral")
-
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(hemisphere = "left", edge_by = "region") |>
   set_edges("red", width = 2) |>
   pan_camera("left lateral")

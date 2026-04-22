@@ -19,8 +19,9 @@ For htmlwidget output, toggles legend visibility. For rgl output,
 draws or removes the legend overlay.
 }
 \examples{
-\dontrun{
 ggseg3d() |> set_legend(FALSE)
+\dontrun{
+# rgl requires OpenGL; not run in check environments.
 ggsegray(hemisphere = "left") |> set_legend()
 }
 }

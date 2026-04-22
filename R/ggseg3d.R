@@ -41,12 +41,10 @@
 #' @importFrom rlang %||%
 #'
 #' @examples
-#' \dontrun{
 #' ggseg3d()
 #' ggseg3d(hemisphere = "left") |> pan_camera("left lateral")
 #' ggseg3d() |> set_legend(FALSE)
 #' ggseg3d() |> set_background("black")
-#' }
 #'
 #' @export
 ggseg3d <- function(
@@ -220,9 +218,8 @@ prepare_brain_meshes.subcortical_atlas <- function(
     na_colour,
     label_by
   )
-  atlas_data <- to_native_coords(result$atlas_data)
   meshes <- build_subcortical_meshes(
-    atlas_data, na_colour,
+    result$atlas_data, na_colour,
     text_by = text_by, label_by = label_by
   )
 
@@ -318,7 +315,7 @@ prepare_brain_meshes.tract_atlas <- function(
     na_colour,
     label_by
   )
-  atlas_data <- to_native_coords(result$atlas_data)
+  atlas_data <- result$atlas_data
   atlas_centerlines <- build_centerline_data(atlas, tube_radius, tube_segments)
   meshes <- build_tract_meshes(
     atlas_data,
@@ -383,8 +380,8 @@ apply_colours_and_legend <- function(
 
 #' Build centerline data for tract atlases
 #'
-#' Extracts centerline data from a tract atlas, applies native coordinate
-#' offsets, and assembles the tube generation parameters.
+#' Extracts centerline data from a tract atlas and assembles the tube
+#' generation parameters.
 #'
 #' @param atlas A `tract_atlas` object
 #' @param tube_radius Optional radius override
@@ -401,21 +398,8 @@ build_centerline_data <- function(
     return(NULL)
   }
 
-  cl <- atlas$data$centerlines
-  if (!is.null(cl$points)) {
-    offset <- native_offset()
-    cl$points <- lapply(cl$points, function(pts) {
-      if (is.null(pts)) {
-        return(pts)
-      }
-      pts[, 2] <- pts[, 2] + offset[["y"]]
-      pts[, 3] <- pts[, 3] + offset[["z"]]
-      pts
-    })
-  }
-
   list(
-    centerlines = cl,
+    centerlines = atlas$data$centerlines,
     tube_radius = tube_radius %||% 2,
     tube_segments = tube_segments %||% 10
   )

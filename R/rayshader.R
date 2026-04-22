@@ -32,6 +32,7 @@
 #'
 #' @examples
 #' \dontrun{
+#' # rgl requires OpenGL; not run in check environments.
 #' ggsegray(hemisphere = "left") |>
 #'   pan_camera("left lateral")
 #'
@@ -316,12 +317,14 @@ render_edges_rgl <- function(mesh_entry, colour = NULL, width = NULL) {
 }
 
 
+#' @noRd
 #' @export
 print.ggsegray <- function(x, ...) {
   rgl::set3d(x$device)
   print(rgl::rglwidget())
 }
 
+#' @noRd
 #' @importFrom knitr knit_print
 #' @export
 knit_print.ggsegray <- function(x, ...) {

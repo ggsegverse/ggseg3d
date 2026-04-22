@@ -20,7 +20,7 @@
 #'
 #' @importFrom htmlwidgets shinyWidgetOutput shinyRenderWidget
 #'
-#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' @examplesIf interactive() && rlang::is_installed("shiny")
 #' library(shiny)
 #' ui <- fluidPage(ggseg3dOutput("brain"))
 #' server <- function(input, output) {
@@ -60,7 +60,7 @@ renderGgseg3d <- function(expr, env = parent.frame(), quoted = FALSE) {
 #'
 #' @return None, called for side effects (sends message to client)
 #'
-#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' @examplesIf interactive() && rlang::is_installed("shiny")
 #' \dontrun{
 #' updateGgseg3dCamera(session, "brain", "left lateral")
 #' }
@@ -82,7 +82,7 @@ updateGgseg3dCamera <- function(session, outputId, camera) {
 #'
 #' @return None, called for side effects (sends message to client)
 #'
-#' @examplesIf rlang::is_installed("shiny") && interactive()
+#' @examplesIf interactive() && rlang::is_installed("shiny")
 #' \dontrun{
 #' updateGgseg3dBackground(session, "brain", "black")
 #' }

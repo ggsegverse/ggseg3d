@@ -17,7 +17,7 @@ build_centerline_data(atlas, tube_radius = NULL, tube_segments = NULL)
 List with centerlines, tube_radius, tube_segments, or NULL
 }
 \description{
-Extracts centerline data from a tract atlas, applies native coordinate
-offsets, and assembles the tube generation parameters.
+Extracts centerline data from a tract atlas and assembles the tube
+generation parameters.
 }
 \keyword{internal}

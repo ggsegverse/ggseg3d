@@ -40,6 +40,7 @@ Authors:
 Other contributors:
 \itemize{
   \item Center for Lifespan Changes in Brain and Cognition (LCBC), University of Oslo [copyright holder]
+  \item three.js authors (Three.js and OrbitControls libraries, see LICENSE.note) [contributor, copyright holder]
 }
 
 }

@@ -1,20 +1,22 @@
 Package: ggseg3d
 Title: Interactive 3D Brain Atlas Visualization
-Version: 2.1.0
+Version: 2.1.1
 Authors@R: c(
     person("Athanasia Mo", "Mowinckel", , "a.m.mowinckel@psykologi.uio.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5756-0223")),
     person("Didac", "Vidal-Piñeiro", , "d.v.pineiro@psykologi.uio.no", role = "aut",
            comment = c(ORCID = "0000-0001-9997-9156")),
     person("Center for Lifespan Changes in Brain and Cognition (LCBC), University of Oslo",
-           role = "cph")
+           role = "cph"),
+    person("three.js authors", role = c("ctb", "cph"),
+           comment = "Three.js and OrbitControls libraries, see LICENSE.note")
   )
 Description: Plot brain atlases as interactive 3D meshes using 'Three.js'
     via 'htmlwidgets', or render publication-quality static images through
     'rgl' and 'rayshader'. A pipe-friendly API lets you map data onto
     brain regions, control camera angles, toggle region edges, overlay
-    glass brains, and snapshot or ray-trace the result.  Additional
-    atlases are available through the 'ggsegverse' r-universe.  Mowinckel
+    glass brains, and snapshot or ray-trace the result. Additional
+    atlases are available through the 'ggsegverse' r-universe. Mowinckel
     & Vidal-Piñeiro (2020) <doi:10.1177/2515245920928009>.
 License: MIT + file LICENSE
 URL: https://github.com/ggsegverse/ggseg3d,
