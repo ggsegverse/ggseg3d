@@ -25,13 +25,26 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown
+          extra-packages: any::pkgdown, any::webshot2, any::chromote
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        env:
+          CHROMOTE_CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: |
+          chromote::set_default_chromote_object(
+            chromote::Chromote$new(
+              browser = chromote::Chrome$new(
+                args = c(chromote::default_chrome_args(), "--no-sandbox")
+              )
+            )
+          )
+          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages
