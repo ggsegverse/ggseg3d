@@ -41,8 +41,6 @@ widget_summary <- function(p, coord_digits = 1) {
 # Build a minimal cerebellar_atlas for testing so we do not depend on
 # external atlas packages.
 make_test_cerebellar_atlas <- function() {
-  n_verts <- nrow(ggseg.formats::get_cerebellar_mesh()$vertices)
-
   vertices_data <- data.frame(
     label = c("left_I-IV", "right_I-IV"),
     stringsAsFactors = FALSE
