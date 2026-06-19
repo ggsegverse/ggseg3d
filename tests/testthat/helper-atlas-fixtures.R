@@ -19,6 +19,27 @@ cerebellar_atlas_fixture <- function(
   )
 }
 
+# Minimal cerebellar atlas used by the visual/snapshot tests so they do not
+# depend on external atlas packages.
+make_test_cerebellar_atlas <- function() {
+  vertices_data <- data.frame(
+    label = c("left_I-IV", "right_I-IV"),
+    stringsAsFactors = FALSE
+  )
+  vertices_data$vertices <- list(0L:99L, 100L:199L)
+
+  cerebellar_atlas_fixture(
+    core = data.frame(
+      label = c("left_I-IV", "right_I-IV"),
+      region = c("I-IV", "I-IV"),
+      hemi = c("left", "right"),
+      stringsAsFactors = FALSE
+    ),
+    vertices = vertices_data,
+    palette = c("left_I-IV" = "#FF0000", "right_I-IV" = "#00FF00")
+  )
+}
+
 subcortical_atlas_fixture <- function(
   core,
   meshes,
