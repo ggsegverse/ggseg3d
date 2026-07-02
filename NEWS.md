@@ -1,3 +1,8 @@
+# ggseg3d 2.1.2
+
+- decouples tests from ggseg.formats internal workings.
+- No user changes.
+
 # ggseg3d 2.1.1
 
 ## Bug fixes

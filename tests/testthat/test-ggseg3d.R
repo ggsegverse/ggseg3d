@@ -202,23 +202,15 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
   cl_data$points <- list(centerline)
   cl_data$tangents <- list(tangents)
 
-  atlas <- structure(
-    list(
-      atlas = "test_tract",
-      type = "tract",
-      core = data.frame(
-        label = "tract_a",
-        region = "tract a",
-        hemi = "subcort",
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(centerlines = cl_data),
-        class = c("ggseg_data_tract", "ggseg_atlas_data")
-      ),
-      palette = c("tract_a" = "#FF0000")
+  atlas <- tract_atlas_fixture(
+    core = data.frame(
+      label = "tract_a",
+      region = "tract a",
+      hemi = "subcort",
+      stringsAsFactors = FALSE
     ),
-    class = c("tract_atlas", "ggseg_atlas", "list")
+    centerlines = cl_data,
+    palette = c("tract_a" = "#FF0000")
   )
 
   prepared <- prepare_brain_meshes(atlas)
@@ -239,23 +231,15 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
     )
   )
 
-  atlas <- structure(
-    list(
-      atlas = "test_subcort",
-      type = "subcortical",
-      core = data.frame(
-        label = "Left-Caudate",
-        region = "caudate",
-        hemi = "subcort",
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(meshes = meshes_data),
-        class = c("ggseg_data_subcortical", "ggseg_atlas_data")
-      ),
-      palette = c("Left-Caudate" = "#FF0000")
+  atlas <- subcortical_atlas_fixture(
+    core = data.frame(
+      label = "Left-Caudate",
+      region = "caudate",
+      hemi = "subcort",
+      stringsAsFactors = FALSE
     ),
-    class = c("subcortical_atlas", "ggseg_atlas", "list")
+    meshes = meshes_data,
+    palette = c("Left-Caudate" = "#FF0000")
   )
 
   prepared <- prepare_brain_meshes(atlas)
@@ -267,11 +251,13 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
 test_that("prepare_brain_meshes uses orientation coloring for tracts", {
   centerline <- matrix(
     c(0, 0, 0, 1, 0, 0, 2, 0, 0),
-    nrow = 3, byrow = TRUE
+    nrow = 3,
+    byrow = TRUE
   )
   tangents <- matrix(
     c(1, 0, 0, 0, 1, 0, 0, 0, 1),
-    nrow = 3, byrow = TRUE
+    nrow = 3,
+    byrow = TRUE
   )
 
   cl_data <- data.frame(label = "tract_a", stringsAsFactors = FALSE)
@@ -284,24 +270,16 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
   )
   meshes_data$mesh <- list(NULL)
 
-  atlas <- structure(
-    list(
-      atlas = "test_tract",
-      type = "tract",
-      core = data.frame(
-        label = "tract_a", region = "tract a", hemi = "subcort",
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(
-          meshes = meshes_data,
-          centerlines = cl_data
-        ),
-        class = c("ggseg_data_tract", "ggseg_atlas_data")
-      ),
-      palette = c("tract_a" = "#FF0000")
+  atlas <- tract_atlas_fixture(
+    core = data.frame(
+      label = "tract_a",
+      region = "tract a",
+      hemi = "subcort",
+      stringsAsFactors = FALSE
     ),
-    class = c("tract_atlas", "ggseg_atlas", "list")
+    centerlines = cl_data,
+    meshes = meshes_data,
+    palette = c("tract_a" = "#FF0000")
   )
 
   prepared <- prepare_brain_meshes(atlas, tract_color = "orientation")
@@ -317,23 +295,16 @@ test_that("prepare_brain_meshes handles cerebellar atlas with vertices", {
   )
   vertices_data$vertices <- list(0L:99L)
 
-  atlas <- structure(
-    list(
-      atlas = "suit_lobules",
-      type = "cerebellar",
-      core = data.frame(
-        label = "left_I-IV",
-        region = "I-IV",
-        hemi = "left",
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(vertices = vertices_data),
-        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
-      ),
-      palette = c("left_I-IV" = "#FF0000")
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "suit_lobules",
+    core = data.frame(
+      label = "left_I-IV",
+      region = "I-IV",
+      hemi = "left",
+      stringsAsFactors = FALSE
     ),
-    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+    vertices = vertices_data,
+    palette = c("left_I-IV" = "#FF0000")
   )
 
   prepared <- prepare_brain_meshes(atlas)
@@ -355,26 +326,19 @@ test_that("cerebellar atlas colors correct vertices", {
   )
   vertices_data$vertices <- list(0L:4L, 100L:104L)
 
-  atlas <- structure(
-    list(
-      atlas = "test_cer",
-      type = "cerebellar",
-      core = data.frame(
-        label = c("left_I-IV", "right_V"),
-        region = c("I-IV", "V"),
-        hemi = c("left", "right"),
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(vertices = vertices_data),
-        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
-      ),
-      palette = c(
-        "left_I-IV" = "#FF0000",
-        "right_V" = "#00FF00"
-      )
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "test_cer",
+    core = data.frame(
+      label = c("left_I-IV", "right_V"),
+      region = c("I-IV", "V"),
+      hemi = c("left", "right"),
+      stringsAsFactors = FALSE
     ),
-    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+    vertices = vertices_data,
+    palette = c(
+      "left_I-IV" = "#FF0000",
+      "right_V" = "#00FF00"
+    )
   )
 
   prepared <- prepare_brain_meshes(atlas)
@@ -403,26 +367,20 @@ test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
     )
   )
 
-  atlas <- structure(
-    list(
-      atlas = "suit_deep",
-      type = "cerebellar",
-      core = data.frame(
-        label = c("left_I-IV", "Left-Dentate"),
-        region = c("I-IV", "Dentate"),
-        hemi = c("left", "left"),
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(vertices = vertices_data, meshes = deep_meshes),
-        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
-      ),
-      palette = c(
-        "left_I-IV" = "#FF0000",
-        "Left-Dentate" = "#0000FF"
-      )
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "suit_deep",
+    core = data.frame(
+      label = c("left_I-IV", "Left-Dentate"),
+      region = c("I-IV", "Dentate"),
+      hemi = c("left", "left"),
+      stringsAsFactors = FALSE
     ),
-    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+    vertices = vertices_data,
+    meshes = deep_meshes,
+    palette = c(
+      "left_I-IV" = "#FF0000",
+      "Left-Dentate" = "#0000FF"
+    )
   )
 
   prepared <- prepare_brain_meshes(atlas)
@@ -456,26 +414,20 @@ test_that("cerebellar surface_opacity can be overridden", {
     )
   )
 
-  atlas <- structure(
-    list(
-      atlas = "suit_deep",
-      type = "cerebellar",
-      core = data.frame(
-        label = c("left_I-IV", "Left-Dentate"),
-        region = c("I-IV", "Dentate"),
-        hemi = c("left", "left"),
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(vertices = vertices_data, meshes = deep_meshes),
-        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
-      ),
-      palette = c(
-        "left_I-IV" = "#FF0000",
-        "Left-Dentate" = "#0000FF"
-      )
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "suit_deep",
+    core = data.frame(
+      label = c("left_I-IV", "Left-Dentate"),
+      region = c("I-IV", "Dentate"),
+      hemi = c("left", "left"),
+      stringsAsFactors = FALSE
     ),
-    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+    vertices = vertices_data,
+    meshes = deep_meshes,
+    palette = c(
+      "left_I-IV" = "#FF0000",
+      "Left-Dentate" = "#0000FF"
+    )
   )
 
   prepared <- prepare_brain_meshes(atlas, surface_opacity = 0.5)
@@ -546,24 +498,17 @@ test_that("cerebellar atlas with text_by populates vertex texts", {
   )
   vertices_data$vertices <- list(0L:4L)
 
-  atlas <- structure(
-    list(
-      atlas = "suit_text",
-      type = "cerebellar",
-      core = data.frame(
-        label = "left_I-IV",
-        region = "I-IV",
-        hemi = "left",
-        score = 0.75,
-        stringsAsFactors = FALSE
-      ),
-      data = structure(
-        list(vertices = vertices_data),
-        class = c("ggseg_data_cerebellar", "ggseg_atlas_data")
-      ),
-      palette = c("left_I-IV" = "#FF0000")
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "suit_text",
+    core = data.frame(
+      label = "left_I-IV",
+      region = "I-IV",
+      hemi = "left",
+      score = 0.75,
+      stringsAsFactors = FALSE
     ),
-    class = c("cerebellar_atlas", "ggseg_atlas", "list")
+    vertices = vertices_data,
+    palette = c("left_I-IV" = "#FF0000")
   )
 
   prepared <- prepare_brain_meshes(atlas, text_by = "score")

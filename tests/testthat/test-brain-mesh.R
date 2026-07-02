@@ -405,7 +405,9 @@ test_that("build_tract_meshes with centerlines and orientation coloring", {
 
 test_that("resolve_brain_mesh returns NULL for empty brain_meshes", {
   result <- resolve_brain_mesh(
-    hemisphere = "lh", surface = "pial", brain_meshes = list()
+    hemisphere = "lh",
+    surface = "pial",
+    brain_meshes = list()
   )
   expect_null(result)
 })
@@ -517,11 +519,13 @@ test_that("build_tract_meshes skips labels not in centerlines", {
 
   centerline <- matrix(
     c(0, 0, 0, 1, 0, 0, 2, 0, 0),
-    nrow = 3, byrow = TRUE
+    nrow = 3,
+    byrow = TRUE
   )
   tangents <- matrix(
     c(1, 0, 0, 1, 0, 0, 1, 0, 0),
-    nrow = 3, byrow = TRUE
+    nrow = 3,
+    byrow = TRUE
   )
 
   atlas_centerlines <- list(
@@ -533,7 +537,8 @@ test_that("build_tract_meshes skips labels not in centerlines", {
   atlas_centerlines$centerlines$tangents <- list(tangents)
 
   meshes <- build_tract_meshes(
-    atlas_data, "#CCCCCC",
+    atlas_data,
+    "#CCCCCC",
     color_by = "colour",
     atlas_centerlines = atlas_centerlines
   )
@@ -555,22 +560,16 @@ test_that("build_tract_meshes applies na_colour for NA colour", {
   atlas_data$mesh <- list(mesh)
 
   meshes <- build_tract_meshes(
-    atlas_data, "#CCCCCC", color_by = "colour"
+    atlas_data,
+    "#CCCCCC",
+    color_by = "colour"
   )
 
   expect_equal(meshes[[1]]$colors, rep("#CCCCCC", 3))
 })
 
 test_that("build_centerline_data returns NULL when no centerlines", {
-  atlas <- structure(
-    list(
-      data = structure(
-        list(centerlines = NULL),
-        class = c("ggseg_data_tract", "ggseg_atlas_data")
-      )
-    ),
-    class = c("tract_atlas", "ggseg_atlas", "list")
-  )
+  atlas <- list(data = list(centerlines = NULL))
 
   expect_null(build_centerline_data(atlas))
 })
@@ -585,15 +584,7 @@ test_that("build_centerline_data skips NULL points in centerlines", {
     NULL
   )
 
-  atlas <- structure(
-    list(
-      data = structure(
-        list(centerlines = cl_data),
-        class = c("ggseg_data_tract", "ggseg_atlas_data")
-      )
-    ),
-    class = c("tract_atlas", "ggseg_atlas", "list")
-  )
+  atlas <- list(data = list(centerlines = cl_data))
 
   result <- build_centerline_data(atlas)
 

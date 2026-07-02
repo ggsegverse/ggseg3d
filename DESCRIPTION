@@ -1,6 +1,6 @@
 Package: ggseg3d
 Title: Interactive 3D Brain Atlas Visualization
-Version: 2.1.1
+Version: 2.1.2
 Authors@R: c(
     person("Athanasia Mo", "Mowinckel", , "a.m.mowinckel@psykologi.uio.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5756-0223")),
