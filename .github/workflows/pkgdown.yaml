@@ -17,7 +17,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -25,7 +25,7 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: browser-actions/setup-chrome@v1
+      - uses: browser-actions/setup-chrome@v2
         id: setup-chrome
 
       - uses: r-lib/actions/setup-r-dependencies@v2
