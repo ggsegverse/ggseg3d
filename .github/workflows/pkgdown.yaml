@@ -30,7 +30,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, any::webshot2, any::chromote
+          extra-packages: any::pkgdown, any::webshot2, any::chromote, local::.
           needs: website
 
       - name: Build site
