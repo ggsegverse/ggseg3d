@@ -8,10 +8,11 @@ on:
 
 name: pkgdown
 
+permissions:
+  contents: write
+
 jobs:
   pkgdown:
-    permissions:
-      contents: write
     uses: ggsegverse/.github/.github/workflows/pkgdown.yaml@main
     with:
       use-chromote: true
