@@ -11,6 +11,7 @@ overlay glass brains, and snapshot the result.
 Install from CRAN:
 
 ``` r
+
 install.packages("ggseg3d")
 ```
 
@@ -18,6 +19,7 @@ Or get the development version from the [ggsegverse
 r-universe](https://ggsegverse.r-universe.dev):
 
 ``` r
+
 options(
   repos = c(
     ggsegverse = "https://ggsegverse.r-universe.dev",
@@ -42,6 +44,7 @@ r-universe](https://ggsegverse.r-universe.dev).
 ## Usage
 
 ``` r
+
 ggseg3d(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 ```
@@ -51,6 +54,7 @@ ggseg3d(atlas = dk(), hemisphere = "left") |>
 Subcortical structures with a translucent glass brain overlay:
 
 ``` r
+
 ggseg3d(atlas = aseg()) |>
   add_glassbrain() |>
   pan_camera("right lateral")

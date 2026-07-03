@@ -14,6 +14,7 @@ palettes, edge rendering, and static exports.
 One call gets you an interactive brain:
 
 ``` r
+
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral")
 ```
@@ -27,6 +28,7 @@ any region to see its name.
 snaps the camera to standard anatomical views:
 
 ``` r
+
 ggseg3d() |>
   pan_camera("left lateral")
 ```
@@ -50,6 +52,7 @@ The full set of presets:
 For anything else, pass explicit coordinates:
 
 ``` r
+
 ggseg3d() |>
   pan_camera(list(eye = list(x = -200, y = 100, z = 100)))
 ```
@@ -61,6 +64,7 @@ column that matches the atlas, then map a variable to `colour_by`. Add
 `text_by` to surface values in the hover tooltip:
 
 ``` r
+
 some_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
@@ -78,6 +82,7 @@ p-value.
 An unnamed vector defines the gradient endpoints:
 
 ``` r
+
 ggseg3d(
   .data = some_data,
   atlas = dk(),
@@ -90,6 +95,7 @@ A named vector pins colours to specific breakpoints, which lets the
 scale extend beyond your data range:
 
 ``` r
+
 ggseg3d(
   .data = some_data,
   atlas = dk(),
@@ -111,6 +117,7 @@ and 1; the colour bar extends to cover the full 0-1 range.
 White works for most journals. Dark backgrounds work for slides:
 
 ``` r
+
 ggseg3d() |>
   set_background("black")
 ```
@@ -131,6 +138,7 @@ standing out against the dark background.
 draws outlines along region boundaries:
 
 ``` r
+
 ggseg3d(hemisphere = "left") |>
   set_edges("black", width = 10) |>
   pan_camera("left lateral")
@@ -151,6 +159,7 @@ when you want boundaries between lobes but not between individual
 regions within the same lobe:
 
 ``` r
+
 lobe_data <- tibble(
   region = c("precentral", "postcentral", "insula", "superior parietal"),
   p = c(0.2, 0.4, 0.3, 0.5),
@@ -176,6 +185,7 @@ The `aseg` atlas covers structures beneath the cortex. Fade unmatched
 regions with `na_alpha` and wrap everything in a glass brain:
 
 ``` r
+
 subcort_data <- tibble(
   region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
@@ -207,6 +217,7 @@ The `tracula` atlas renders white matter pathways as tube meshes. A
 near-invisible glass brain keeps things oriented:
 
 ``` r
+
 ggseg3d(atlas = tracula()) |>
   add_glassbrain(opacity = 0.1)
 ```
@@ -224,6 +235,7 @@ Data mapping works the same way as cortical and subcortical atlases —
 the `region` column matches tract names:
 
 ``` r
+
 tract_data <- tibble(
   region = c("arcuate fasciculus", "corticospinal tract",
              "cingulum bundle", "uncinate fasciculus"),
@@ -253,6 +265,7 @@ left-right, green for anterior-posterior, blue for superior-inferior.
 This is the same convention used in DTI colour maps:
 
 ``` r
+
 ggseg3d(atlas = tracula(), tract_color = "orientation") |>
   add_glassbrain(opacity = 0.1) |>
   set_background("black")
@@ -272,6 +285,7 @@ background.
 Higher segments look better but render slower:
 
 ``` r
+
 ggseg3d(atlas = tracula(), tube_radius = 4, tube_segments = 16) |>
   add_glassbrain(opacity = 0.1)
 ```
@@ -283,6 +297,7 @@ renders the widget to a PNG using a headless browser (Chrome or Chromium
 required):
 
 ``` r
+
 ggseg3d() |>
   pan_camera("left lateral") |>
   snapshot_brain("brain_lateral.png")
@@ -293,6 +308,7 @@ ggseg3d() |>
 For print, crank up the resolution:
 
 ``` r
+
 ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
   pan_camera("left lateral") |>
   set_background("white") |>
@@ -314,6 +330,7 @@ ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
 Snapshot each view separately, then stitch them together with magick:
 
 ``` r
+
 library(magick)
 
 base_plot <- ggseg3d(.data = some_data, atlas = dk(), colour_by = "p") |>
@@ -357,6 +374,7 @@ right medial — stitched into a 2x2 grid.
 ## Legend control
 
 ``` r
+
 ggseg3d() |>
   set_legend(FALSE)
 ```
@@ -364,6 +382,7 @@ ggseg3d() |>
 ## Widget dimensions
 
 ``` r
+
 ggseg3d() |>
   set_dimensions(width = 800, height = 600)
 ```
@@ -376,6 +395,7 @@ turns off all lighting so every vertex renders at its exact assigned
 colour — useful for atlas illustrations or mask extraction:
 
 ``` r
+
 ggseg3d() |>
   set_flat_shading()
 ```
@@ -394,6 +414,7 @@ projection removes that depth cue, so every region appears at the same
 scale regardless of distance from the camera:
 
 ``` r
+
 ggseg3d() |>
   set_orthographic()
 ```
@@ -411,6 +432,7 @@ size whether they face the camera or sit behind the brain.
 meshes). One atlas, two views:
 
 ``` r
+
 library(ggseg)
 
 plot(dk())

@@ -17,6 +17,7 @@ rgl provides the 3D scene, rayshader provides the ray tracer. Both are
 optional dependencies — ggseg3d checks for them at runtime.
 
 ``` r
+
 library(ggseg3d)
 library(dplyr)
 
@@ -34,6 +35,7 @@ overlays — all of that comes through the same pipe functions you already
 know from the widget side.
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -61,6 +63,7 @@ Provide a data frame with a `region` column, point `colour_by` at a
 numeric or categorical variable, and optionally set a custom palette:
 
 ``` r
+
 ggsegray(
   .data = some_data,
   atlas = dk(),
@@ -87,6 +90,7 @@ Before reaching for the ray tracer, grab a fast screenshot with
 [`rgl::snapshot3d()`](https://dmurdoch.github.io/rgl/dev/reference/snapshot.html):
 
 ``` r
+
 p <- ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -104,6 +108,7 @@ Build the scene with
 and pipe functions, then call `render_highquality()`:
 
 ``` r
+
 ggsegray(
   .data = some_data,
   atlas = dk(),
@@ -133,6 +138,7 @@ after
 [`ggsegray()`](https://ggsegverse.github.io/ggseg3d/reference/ggsegray.md):
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -141,6 +147,7 @@ rgl::close3d()
 ```
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left medial")
 
@@ -149,6 +156,7 @@ rgl::close3d()
 ```
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "right") |>
   pan_camera("right superior")
 
@@ -159,6 +167,7 @@ rgl::close3d()
 For a custom viewpoint, pass a numeric vector `c(x, y, z)`:
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera(c(-300, 100, 150))
 
@@ -179,6 +188,7 @@ Rayshader controls lighting through `render_highquality()`. The
 elevation of the light source:
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -195,6 +205,7 @@ For richer lighting setups — multiple light sources, coloured lights,
 area lights — pass custom scene elements:
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -220,6 +231,7 @@ White backgrounds work for most journals. For posters or slides, dark
 backgrounds make the brain pop:
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black")
@@ -241,6 +253,7 @@ Subcortical structures float in space without context. A translucent
 glass brain fixes that:
 
 ``` r
+
 ggsegray(atlas = aseg()) |>
   add_glassbrain(colour = "#CCCCCC", opacity = 0.15) |>
   pan_camera("right lateral")
@@ -267,6 +280,7 @@ The `tracula` atlas works with
 too. Tracts render as tube meshes:
 
 ``` r
+
 ggsegray(atlas = tracula()) |>
   add_glassbrain(opacity = 0.1) |>
   pan_camera("right lateral")
@@ -285,6 +299,7 @@ viewed from the right side.
 Direction-based RGB colouring with `tract_color = "orientation"`:
 
 ``` r
+
 ggsegray(atlas = tracula(), tract_color = "orientation") |>
   add_glassbrain(opacity = 0.1) |>
   pan_camera("left lateral") |>
@@ -314,6 +329,7 @@ and shading without ggseg3d needing to wrap every option.
 for matte):
 
 ``` r
+
 ggsegray(
   atlas = dk(),
   hemisphere = "left",
@@ -337,6 +353,7 @@ shading. Every vertex renders at its exact assigned colour. Essential
 for mask extraction where shadows would contaminate the output:
 
 ``` r
+
 highlight <- tibble(
   region = c("precentral"),
   highlight = c("#FF0000")
@@ -368,6 +385,7 @@ in white — no shading, no shadows, exact colour reproduction.
 geometry:
 
 ``` r
+
 ggsegray(
   atlas = dk(),
   hemisphere = "left",
@@ -404,6 +422,7 @@ to a specific structure. `render_depth()` applies this as a
 post-processing step on a snapshot:
 
 ``` r
+
 ggsegray(
   .data = some_data,
   atlas = dk(),
@@ -433,6 +452,7 @@ Place text labels directly in the 3D scene with
 [`rgl::text3d()`](https://dmurdoch.github.io/rgl/dev/reference/texts.html):
 
 ``` r
+
 ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 
@@ -449,6 +469,7 @@ spins the camera around the scene and writes frames to a GIF — handy for
 conference talks or supplementary materials:
 
 ``` r
+
 ggsegray(
   .data = some_data,
   atlas = dk(),
@@ -474,6 +495,7 @@ quality, use
 which ray-traces each frame:
 
 ``` r
+
 rayshader::render_movie(
   filename = "brain_rotate.mp4",
   frames = 360,
@@ -489,6 +511,7 @@ For multi-panel figures, render each view separately and stitch them
 together with magick:
 
 ``` r
+
 library(magick)
 
 views <- c("left lateral", "left medial", "right lateral", "right medial")

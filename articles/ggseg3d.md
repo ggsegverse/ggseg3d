@@ -8,6 +8,7 @@ browser.
 ## Getting started
 
 ``` r
+
 library(ggseg3d)
 
 ggseg3d(hemisphere = "left") |>
@@ -32,6 +33,7 @@ Match your data to the atlas by region name, then point `colour_by` at
 the variable you care about:
 
 ``` r
+
 library(dplyr)
 
 some_data <- tibble(
@@ -61,6 +63,7 @@ subcortical structures, and
 wraps them in a translucent cortex for anatomical context:
 
 ``` r
+
 subcort_data <- tibble(
   region = c("Thalamus", "Caudate", "Hippocampus"),
   p = c(0.2, 0.5, 0.8)
@@ -85,6 +88,7 @@ sets the viewing angle.
 changes the canvas colour — handy for dark-themed slides:
 
 ``` r
+
 ggseg3d(hemisphere = "left") |>
   pan_camera("left lateral") |>
   set_background("black")

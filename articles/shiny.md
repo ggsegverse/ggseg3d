@@ -4,6 +4,7 @@ ggseg3d widgets work in Shiny applications. This vignette covers the
 output and render functions, plus reactive updates.
 
 ``` r
+
 library(shiny)
 library(ggseg3d)
 ```
@@ -17,6 +18,7 @@ in the UI and
 in the server:
 
 ``` r
+
 ui <- fluidPage(
   titlePanel("Brain Atlas Viewer"),
   sidebarLayout(
@@ -52,6 +54,7 @@ Set explicit dimensions in
 [`ggseg3dOutput()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d-shiny.md):
 
 ``` r
+
 ggseg3dOutput("brain", width = "100%", height = "600px")
 ```
 
@@ -60,6 +63,7 @@ Or use
 in the render function:
 
 ``` r
+
 renderGgseg3d({
   ggseg3d() |>
     set_dimensions(width = 800, height = 600)
@@ -71,6 +75,7 @@ renderGgseg3d({
 Update the brain plot when data changes:
 
 ``` r
+
 server <- function(input, output, session) {
   brain_data <- reactive({
     tibble(
@@ -99,6 +104,7 @@ and
 to modify an existing widget without re-rendering:
 
 ``` r
+
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -143,6 +149,7 @@ These updates are faster than re-rendering the entire widget.
 Here’s a full app with data selection and dynamic updates:
 
 ``` r
+
 library(shiny)
 library(ggseg3d)
 library(dplyr)

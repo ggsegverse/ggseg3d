@@ -1,5 +1,12 @@
 # Changelog
 
+## ggseg3d 2.1.2
+
+CRAN release: 2026-07-02
+
+- decouples tests from ggseg.formats internal workings.
+- No user changes.
+
 ## ggseg3d 2.1.1
 
 CRAN release: 2026-04-22
