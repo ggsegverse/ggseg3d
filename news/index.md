@@ -1,5 +1,7 @@
 # Changelog
 
+## ggseg3d (development version)
+
 ## ggseg3d 2.1.2
 
 CRAN release: 2026-07-02
