@@ -40,11 +40,11 @@ resolve_brain_mesh <- function(
 
   from_ggseg_meshes <- is.null(brain_meshes) && surface != "inflated"
 
-  if (!from_ggseg_meshes) {
-    mesh <- ggseg.formats::get_brain_mesh(hemisphere, surface, brain_meshes)
-  } else {
+  if (from_ggseg_meshes) {
     check_ggseg_meshes(surface)
     mesh <- ggseg.meshes::get_cortical_mesh(hemisphere, surface)
+  } else {
+    mesh <- ggseg.formats::get_brain_mesh(hemisphere, surface, brain_meshes)
   }
 
   if (is.null(mesh)) {
