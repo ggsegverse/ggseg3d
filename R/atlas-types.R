@@ -25,11 +25,10 @@ is_unified_atlas <- function(atlas) {
 
   has_core <- !is.null(atlas$core)
 
-  if (
-    !is.null(atlas$data) &&
-      (inherits(atlas$data, "ggseg_atlas_data") ||
-        inherits(atlas$data, "brain_atlas_data"))
-  ) {
+  has_data_class <- inherits(atlas$data, "ggseg_atlas_data") ||
+    inherits(atlas$data, "brain_atlas_data")
+
+  if (!is.null(atlas$data) && has_data_class) {
     has_3d <- !is.null(atlas$data$vertices) ||
       !is.null(atlas$data$meshes) ||
       !is.null(atlas$data$centerlines)
