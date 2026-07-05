@@ -8,7 +8,7 @@
   "codeRepository": "https://github.com/ggsegverse/ggseg3d",
   "issueTracker": "https://github.com/ggsegverse/ggseg3d/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "2.1.2",
+  "version": "2.1.2.9000",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -290,7 +290,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "1895.509KB",
+  "fileSize": "1895.547KB",
   "citation": [
     {
       "@type": "CreativeWork",
