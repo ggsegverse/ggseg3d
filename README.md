@@ -1,5 +1,5 @@
 
-# ggseg3d <img src='man/figures/logo.png' align="right" height="138.5" />
+# ggseg3d <img src='man/figures/logo.png' align="right" alt="" height="138.5" />
 
 <!-- badges: start -->
 

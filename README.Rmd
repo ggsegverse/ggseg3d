@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(ggseg3d)
 ```
 
-# ggseg3d <img src='man/figures/logo.png' align="right" height="138.5" />
+# ggseg3d <img src='man/figures/logo.png' align="right" alt="" height="138.5" />
 <!-- badges: start -->
 [![Coverage Status](https://raw.githubusercontent.com/ggsegverse/ggseg3d/coverage/badges/coverage.svg)](https://github.com/ggsegverse/ggseg3d/actions/workflows/test-coverage.yaml)
 [![CRAN status](https://www.r-pkg.org/badges/version/ggseg3d)](https://CRAN.R-project.org/package=ggseg3d)
