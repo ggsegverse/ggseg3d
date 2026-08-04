@@ -1,5 +1,10 @@
 # ggseg3d (development version)
 
+- Test fixtures updated to the `ggseg.formats` short `region` keys (e.g.
+  `transversetemporal`, `af`, `cst`, lowercase subcortical names); the
+  fully spelled-out names now live in the atlas `names` column. Fixes the
+  `text_by` and custom-palette test failures under `ggseg.formats` >= 0.0.4.9001.
+
 # ggseg3d 2.1.2
 
 - decouples tests from ggseg.formats internal workings.
