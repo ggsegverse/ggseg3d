@@ -2,11 +2,11 @@
 
 ## ggseg3d (development version)
 
-- Test fixtures updated to the `ggseg.formats` short `region` keys (e.g.
-  `transversetemporal`, `af`, `cst`, lowercase subcortical names); the
-  fully spelled-out names now live in the atlas `names` column. Fixes
-  the `text_by` and custom-palette test failures under `ggseg.formats`
-  \>= 0.0.4.9001.
+- Test fixtures now resolve region names dynamically via
+  [`ggseg.formats::atlas_regions()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html)
+  instead of hard-coding schema-specific strings, so `ggseg3d` checks
+  cleanly against both the released and development `ggseg.formats`
+  atlas schema. Geometry snapshots skip on CRAN.
 
 ## ggseg3d 2.1.2
 
