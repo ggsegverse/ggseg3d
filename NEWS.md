@@ -1,7 +1,7 @@
 # ggseg3d (development version)
 
 - Test fixtures now resolve region names dynamically via
-  `ggseg.formats::atlas_regions()` instead of hardcoding schema-specific
+  `ggseg.formats::atlas_regions()` instead of hard-coding schema-specific
   strings, so `ggseg3d` checks cleanly against both the released and
   development `ggseg.formats` atlas schema. Geometry snapshots skip on CRAN.
 
