@@ -6,9 +6,9 @@
                  name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
         left inflated      10242   20480   -83   0.0 -108.0 108.0 -72.9  73.0
        right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor       36     e4a6ca19       1      FALSE
-       vertexcolor       36     e4a6ca19       1      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor       36       1      FALSE
+       vertexcolor       36       1      FALSE
 
 # dk single hemisphere has medial edge at midline
 
@@ -17,8 +17,8 @@
     Output
                 name n_vertices n_faces x_min x_max y_min y_max z_min z_max
        left inflated      10242   20480   -83     0  -108   108 -72.9    73
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor       36     e4a6ca19       1      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor       36       1      FALSE
 
 ---
 
@@ -27,8 +27,8 @@
     Output
                  name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
        right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor       36     e4a6ca19       1      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor       36       1      FALSE
 
 # dk pial surface produces stable mesh layout
 
@@ -38,9 +38,9 @@
              name n_vertices n_faces x_min x_max  y_min y_max z_min z_max  color_mode
         left pial      10242   20480   -70     0 -104.7  68.9 -48.3  78.1 vertexcolor
        right pial      10242   20480     0    70 -104.4  69.2 -48.4  79.2 vertexcolor
-       n_colors color_digest opacity is_flatmap
-             36     e4a6ca19       1      FALSE
-             36     e4a6ca19       1      FALSE
+       n_colors opacity is_flatmap
+             36       1      FALSE
+             36       1      FALSE
 
 # aseg subcortical atlas produces stable mesh layout
 
@@ -95,54 +95,54 @@
              cc central        532    1060  -2.7   2.1  14.0  29.5   9.7  18.0
         cc mid anterior        608    1212  -2.7   2.1  29.0  44.5   1.1  14.8
             cc anterior       1006    2008  -2.8   2.6  40.0  57.6 -15.0   5.7
-       color_mode n_colors color_digest opacity is_flatmap
-        facecolor        1     40605a68       1      FALSE
-        facecolor        1     40605a68       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     82a2eb8f       1      FALSE
-        facecolor        1     82a2eb8f       1      FALSE
-        facecolor        1     c05a8a6d       1      FALSE
-        facecolor        1     c05a8a6d       1      FALSE
-        facecolor        1     e2060b29       1      FALSE
-        facecolor        1     e2060b29       1      FALSE
-        facecolor        1     5bb108a8       1      FALSE
-        facecolor        1     b20c29bc       1      FALSE
-        facecolor        1     b20c29bc       1      FALSE
-        facecolor        1     45d88deb       1      FALSE
-        facecolor        1     45d88deb       1      FALSE
-        facecolor        1     b47f2b74       1      FALSE
-        facecolor        1     756ab4b2       1      FALSE
-        facecolor        1     a9b715e7       1      FALSE
-        facecolor        1     f7cfe829       1      FALSE
-        facecolor        1     40605a68       1      FALSE
-        facecolor        1     40605a68       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     fa9a06b0       1      FALSE
-        facecolor        1     82a2eb8f       1      FALSE
-        facecolor        1     82a2eb8f       1      FALSE
-        facecolor        1     c05a8a6d       1      FALSE
-        facecolor        1     c05a8a6d       1      FALSE
-        facecolor        1     2960ae60       1      FALSE
-        facecolor        1     2960ae60       1      FALSE
-        facecolor        1     b20c29bc       1      FALSE
-        facecolor        1     b20c29bc       1      FALSE
-        facecolor        1     45d88deb       1      FALSE
-        facecolor        1     45d88deb       1      FALSE
-        facecolor        1     b47f2b74       1      FALSE
-        facecolor        1     756ab4b2       1      FALSE
-        facecolor        1     a9b715e7       1      FALSE
-        facecolor        1     64787738       1      FALSE
-        facecolor        1     5c6e2031       1      FALSE
-        facecolor        1     36c2395a       1      FALSE
-        facecolor        1     2ce28dcf       1      FALSE
-        facecolor        1     5b40b064       1      FALSE
-        facecolor        1     0f09f440       1      FALSE
-        facecolor        1     b6b26add       1      FALSE
+       color_mode n_colors opacity is_flatmap
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
+        facecolor        1       1      FALSE
 
 # cerebellar atlas produces stable mesh layout
 
@@ -151,8 +151,8 @@
     Output
              name n_vertices n_faces x_min x_max y_min y_max z_min z_max  color_mode
        cerebellum      30013   57665 -53.6    56 -91.7     0 -64.6     0 vertexcolor
-       n_colors color_digest opacity is_flatmap
-              3     8690aed8       1      FALSE
+       n_colors opacity is_flatmap
+              3       1      FALSE
 
 # cortical + glassbrain composes as expected
 
@@ -164,11 +164,11 @@
        glass brain right      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
            left inflated      10242   20480   -83   0.0 -108.0 108.0 -72.9  73.0
           right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor        1     19986245     0.2      FALSE
-       vertexcolor        1     19986245     0.2      FALSE
-       vertexcolor       36     e4a6ca19     1.0      FALSE
-       vertexcolor       36     e4a6ca19     1.0      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor        1     0.2      FALSE
+       vertexcolor        1     0.2      FALSE
+       vertexcolor       36     1.0      FALSE
+       vertexcolor       36     1.0      FALSE
 
 # aseg + glassbrain composes as expected
 
@@ -225,56 +225,56 @@
               cc central        532    1060  -2.7   2.1   14.0  29.5   9.7  18.0
          cc mid anterior        608    1212  -2.7   2.1   29.0  44.5   1.1  14.8
              cc anterior       1006    2008  -2.8   2.6   40.0  57.6 -15.0   5.7
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor        1     19986245    0.15      FALSE
-       vertexcolor        1     19986245    0.15      FALSE
-         facecolor        1     40605a68    1.00      FALSE
-         facecolor        1     40605a68    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     82a2eb8f    1.00      FALSE
-         facecolor        1     82a2eb8f    1.00      FALSE
-         facecolor        1     c05a8a6d    1.00      FALSE
-         facecolor        1     c05a8a6d    1.00      FALSE
-         facecolor        1     e2060b29    1.00      FALSE
-         facecolor        1     e2060b29    1.00      FALSE
-         facecolor        1     5bb108a8    1.00      FALSE
-         facecolor        1     b20c29bc    1.00      FALSE
-         facecolor        1     b20c29bc    1.00      FALSE
-         facecolor        1     45d88deb    1.00      FALSE
-         facecolor        1     45d88deb    1.00      FALSE
-         facecolor        1     b47f2b74    1.00      FALSE
-         facecolor        1     756ab4b2    1.00      FALSE
-         facecolor        1     a9b715e7    1.00      FALSE
-         facecolor        1     f7cfe829    1.00      FALSE
-         facecolor        1     40605a68    1.00      FALSE
-         facecolor        1     40605a68    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     fa9a06b0    1.00      FALSE
-         facecolor        1     82a2eb8f    1.00      FALSE
-         facecolor        1     82a2eb8f    1.00      FALSE
-         facecolor        1     c05a8a6d    1.00      FALSE
-         facecolor        1     c05a8a6d    1.00      FALSE
-         facecolor        1     2960ae60    1.00      FALSE
-         facecolor        1     2960ae60    1.00      FALSE
-         facecolor        1     b20c29bc    1.00      FALSE
-         facecolor        1     b20c29bc    1.00      FALSE
-         facecolor        1     45d88deb    1.00      FALSE
-         facecolor        1     45d88deb    1.00      FALSE
-         facecolor        1     b47f2b74    1.00      FALSE
-         facecolor        1     756ab4b2    1.00      FALSE
-         facecolor        1     a9b715e7    1.00      FALSE
-         facecolor        1     64787738    1.00      FALSE
-         facecolor        1     5c6e2031    1.00      FALSE
-         facecolor        1     36c2395a    1.00      FALSE
-         facecolor        1     2ce28dcf    1.00      FALSE
-         facecolor        1     5b40b064    1.00      FALSE
-         facecolor        1     0f09f440    1.00      FALSE
-         facecolor        1     b6b26add    1.00      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor        1    0.15      FALSE
+       vertexcolor        1    0.15      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
+         facecolor        1    1.00      FALSE
 
 # cerebellar + glassbrain composes as expected
 
@@ -285,8 +285,8 @@
         glass brain left      10242   20480 -83.0   0.0 -108.0 108.0 -72.9  73.0
        glass brain right      10242   20480   0.0  81.8 -107.7 107.7 -73.3  73.3
               cerebellum      30013   57665 -53.6  56.0  -91.7   0.0 -64.6   0.0
-        color_mode n_colors color_digest opacity is_flatmap
-       vertexcolor        1     19986245    0.15      FALSE
-       vertexcolor        1     19986245    0.15      FALSE
-       vertexcolor        3     8690aed8    1.00      FALSE
+        color_mode n_colors opacity is_flatmap
+       vertexcolor        1    0.15      FALSE
+       vertexcolor        1    0.15      FALSE
+       vertexcolor        3    1.00      FALSE
 

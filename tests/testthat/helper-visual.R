@@ -32,7 +32,11 @@ widget_summary <- function(p, coord_digits = 1) {
       z_max = z_range[2],
       color_mode = m$colorMode %||% NA_character_,
       n_colors = length(unique(colors)),
-      color_digest = substr(rlang::hash(sort(unique(colors))), 1, 8),
+      # No hash of the exact colours: continuous colour interpolation renders
+      # marginally different hex across CPU architectures (macOS ARM vs Linux
+      # x86), which would make this snapshot machine-specific. n_colors +
+      # colour_mode catch count/mode regressions; exact-colour drift is tracked
+      # separately (see the arch-determinism investigation).
       opacity = m$opacity %||% 1,
       is_flatmap = isTRUE(m$isFlatmap),
       stringsAsFactors = FALSE
