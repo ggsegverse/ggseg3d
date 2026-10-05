@@ -176,34 +176,12 @@ test_that("vertices_to_groups handles NA group values", {
 })
 
 test_that("is_unified_atlas detects atlas with data component", {
-  atlas <- structure(
-    list(
-      core = data.frame(label = "a", region = "r", hemi = "left"),
-      data = structure(
-        list(vertices = data.frame(label = "a")),
-        class = "ggseg_atlas_data"
-      )
-    ),
-    class = "ggseg_atlas"
-  )
-  atlas$data$vertices$vertices <- list(1:10)
-
-  expect_true(is_unified_atlas(atlas))
+  expect_true(is_unified_atlas(make_test_cortical_atlas()))
+  expect_true(is_unified_atlas(make_test_cerebellar_atlas()))
 })
 
 test_that("is_unified_atlas returns FALSE for atlas without 3d data", {
-  atlas <- structure(
-    list(
-      core = data.frame(label = "a", region = "r", hemi = "left"),
-      data = structure(
-        list(geometry = data.frame()),
-        class = "ggseg_atlas_data"
-      )
-    ),
-    class = "ggseg_atlas"
-  )
-
-  expect_false(is_unified_atlas(atlas))
+  expect_false(is_unified_atlas(make_test_2d_only_atlas()))
 })
 
 test_that("is_subcortical_atlas detects subcortical atlases", {
@@ -211,7 +189,7 @@ test_that("is_subcortical_atlas detects subcortical atlases", {
   expect_false(is_subcortical_atlas(dk()))
 })
 
-test_that("is_unified_atlas detects direct vertices", {
+test_that("is_unified_atlas rejects pre-unification atlas objects", {
   atlas <- structure(
     list(
       core = data.frame(label = "a", region = "r", hemi = "left"),
@@ -221,19 +199,22 @@ test_that("is_unified_atlas detects direct vertices", {
   )
   atlas$vertices$vertices <- list(1:10)
 
-  expect_true(is_unified_atlas(atlas))
+  expect_false(is_unified_atlas(atlas))
 })
 
-test_that("is_unified_atlas detects direct meshes", {
-  atlas <- structure(
-    list(
-      core = data.frame(label = "a", region = "r", hemi = "subcort"),
-      meshes = data.frame(label = "a")
-    ),
-    class = "ggseg_atlas"
+test_that("atlas_3d_components reports the geometry each atlas carries", {
+  expect_identical(
+    atlas_3d_components(dk()),
+    c(vertices = TRUE, meshes = FALSE, centerlines = FALSE)
   )
-
-  expect_true(is_unified_atlas(atlas))
+  expect_identical(
+    atlas_3d_components(aseg()),
+    c(vertices = FALSE, meshes = TRUE, centerlines = FALSE)
+  )
+  expect_identical(
+    atlas_3d_components(tracula()),
+    c(vertices = FALSE, meshes = FALSE, centerlines = TRUE)
+  )
 })
 
 test_that("cross_product computes correct cross products", {
@@ -569,26 +550,18 @@ test_that("build_tract_meshes applies na_colour for NA colour", {
 })
 
 test_that("build_centerline_data returns NULL when no centerlines", {
-  atlas <- list(data = list(centerlines = NULL))
-
-  expect_null(build_centerline_data(atlas))
+  expect_null(build_centerline_data(aseg()))
 })
 
-test_that("build_centerline_data skips NULL points in centerlines", {
-  cl_data <- data.frame(
-    label = c("tract_a", "tract_b"),
-    stringsAsFactors = FALSE
-  )
-  cl_data$points <- list(
-    matrix(c(0, 0, 0, 1, 0, 0), nrow = 2, byrow = TRUE),
-    NULL
-  )
-
-  atlas <- list(data = list(centerlines = cl_data))
-
-  result <- build_centerline_data(atlas)
+test_that("build_centerline_data carries centerlines and tube defaults", {
+  result <- build_centerline_data(tracula())
 
   expect_type(result, "list")
-  expect_null(result$centerlines$points[[2]])
-  expect_identical(nrow(result$centerlines$points[[1]]), 2L)
+  expect_true(all(
+    c("label", "points", "tangents") %in%
+      names(result$centerlines)
+  ))
+  expect_identical(ncol(result$centerlines$points[[1]]), 3L)
+  expect_identical(result$tube_radius, 2)
+  expect_identical(result$tube_segments, 10)
 })

@@ -95,7 +95,8 @@ ggseg3d <- function(
     cli::cli_abort(c(
       "Atlas must be a {.cls ggseg_atlas} object with 3D data.",
       "i" = "Use atlases from {.pkg ggseg.formats}.",
-      "i" = "Create atlases with {.fn ggseg.extra::create_cortical_atlas}."
+      "i" = "Create atlases with
+             {.fn ggseg.extra::create_cortical_from_labels}."
     ))
   }
 
@@ -226,7 +227,7 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   surface_opacity = NULL,
   ...
 ) {
-  has_deep <- !is.null(atlas$data$meshes)
+  has_deep <- has_atlas_meshes(atlas)
   surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
 
   atlas_data <- prepare_atlas_data(atlas, .data)
@@ -406,12 +407,12 @@ build_centerline_data <- function(
   tube_radius = NULL,
   tube_segments = NULL
 ) {
-  if (is.null(atlas$data$centerlines)) {
+  if (!has_atlas_centerlines(atlas)) {
     return(NULL)
   }
 
   list(
-    centerlines = atlas$data$centerlines,
+    centerlines = ggseg.formats::atlas_centerlines(atlas),
     tube_radius = tube_radius %||% 2,
     tube_segments = tube_segments %||% 10
   )

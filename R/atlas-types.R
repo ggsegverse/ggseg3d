@@ -1,49 +1,76 @@
 #' Check if atlas is a unified ggseg_atlas
 #'
-#' Checks whether an atlas object is a ggseg_atlas with the unified format
-#' (containing vertices or meshes component for 3D rendering).
-#'
-#' Unified atlases (ggseg_atlas class from ggseg.formats) contain:
-#' - core: region info (hemi, region, label)
-#' - data: type-specific data object
-#'   (ggseg_data_cortical, ggseg_data_subcortical, ggseg_data_tract)
-#' - palette: colours keyed by label
+#' Checks whether an atlas object is a valid `ggseg_atlas` that carries
+#' geometry `ggseg3d` can render in 3D: cortical or cerebellar vertices,
+#' subcortical meshes, or tract centerlines.
 #'
 #' @param atlas An atlas object to check
 #'
-#' @return Logical indicating if this is a unified ggseg_atlas
+#' @return Logical indicating if this is a renderable unified ggseg_atlas
 #' @noRd
 #' @keywords internal
-#' \dontrun{
-#' is_unified_atlas(dk())
-#' is_unified_atlas(ggseg.formats::dk())
-#' }
 is_unified_atlas <- function(atlas) {
-  if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {
-    return(FALSE)
-  }
+  ggseg.formats::is_ggseg_atlas(atlas) && any(atlas_3d_components(atlas))
+}
 
-  has_core <- !is.null(atlas$core)
 
-  has_atlas_data <- inherits(atlas$data, "ggseg_atlas_data") ||
-    inherits(atlas$data, "brain_atlas_data")
+#' Which 3D geometry components an atlas carries
+#'
+#' ggseg.formats exposes no predicate for which geometry an atlas holds, and
+#' its accessors abort rather than return `NULL` when a component is absent,
+#' so presence has to be read off the data slot. This is the only place in
+#' `ggseg3d` that inspects atlas structure directly; every read of the
+#' geometry itself goes through the ggseg.formats accessors.
+#'
+#' @param atlas A `ggseg_atlas` object
+#'
+#' @return Named logical vector with `vertices`, `meshes` and `centerlines`
+#' @keywords internal
+#' @noRd
+atlas_3d_components <- function(atlas) {
+  data <- atlas$data
+  c(
+    vertices = !is.null(data$vertices),
+    meshes = !is.null(data$meshes),
+    centerlines = !is.null(data$centerlines)
+  )
+}
 
-  if (has_atlas_data) {
-    has_3d <- !is.null(atlas$data$vertices) ||
-      !is.null(atlas$data$meshes) ||
-      !is.null(atlas$data$centerlines)
-    return(has_core && has_3d)
-  }
+#' @noRd
+has_atlas_meshes <- function(atlas) {
+  atlas_3d_components(atlas)[["meshes"]]
+}
 
-  has_3d_data <- !is.null(atlas$vertices) || !is.null(atlas$meshes)
-  has_core && has_3d_data
+#' @noRd
+has_atlas_centerlines <- function(atlas) {
+  atlas_3d_components(atlas)[["centerlines"]]
+}
+
+
+#' Attach the atlas colours a plot should use
+#'
+#' Overwrites the `colour` column with [ggseg.formats::atlas_plot_palette()],
+#' which substitutes distinguishable colours when the atlas palette gives
+#' every region the same colour. Reading `atlas$palette` instead renders such
+#' atlases as a single indistinguishable silhouette.
+#'
+#' @param atlas A `ggseg_atlas` object
+#' @param atlas_data Data frame with a `label` column
+#'
+#' @return `atlas_data` with a `colour` column
+#' @keywords internal
+#' @noRd
+with_plot_colours <- function(atlas, atlas_data) {
+  palette <- ggseg.formats::atlas_plot_palette(atlas)
+  atlas_data$colour <- unname(palette[atlas_data$label])
+  atlas_data
 }
 
 
 #' Prepare atlas data
 #'
 #' Extracts and prepares data from a ggseg_atlas object for rendering.
-#' Joins vertices with core region info and palette colours.
+#' Joins vertices with core region info and plot palette colours.
 #'
 #' @param atlas A ggseg_atlas object
 #' @param .data Optional user data to merge
@@ -52,23 +79,10 @@ is_unified_atlas <- function(atlas) {
 #' @keywords internal
 #' @noRd
 prepare_atlas_data <- function(atlas, .data) {
-  vertices <- if (!is.null(atlas$data$vertices)) {
-    atlas$data$vertices
-  } else {
-    atlas$vertices
-  }
-  atlas_data <- dplyr::left_join(
-    vertices,
-    atlas$core,
-    by = "label",
-    relationship = "many-to-many"
+  atlas_data <- with_plot_colours(
+    atlas,
+    ggseg.formats::atlas_vertices(atlas)
   )
-
-  if (!is.null(atlas$palette)) {
-    atlas_data$colour <- atlas$palette[atlas_data$label]
-  } else {
-    atlas_data$colour <- NA_character_
-  }
 
   if (!is.null(.data)) {
     atlas_data <- merge_atlas_data(.data, atlas_data)
@@ -82,7 +96,7 @@ prepare_atlas_data <- function(atlas, .data) {
 #'
 #' Extracts and prepares data from a mesh-based ggseg_atlas object
 #' (subcortical/tract) for rendering. Joins meshes with core region info
-#' and palette colours.
+#' and plot palette colours.
 #'
 #' @param atlas A mesh-based ggseg_atlas object
 #' @param .data Optional user data to merge
@@ -91,34 +105,36 @@ prepare_atlas_data <- function(atlas, .data) {
 #' @keywords internal
 #' @noRd
 prepare_mesh_atlas_data <- function(atlas, .data) {
-  if (!is.null(atlas$data$centerlines)) {
-    base_data <- atlas$data$centerlines[, "label", drop = FALSE]
+  base_data <- if (has_atlas_centerlines(atlas)) {
+    centerline_metadata(atlas)
   } else {
-    base_data <- if (!is.null(atlas$data$meshes)) {
-      atlas$data$meshes
-    } else {
-      atlas$meshes
-    }
+    ggseg.formats::atlas_meshes(atlas)
   }
 
-  atlas_data <- dplyr::left_join(
-    base_data,
-    atlas$core,
-    by = "label",
-    relationship = "many-to-many"
-  )
-
-  if (!is.null(atlas$palette)) {
-    atlas_data$colour <- atlas$palette[atlas_data$label]
-  } else {
-    atlas_data$colour <- NA_character_
-  }
+  atlas_data <- with_plot_colours(atlas, base_data)
 
   if (!is.null(.data)) {
     atlas_data <- data_merge_mesh(.data, atlas_data)
   }
 
   atlas_data
+}
+
+
+#' Tract centerline rows without their geometry columns
+#'
+#' Tract meshes are swept from the centerlines separately, so the prepared
+#' data carries only the region metadata.
+#'
+#' @param atlas A tract `ggseg_atlas` object
+#'
+#' @return Data frame of centerline metadata
+#' @keywords internal
+#' @noRd
+centerline_metadata <- function(atlas) {
+  centerlines <- ggseg.formats::atlas_centerlines(atlas)
+  geometry_cols <- c("points", "tangents")
+  centerlines[, setdiff(names(centerlines), geometry_cols), drop = FALSE]
 }
 
 
