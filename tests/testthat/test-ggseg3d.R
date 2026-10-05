@@ -30,7 +30,7 @@ test_that("Check that ggseg3d is working", {
     )
   )
 
-  dk_regions <- ggseg.formats::atlas_regions(dk())
+  dk_regions <- sort(unique(ggseg.formats::atlas_regions(dk())))
   some_data <- data.frame(
     region = dk_regions[1:4],
     p = sample(seq(0, 0.5, 0.001), 4),
@@ -82,7 +82,7 @@ test_that("ggseg3d with inflated surface", {
 
 test_that("ggseg3d handles edge_by parameter", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:4],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:4],
     lobe = c("temporal", "insular", "frontal", "parietal"),
     stringsAsFactors = FALSE
   )
@@ -102,7 +102,7 @@ test_that("ggseg3d default colorbar is present", {
 
 test_that("ggseg3d with custom palette", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:2],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:2],
     p = c(0.1, 0.9),
     stringsAsFactors = FALSE
   )
@@ -129,7 +129,7 @@ test_that("ggseg3d with label_by parameter", {
 
 test_that("deprecated params trigger warnings", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:2],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:2],
     p = c(0.1, 0.5),
     stringsAsFactors = FALSE
   )
@@ -537,7 +537,7 @@ test_that("vertices_to_text returns NA vector when column is missing", {
 })
 
 test_that("text_by works with subcortical atlas", {
-  aseg_regions <- ggseg.formats::atlas_regions(aseg())
+  aseg_regions <- sort(unique(ggseg.formats::atlas_regions(aseg())))
   some_data <- data.frame(
     region = aseg_regions[1:2],
     p = c(0.1, 0.5),
@@ -556,7 +556,7 @@ test_that("text_by works with subcortical atlas", {
 })
 
 test_that("text_by works with tract atlas", {
-  tracula_regions <- ggseg.formats::atlas_regions(tracula())
+  tracula_regions <- sort(unique(ggseg.formats::atlas_regions(tracula())))
   some_data <- data.frame(
     region = tracula_regions[1:2],
     fa = c(0.45, 0.55),
