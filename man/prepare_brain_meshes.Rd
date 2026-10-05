@@ -67,15 +67,15 @@
 prepare_brain_meshes(atlas, ...)
 }
 \arguments{
-\item{atlas}{A `ggseg_atlas` object}
+\item{atlas}{A \code{ggseg_atlas} object}
 
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{surface}{Surface type: `"inflated"` (default), `"semi-inflated"`,
-`"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.}
+\item{surface}{Surface type: \code{"inflated"} (default), \code{"semi-inflated"},
+\code{"white"}, \code{"pial"}. Use \code{"LCBC"} as alias for \code{"inflated"}.}
 
-\item{hemisphere}{Character vector of hemispheres: `"right"`, `"left"`.}
+\item{hemisphere}{Character vector of hemispheres: \code{"right"}, \code{"left"}.}
 
 \item{label_by}{String. Column name used as hover label for each region.}
 
@@ -97,25 +97,25 @@ transparency of NA-regions.}
 \item{edge_by}{Column name for region boundary edge grouping}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
-[ggseg.formats::get_brain_mesh()] for format details.}
+\code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
 
 \item{...}{Type-specific arguments passed to methods}
 
 \item{surface_opacity}{Numeric opacity for the cerebellar surface mesh.
-Defaults to `0.3` when deep nuclei are present and `1` otherwise.}
+Defaults to \code{0.3} when deep nuclei are present and \code{1} otherwise.}
 
-\item{tract_color}{`"palette"` (default) or `"orientation"`
+\item{tract_color}{\code{"palette"} (default) or \code{"orientation"}
 (direction-based RGB colouring)}
 
-\item{tube_radius}{Numeric tube radius (default 5 when `NULL`).}
+\item{tube_radius}{Numeric tube radius (default 5 when \code{NULL}).}
 
-\item{tube_segments}{Integer tube segment count (default 8 when `NULL`).}
+\item{tube_segments}{Integer tube segment count (default 8 when \code{NULL}).}
 }
 \value{
-List with `meshes` (list of mesh entries) and `legend_data`
+List with \code{meshes} (list of mesh entries) and \code{legend_data}
 }
 \description{
 S3 generic that dispatches to atlas-type-specific preparation methods.
-Builds mesh data structures and legend data from a `ggseg_atlas`.
+Builds mesh data structures and legend data from a \code{ggseg_atlas}.
 }
 \keyword{internal}

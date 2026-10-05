@@ -7,7 +7,7 @@
 set_edges(p, colour = "black", width = 1)
 }
 \arguments{
-\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{colour}{string. Edge colour (hex or named color). Set to NULL to
 hide edges.}
@@ -21,12 +21,12 @@ The input object (modified), for piping.
 \description{
 Adds coloured outlines around brain regions. This is useful for
 highlighting region boundaries in figures. Works with both
-htmlwidget (`ggseg3d`) and rgl (`ggsegray`) objects. For rgl,
-edges must have been computed at creation time via `edge_by`.
+htmlwidget (\code{ggseg3d}) and rgl (\code{ggsegray}) objects. For rgl,
+edges must have been computed at creation time via \code{edge_by}.
 }
 \section{Lifecycle}{
 
-`r lifecycle::badge("experimental")`
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 
 \examples{

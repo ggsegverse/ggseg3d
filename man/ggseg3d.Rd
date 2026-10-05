@@ -23,7 +23,7 @@ ggseg3d(
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{atlas}{A `ggseg_atlas` object containing 3D vertex mappings, or a
+\item{atlas}{A \code{ggseg_atlas} object containing 3D vertex mappings, or a
 string naming an atlas function (deprecated).}
 
 \item{label_by}{String. Column name used as hover label for each region.}
@@ -44,37 +44,37 @@ colour.}
 transparency of NA-regions.}
 
 \item{...}{Type-specific arguments passed to the atlas method.
-See section **Type-specific arguments** below.}
+See section \strong{Type-specific arguments} below.}
 
-\item{label, text, colour}{`r lifecycle::badge("deprecated")` Use
-`label_by`, `text_by`, and `colour_by` instead.}
+\item{label, text, colour}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use
+\code{label_by}, \code{text_by}, and \code{colour_by} instead.}
 }
 \value{
 an htmlwidget object for interactive 3D brain visualization
 }
 \description{
-`ggseg3d` creates and returns an interactive Three.js brain mesh
+\code{ggseg3d} creates and returns an interactive Three.js brain mesh
 visualization. Dispatches to atlas-type-specific methods via
-[prepare_brain_meshes()].
+\code{\link[=prepare_brain_meshes]{prepare_brain_meshes()}}.
 }
 \section{Type-specific arguments}{
 
-Cortical atlases (`cortical_atlas`):
+Cortical atlases (\code{cortical_atlas}):
 \describe{
-  \item{`surface`}{Surface type: `"LCBC"` (default, alias for
-    inflated), `"inflated"`, `"semi-inflated"`, `"white"`, `"pial"`.}
-  \item{`hemisphere`}{Character vector of hemispheres: `"right"`,
-    `"left"`.}
-  \item{`edge_by`}{Column name for region boundary edges.}
-  \item{`brain_meshes`}{Custom brain mesh data.}
+\item{\code{surface}}{Surface type: \code{"LCBC"} (default, alias for
+inflated), \code{"inflated"}, \code{"semi-inflated"}, \code{"white"}, \code{"pial"}.}
+\item{\code{hemisphere}}{Character vector of hemispheres: \code{"right"},
+\code{"left"}.}
+\item{\code{edge_by}}{Column name for region boundary edges.}
+\item{\code{brain_meshes}}{Custom brain mesh data.}
 }
 
-Tract atlases (`tract_atlas`):
+Tract atlases (\code{tract_atlas}):
 \describe{
-  \item{`tract_color`}{`"palette"` (default) or `"orientation"`
-    (direction-based RGB).}
-  \item{`tube_radius`}{Tube radius (numeric, default 5).}
-  \item{`tube_segments`}{Tube segment count (integer, default 8).}
+\item{\code{tract_color}}{\code{"palette"} (default) or \code{"orientation"}
+(direction-based RGB).}
+\item{\code{tube_radius}}{Tube radius (numeric, default 5).}
+\item{\code{tube_segments}}{Tube segment count (integer, default 8).}
 }
 }
 
@@ -86,8 +86,8 @@ ggseg3d() |> set_background("black")
 
 }
 \seealso{
-[pan_camera()] for camera position, [set_background()] for
-  background colour, [set_legend()] for legend visibility
+\code{\link[=pan_camera]{pan_camera()}} for camera position, \code{\link[=set_background]{set_background()}} for
+background colour, \code{\link[=set_legend]{set_legend()}} for legend visibility
 }
 \author{
 Athanasia Mowinckel and Didac Piñeiro

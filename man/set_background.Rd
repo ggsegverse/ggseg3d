@@ -7,7 +7,7 @@
 set_background(p, colour = "#ffffff")
 }
 \arguments{
-\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{colour}{string. Background color (hex or named color)}
 }

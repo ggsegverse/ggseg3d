@@ -10,11 +10,13 @@ set_positioning(p, positioning = c("anatomical", "centered"))
 \item{p}{ggseg3d widget object}
 
 \item{positioning}{How to position hemispheres:
-- "anatomical": Medial surfaces adjacent at midline. Left at negative
-  x, right at positive x. Default for displaying both hemispheres
-  together.
-- "centered": Centre each hemisphere at the origin. Best for
-  single-hemisphere snapshots where consistent sizing is needed.}
+\itemize{
+\item "anatomical": Medial surfaces adjacent at midline. Left at negative
+x, right at positive x. Default for displaying both hemispheres
+together.
+\item "centered": Centre each hemisphere at the origin. Best for
+single-hemisphere snapshots where consistent sizing is needed.
+}}
 }
 \value{
 ggseg3d widget object with repositioned meshes
@@ -27,8 +29,8 @@ snapshots, or to reapply anatomical positioning after manual edits.
 }
 \details{
 Only cortical hemisphere meshes are repositioned (those named
-  `"<hemi> <surface>"`, e.g. `"left inflated"`). Subcortical, cerebellar
-  and glassbrain meshes are left untouched.
+\code{"<hemi> <surface>"}, e.g. \code{"left inflated"}). Subcortical, cerebellar
+and glassbrain meshes are left untouched.
 }
 \examples{
 # View both hemispheres anatomically positioned (default)

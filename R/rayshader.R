@@ -146,7 +146,7 @@ knit_print.ggsegray <- function(x, ...) {
 #' Convert mesh entry to rgl mesh3d object
 #'
 #' Converts the internal mesh_entry list structure (as built by
-#' [make_mesh_entry()]) into an [rgl::tmesh3d()] object for rgl rendering.
+#' `make_mesh_entry()`) into an [rgl::tmesh3d()] object for rgl rendering.
 #'
 #' @param mesh_entry A mesh entry list with vertices, faces, colors,
 #'   colorMode, and opacity.

@@ -14,21 +14,21 @@ add_glassbrain(
 )
 }
 \arguments{
-\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{hemisphere}{Character vector. Hemispheres to add: "left", "right",
 or both.}
 
-\item{surface}{Character. Surface type. Defaults to `"inflated"`, which
-is supplied by `ggseg.formats` and requires no additional dependency.
-Other surfaces (`"pial"`, `"white"`, etc.) are drawn from `ggseg.meshes`.}
+\item{surface}{Character. Surface type. Defaults to \code{"inflated"}, which
+is supplied by \code{ggseg.formats} and requires no additional dependency.
+Other surfaces (\code{"pial"}, \code{"white"}, etc.) are drawn from \code{ggseg.meshes}.}
 
 \item{colour}{Character. Colour for the glass brain surface (hex or named).}
 
 \item{opacity}{Numeric. Transparency of the glass brain (0-1).}
 
 \item{brain_meshes}{Optional user-supplied brain meshes. See
-[ggseg.formats::get_brain_mesh()] for format details.}
+\code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
 }
 \value{
 The input object (modified), for piping.
@@ -36,8 +36,8 @@ The input object (modified), for piping.
 \description{
 Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
 Particularly useful for subcortical and tract visualizations where spatial
-context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
-rgl (`ggsegray`) objects.
+context helps interpretation. Works with both htmlwidget (\code{ggseg3d}) and
+rgl (\code{ggsegray}) objects.
 }
 \examples{
 \donttest{

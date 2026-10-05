@@ -17,7 +17,7 @@ with convenient functions to inspect the results directly on
 a brain-plot using interactive 3D mesh visualizations powered
 by Three.js via htmlwidgets.
 
-The package uses `ggseg_atlas` objects from ggseg.formats
+The package uses \code{ggseg_atlas} objects from ggseg.formats
 that contain 3D vertex mappings.
 }
 \seealso{
@@ -34,6 +34,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Athanasia Mo Mowinckel \email{a.m.mowinckel@psykologi.uio.no} (\href{https://orcid.org/0000-0002-5756-0223}{ORCID})
   \item Didac Vidal-Piñeiro \email{d.v.pineiro@psykologi.uio.no} (\href{https://orcid.org/0000-0001-9997-9156}{ORCID})
 }
 
