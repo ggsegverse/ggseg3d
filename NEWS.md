@@ -1,13 +1,52 @@
-# ggseg3d (development version)
+# ggseg3d 2.1.3
+
+## Bug fixes
+
+- Atlases whose colour lookup table gives every region the same colour (often
+  black) no longer render as a single indistinguishable brain. Region colours
+  now come from `ggseg.formats::atlas_plot_palette()`, which substitutes
+  distinguishable colours and warns that the atlas colour table is what needs
+  fixing. Previously `ggseg3d()` read `atlas$palette` directly and drew such
+  atlases faithfully as one solid silhouette, while the same atlas plotted
+  correctly in 2D through `ggseg`.
+
+- `print()` on a `ggsegray` object now returns the object invisibly, as print
+  methods are expected to. It still renders the scene; only the return value
+  changed, and piping was never supported off `print()`.
+
+## Documentation
+
+- Roxygen markdown is now enabled, so cross-references and formatting in the
+  help pages render as intended. Previously `?ggsegray` and `?ggseg3d` showed
+  literal text such as `[pan_camera()]` instead of a link, and the deprecation
+  badge on `label`, `text` and `colour` never rendered.
+
+- The error raised for a non-atlas input now points at
+  `ggseg.extra::create_cortical_from_labels()`; the function it named before
+  does not exist.
+
+## Internal
+
+- All atlas reads now go through the `ggseg.formats` accessors
+  (`atlas_vertices()`, `atlas_meshes()`, `atlas_centerlines()`,
+  `atlas_plot_palette()`) instead of reaching into `atlas$core`,
+  `atlas$palette` and `atlas$data`. This requires
+  `ggseg.formats (>= 0.1.0)`.
+
+- Atlas objects predating the unified `ggseg_atlas` layout, which stored
+  `vertices` or `meshes` at the top level instead of under `data`, are no
+  longer accepted. They are rejected up front with the usual
+  "must be a ggseg_atlas object with 3D data" error rather than failing deeper
+  in rendering. No released atlas package ships that layout.
+
+- `png` and `rayshader` moved from `Suggests` to `Config/Needs/website`; they
+  are used only by the pkgdown-only articles, which are not part of the built
+  package.
 
 - Test fixtures now resolve region names dynamically via
   `ggseg.formats::atlas_regions()` instead of hard-coding schema-specific
   strings, so `ggseg3d` checks cleanly against both the released and
   development `ggseg.formats` atlas schema. Geometry snapshots skip on CRAN.
-
-- `print()` on a `ggsegray` object now returns the object invisibly, as print
-  methods are expected to. It still renders the scene; only the return value
-  changed, and piping was never supported off `print()`.
 
 # ggseg3d 2.1.2
 
