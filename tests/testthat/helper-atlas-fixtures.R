@@ -3,6 +3,16 @@
 # layout. Tests supply the meaningful data (core, vertices, meshes, ...) and
 # these helpers assemble a valid ggseg_atlas.
 
+# `names` carries the long-form display name and is part of the core schema, so
+# ggseg.formats asks atlas authors for it at construction. Fixtures care about
+# geometry rather than display names, so fall back to the region name.
+core_with_names <- function(core) {
+  if (!"names" %in% names(core)) {
+    core$names <- core$region
+  }
+  core
+}
+
 cerebellar_atlas_fixture <- function(
   core,
   vertices = NULL,
@@ -13,7 +23,7 @@ cerebellar_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "cerebellar",
-    core = core,
+    core = core_with_names(core),
     data = ggseg.formats::ggseg_data_cerebellar(
       vertices = vertices,
       meshes = meshes
@@ -52,7 +62,7 @@ subcortical_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "subcortical",
-    core = core,
+    core = core_with_names(core),
     data = ggseg.formats::ggseg_data_subcortical(meshes = meshes),
     palette = palette
   )
@@ -68,7 +78,7 @@ tract_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "tract",
-    core = core,
+    core = core_with_names(core),
     data = ggseg.formats::ggseg_data_tract(
       centerlines = centerlines,
       meshes = meshes
@@ -87,7 +97,7 @@ cortical_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "cortical",
-    core = core,
+    core = core_with_names(core),
     data = ggseg.formats::ggseg_data_cortical(
       geom = geom,
       vertices = vertices
