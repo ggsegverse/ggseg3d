@@ -2,6 +2,27 @@
 
 ## Bug fixes
 
+- Data with a single distinct value no longer colours every region as if it
+  had data: regions with no value keep `na_colour`, and the legend shows a
+  single swatch instead of disappearing.
+
+- `na_alpha` now does what it documents. Regions with no value in `.data` fade
+  per vertex on cortical and cerebellar surfaces and per mesh on subcortical
+  structures and tracts. It was accepted and ignored in every previous
+  release. Values outside 0-1 are now an error.
+
+- Transparent meshes are drawn front-faces-only and without depth writes, so
+  a requested opacity renders as asked instead of blending the mesh against
+  its own back faces.
+
+- Mesh face indices now follow the `face_index_base` attribute `ggseg.meshes`
+  publishes, falling back to the smallest index used. The previous heuristic
+  inspected only the `i` column, so a 0-based mesh that put no vertex 0 there
+  would have reached the renderer without being shifted.
+
+- A numeric `colour_by` column matching no atlas region no longer fails with
+  `'from' must be a finite number`.
+
 - Atlases whose colour lookup table gives every region the same colour (often
   black) no longer render as a single indistinguishable brain. Region colours
   now come from `ggseg.formats::atlas_plot_palette()`, which substitutes
@@ -30,8 +51,9 @@
 - All atlas reads now go through the `ggseg.formats` accessors
   (`atlas_vertices()`, `atlas_meshes()`, `atlas_centerlines()`,
   `atlas_plot_palette()`) instead of reaching into `atlas$core`,
-  `atlas$palette` and `atlas$data`. This requires
-  `ggseg.formats (>= 0.1.0)`.
+  `atlas$palette` and `atlas$data`, except one presence check that reads
+  `atlas$data` because the accessors abort rather than return `NULL`. This
+  requires a newer `ggseg.formats`; `DESCRIPTION` carries the floor.
 
 - Atlas objects predating the unified `ggseg_atlas` layout, which stored
   `vertices` or `meshes` at the top level instead of under `data`, are no

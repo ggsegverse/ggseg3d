@@ -68,7 +68,8 @@ make_mesh_entry <- function(
   edge_color = NULL,
   edge_width = NULL,
   vertex_labels = NULL,
-  vertex_texts = NULL
+  vertex_texts = NULL,
+  vertex_alphas = NULL
 ) {
   entry <- list(
     name = name,
@@ -103,6 +104,12 @@ make_mesh_entry <- function(
 
   if (!is.null(vertex_texts)) {
     entry$vertexTexts <- unname(vertex_texts)
+  }
+
+  # An all-opaque mesh needs no alpha channel, and omitting it keeps the
+  # renderer on the cheaper 3-component colour attribute.
+  if (!is.null(vertex_alphas) && any(vertex_alphas < 1)) {
+    entry$vertexAlphas <- unname(as.numeric(vertex_alphas))
   }
 
   entry

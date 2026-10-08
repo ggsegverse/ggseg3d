@@ -51,13 +51,89 @@ resolve_brain_mesh <- function(
     return(NULL)
   }
 
-  if (min(mesh$faces$i) == 0) {
+  mesh <- as_one_based_mesh(mesh)
+
+  normalize_cortical_mesh(mesh, hemisphere, from_ggseg_meshes)
+}
+
+
+#' Face index base of a mesh
+#'
+#' `ggseg.meshes` publishes the base its face indices are counted from as a
+#' `face_index_base` attribute on the mesh, and reading it matters because the
+#' ecosystem genuinely mixes bases: `ggseg.formats` inflated surfaces are
+#' 0-based, `ggseg.meshes` cortical surfaces are 1-based, and `ggseg.meshes`
+#' cerebellar surfaces are 0-based.
+#'
+#' The attribute is a contract internal to the core packages. Meshes from
+#' `ggseg.formats` and from third-party atlas packages may legitimately carry
+#' no attribute at all, so its absence is normal input rather than an error
+#' and the base is inferred from the indices instead.
+#'
+#' @param mesh List with `vertices` and `faces`
+#'
+#' @return `0L` or `1L`
+#' @keywords internal
+#' @noRd
+face_index_base <- function(mesh) {
+  base <- attr(mesh, "face_index_base")
+
+  if (!is.null(base)) {
+    base <- as.integer(base)
+    if (!base %in% c(0L, 1L)) {
+      cli::cli_abort(
+        "Mesh {.field face_index_base} must be 0 or 1, not {.val {base}}."
+      )
+    }
+    return(base)
+  }
+
+  infer_face_index_base(mesh)
+}
+
+
+# Fallback for meshes that publish no base. An index of 0 can only be
+# 0-based, and an index equal to the vertex count can only be 1-based; when
+# neither is decisive, a span that ends one short of the vertex count is
+# 0-based. Anything still ambiguous (a mesh whose highest vertices are unused)
+# is read as 1-based, which is what ggseg3d works in.
+infer_face_index_base <- function(mesh) {
+  indices <- c(mesh$faces$i, mesh$faces$j, mesh$faces$k)
+  n_vertices <- nrow(mesh$vertices)
+
+  if (min(indices) == 0L) {
+    return(0L)
+  }
+  if (max(indices) == n_vertices) {
+    return(1L)
+  }
+  if (max(indices) == n_vertices - 1L) {
+    return(0L)
+  }
+
+  1L
+}
+
+
+#' Convert a mesh to 1-based face indices
+#'
+#' ggseg3d works in 1-based face indices internally and subtracts one when
+#' serialising for the renderer in `make_mesh_entry()`.
+#'
+#' @param mesh List with `vertices` and `faces`
+#'
+#' @return `mesh` with 1-based faces and `face_index_base` set to `1L`
+#' @keywords internal
+#' @noRd
+as_one_based_mesh <- function(mesh) {
+  if (face_index_base(mesh) == 0L) {
     mesh$faces$i <- mesh$faces$i + 1L
     mesh$faces$j <- mesh$faces$j + 1L
     mesh$faces$k <- mesh$faces$k + 1L
   }
 
-  normalize_cortical_mesh(mesh, hemisphere, from_ggseg_meshes)
+  attr(mesh, "face_index_base") <- 1L
+  mesh
 }
 
 
@@ -95,6 +171,37 @@ normalize_cortical_mesh <- function(mesh, hemisphere, rotate_axes) {
 }
 
 
+#' Scatter one value per atlas row onto the mesh vertices it covers
+#'
+#' Shared core of the `vertices_to_*()` helpers: every vertex of row `i`'s
+#' region takes `values[i]`, and vertices no region claims keep `fill`. Atlas
+#' vertex indices are 0-based; mesh vectors are 1-based.
+#'
+#' @param atlas_data Data frame with a `vertices` list column
+#' @param n_vertices Number of vertices in the mesh
+#' @param values Vector of one value per row of `atlas_data`
+#' @param fill Value for vertices not in any region
+#'
+#' @return Vector of length `n_vertices`
+#' @keywords internal
+#' @noRd
+map_vertex_values <- function(atlas_data, n_vertices, values, fill) {
+  mapped <- rep(fill, n_vertices)
+
+  for (i in seq_len(nrow(atlas_data))) {
+    region_vertices <- atlas_data$vertices[[i]]
+    value <- values[[i]]
+
+    if (length(region_vertices) > 0 && !is.na(value)) {
+      idx <- region_vertices + 1L
+      mapped[idx[idx >= 1 & idx <= n_vertices]] <- value
+    }
+  }
+
+  mapped
+}
+
+
 #' Map atlas vertex indices to mesh colors
 #'
 #' Given a ggseg_atlas with vertices column and a brain mesh, creates a color
@@ -112,20 +219,7 @@ vertices_to_colors <- function(
   n_vertices,
   na_colour = "#CCCCCC"
 ) {
-  vertex_colors <- rep(na_colour, n_vertices)
-
-  for (i in seq_len(nrow(atlas_data))) {
-    region_vertices <- atlas_data$vertices[[i]]
-    region_colour <- atlas_data$colour[i]
-
-    if (length(region_vertices) > 0 && !is.na(region_colour)) {
-      idx <- region_vertices + 1L
-      idx <- idx[idx >= 1 & idx <= n_vertices]
-      vertex_colors[idx] <- region_colour
-    }
-  }
-
-  vertex_colors
+  map_vertex_values(atlas_data, n_vertices, atlas_data$colour, na_colour)
 }
 
 
@@ -146,20 +240,7 @@ vertices_to_labels <- function(
   n_vertices,
   na_label = NA_character_
 ) {
-  vertex_labels <- rep(na_label, n_vertices)
-
-  for (i in seq_len(nrow(atlas_data))) {
-    region_vertices <- atlas_data$vertices[[i]]
-    region_label <- atlas_data$region[i]
-
-    if (length(region_vertices) > 0 && !is.na(region_label)) {
-      idx <- region_vertices + 1L
-      idx <- idx[idx >= 1 & idx <= n_vertices]
-      vertex_labels[idx] <- region_label
-    }
-  }
-
-  vertex_labels
+  map_vertex_values(atlas_data, n_vertices, atlas_data$region, na_label)
 }
 
 
@@ -176,24 +257,18 @@ vertices_to_labels <- function(
 #' @keywords internal
 #' @noRd
 vertices_to_text <- function(atlas_data, n_vertices, text_col) {
-  vertex_text <- rep(NA_character_, n_vertices)
-
   if (!text_col %in% names(atlas_data)) {
-    return(vertex_text)
+    return(rep(NA_character_, n_vertices))
   }
 
-  for (i in seq_len(nrow(atlas_data))) {
-    region_vertices <- atlas_data$vertices[[i]]
-    val <- as.character(atlas_data[[text_col]][i])
+  values <- as.character(atlas_data[[text_col]])
+  values <- ifelse(
+    is.na(values),
+    NA_character_,
+    paste0(text_col, ": ", values)
+  )
 
-    if (length(region_vertices) > 0 && !is.na(val)) {
-      idx <- region_vertices + 1L
-      idx <- idx[idx >= 1 & idx <= n_vertices]
-      vertex_text[idx] <- paste0(text_col, ": ", val)
-    }
-  }
-
-  vertex_text
+  map_vertex_values(atlas_data, n_vertices, values, NA_character_)
 }
 
 
@@ -217,26 +292,45 @@ vertices_to_groups <- function(
   group_col,
   na_group = NA_character_
 ) {
-  vertex_groups <- rep(na_group, n_vertices)
-
   if (!group_col %in% names(atlas_data)) {
     cli::cli_abort(
       "Column {.val {group_col}} not found in atlas data."
     )
   }
 
-  for (i in seq_len(nrow(atlas_data))) {
-    region_vertices <- atlas_data$vertices[[i]]
-    region_group <- as.character(atlas_data[[group_col]][i])
+  map_vertex_values(
+    atlas_data,
+    n_vertices,
+    as.character(atlas_data[[group_col]]),
+    na_group
+  )
+}
 
-    if (length(region_vertices) > 0 && !is.na(region_group)) {
-      idx <- region_vertices + 1L
-      idx <- idx[idx >= 1 & idx <= n_vertices]
-      vertex_groups[idx] <- region_group
-    }
+
+#' Map vertices to per-vertex alpha
+#'
+#' Cortical and cerebellar atlases emit one mesh per hemisphere, so fading
+#' regions without data cannot be done with a mesh-level opacity the way
+#' per-region subcortical meshes can. Rows carry their alpha in the `alpha`
+#' column written by `apply_colour_palette()`; vertices no region claims are
+#' not data either, so they fade with `na_alpha` too.
+#'
+#' @param atlas_data Data frame with a `vertices` list column, optionally
+#'   with an `alpha` column
+#' @param n_vertices Number of vertices in the mesh
+#' @param na_alpha Alpha for vertices not in any region
+#'
+#' @return Numeric vector of alphas, one per mesh vertex
+#' @keywords internal
+#' @noRd
+vertices_to_alphas <- function(atlas_data, n_vertices, na_alpha = 1) {
+  alphas <- if ("alpha" %in% names(atlas_data)) {
+    atlas_data$alpha
+  } else {
+    rep(1, nrow(atlas_data))
   }
 
-  vertex_groups
+  map_vertex_values(atlas_data, n_vertices, alphas, na_alpha)
 }
 
 
@@ -263,7 +357,8 @@ build_cortical_meshes <- function(
   edge_by,
   brain_meshes = NULL,
   text_by = NULL,
-  label_by = "region"
+  label_by = "region",
+  na_alpha = 1
 ) {
   hemi_map <- c("right" = "rh", "left" = "lh")
 
@@ -290,6 +385,7 @@ build_cortical_meshes <- function(
     n_vertices <- nrow(mesh$vertices)
     vertex_colors <- vertices_to_colors(hemi_data, n_vertices, na_colour)
     vertex_labels <- vertices_to_labels(hemi_data, n_vertices, na_label = "")
+    vertex_alphas <- vertices_to_alphas(hemi_data, n_vertices, na_alpha)
 
     vertex_texts <- if (!is.null(text_by)) {
       vertices_to_text(hemi_data, n_vertices, text_by)
@@ -313,7 +409,8 @@ build_cortical_meshes <- function(
       boundary_edges = boundary,
       edge_color = edge_color,
       vertex_labels = vertex_labels,
-      vertex_texts = vertex_texts
+      vertex_texts = vertex_texts,
+      vertex_alphas = vertex_alphas
     )
   })
 
@@ -339,7 +436,8 @@ build_cerebellar_meshes <- function(
   na_colour,
   text_by = NULL,
   label_by = "region",
-  opacity = 1
+  opacity = 1,
+  na_alpha = 1
 ) {
   mesh <- ggseg.formats::get_cerebellar_mesh()
 
@@ -347,11 +445,7 @@ build_cerebellar_meshes <- function(
     cli::cli_abort("SUIT cerebellar mesh not available.")
   }
 
-  if (min(mesh$faces$i) == 0) {
-    mesh$faces$i <- mesh$faces$i + 1L
-    mesh$faces$j <- mesh$faces$j + 1L
-    mesh$faces$k <- mesh$faces$k + 1L
-  }
+  mesh <- as_one_based_mesh(mesh)
 
   n_vertices <- nrow(mesh$vertices)
   vertex_colors <- vertices_to_colors(atlas_data, n_vertices, na_colour)
@@ -360,6 +454,7 @@ build_cerebellar_meshes <- function(
     n_vertices,
     na_label = ""
   )
+  vertex_alphas <- vertices_to_alphas(atlas_data, n_vertices, na_alpha)
 
   vertex_texts <- if (!is.null(text_by)) {
     vertices_to_text(atlas_data, n_vertices, text_by)
@@ -376,7 +471,8 @@ build_cerebellar_meshes <- function(
     opacity = opacity,
     boundary_edges = boundary,
     vertex_labels = vertex_labels,
-    vertex_texts = vertex_texts
+    vertex_texts = vertex_texts,
+    vertex_alphas = vertex_alphas
   )
 
   if (is_flat_mesh(mesh$vertices)) {
@@ -399,6 +495,20 @@ is_flat_mesh <- function(vertices, tol = 1) {
     ) <
       tol
   )
+}
+
+
+# Per-region meshes carry their own opacity, so a region without data fades
+# through the mesh-level opacity the renderer already honours. The `alpha`
+# column comes from `apply_colour_palette()`; builders called directly with
+# hand-built data may not have it.
+row_alpha <- function(atlas_data, i) {
+  if (!"alpha" %in% names(atlas_data)) {
+    return(1)
+  }
+
+  alpha <- atlas_data$alpha[i]
+  if (is.na(alpha)) 1 else alpha
 }
 
 
@@ -448,6 +558,7 @@ build_subcortical_meshes <- function(
       faces = mesh_data$faces,
       colors = rep(colour, nrow(mesh_data$faces)),
       color_mode = "facecolor",
+      opacity = row_alpha(atlas_data, i),
       hover_text = hover
     )
   })
@@ -514,6 +625,7 @@ build_tract_meshes <- function(
         na_colour
       ),
       color_mode = "vertexcolor",
+      opacity = row_alpha(atlas_data, i),
       hover_text = mesh_hover_text(atlas_data, i, text_by)
     )
   })

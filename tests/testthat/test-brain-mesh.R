@@ -565,3 +565,95 @@ test_that("build_centerline_data carries centerlines and tube defaults", {
   expect_identical(result$tube_radius, 2)
   expect_identical(result$tube_segments, 10)
 })
+
+test_that("face_index_base reads the published attribute over the data", {
+  # 1-based faces that happen to use no vertex 0 in `i`, the arrangement the
+  # old heuristic read as 1-based whatever the attribute said.
+  mesh <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 1L, j = 2L, k = 3L)
+  )
+
+  expect_identical(face_index_base(mesh), 1L)
+
+  # The attribute overrides the inference, in both directions.
+  attr(mesh, "face_index_base") <- 0L
+  expect_identical(face_index_base(mesh), 0L)
+
+  attr(mesh, "face_index_base") <- 2L
+  expect_error(face_index_base(mesh), "must be 0 or 1")
+})
+
+test_that("as_one_based_mesh leaves 1-based faces and shifts 0-based ones", {
+  one_based <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 1L, j = 2L, k = 3L)
+  )
+  attr(one_based, "face_index_base") <- 1L
+
+  zero_based <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 0L, j = 1L, k = 2L)
+  )
+  attr(zero_based, "face_index_base") <- 0L
+
+  expect_identical(as_one_based_mesh(one_based)$faces, one_based$faces)
+  expect_identical(as_one_based_mesh(zero_based)$faces, one_based$faces)
+  expect_identical(
+    attr(as_one_based_mesh(zero_based), "face_index_base"),
+    1L
+  )
+})
+
+test_that("a mesh without the attribute is valid input, not an error", {
+  # Third-party atlas packages are not bound by the core packages' mesh
+  # contract, so a mesh may legitimately publish no base at all. ggseg.formats
+  # meshes are 0-based with vertex 0 not necessarily in the `i` column.
+  mesh <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 1L, j = 0L, k = 2L)
+  )
+
+  expect_no_condition(base <- face_index_base(mesh))
+  expect_identical(base, 0L)
+  expect_no_condition(shifted <- as_one_based_mesh(mesh))
+  expect_identical(shifted$faces, data.frame(i = 2L, j = 1L, k = 3L))
+
+  one_based <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 1L, j = 2L, k = 3L)
+  )
+
+  expect_no_condition(base <- face_index_base(one_based))
+  expect_identical(base, 1L)
+  expect_identical(as_one_based_mesh(one_based)$faces, one_based$faces)
+})
+
+test_that("the inferred base uses the whole index span, not just column i", {
+  # Every index above 0, but the span stops one short of the vertex count:
+  # 0-based with vertex 0 unused by this face.
+  zero_based <- list(
+    vertices = data.frame(x = 0:3, y = 0:3, z = 0:3),
+    faces = data.frame(i = 1L, j = 2L, k = 3L)
+  )
+
+  expect_identical(infer_face_index_base(zero_based), 0L)
+
+  one_based <- list(
+    vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),
+    faces = data.frame(i = 1L, j = 2L, k = 3L)
+  )
+
+  expect_identical(infer_face_index_base(one_based), 1L)
+})
+
+test_that("resolve_brain_mesh returns 1-based faces for both index bases", {
+  inflated <- resolve_brain_mesh("lh", "inflated")
+  expect_identical(min(unlist(inflated$faces)), 1L)
+  expect_identical(max(unlist(inflated$faces)), nrow(inflated$vertices))
+
+  skip_if_not_installed("ggseg.meshes")
+  pial <- resolve_brain_mesh("lh", "pial")
+  expect_identical(min(unlist(pial$faces)), 1L)
+  expect_identical(max(unlist(pial$faces)), nrow(pial$vertices))
+})

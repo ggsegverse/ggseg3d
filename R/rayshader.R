@@ -180,6 +180,9 @@ mesh_entry_to_mesh3d <- function(mesh_entry, ...) {
   }
 
   alpha <- mesh_entry$opacity %||% 1
+  if (!is.null(mesh_entry$vertexAlphas)) {
+    alpha <- alpha * mesh_entry$vertexAlphas
+  }
 
   material <- list(
     color = mesh_entry$colors,

@@ -38,11 +38,41 @@ build_legend_data <- function(
     ))
   }
 
+  if (is_numeric && !is.na(data_min) && data_min == data_max) {
+    return(build_single_value_legend(pal_colours, colour_col, data_min))
+  }
+
   if (!is_numeric) {
     return(build_discrete_legend(data, fill_col, label_col))
   }
 
   NULL
+}
+
+
+#' Build single-swatch legend
+#'
+#' A numeric column whose matched values are all identical has no range to
+#' draw a colourbar over, but it still needs a legend: without one there is
+#' nothing to tell the reader that the single palette colour means one value
+#' and the `na_colour` regions carry no data at all.
+#'
+#' @param pal_colours Processed palette colours
+#' @param colour_col Name of the colour column (used as title)
+#' @param value The single data value
+#'
+#' @return List with discrete legend specification
+#' @keywords internal
+#' @noRd
+build_single_value_legend <- function(pal_colours, colour_col, value) {
+  # I() keeps a single label an array through htmlwidgets' auto-unboxing;
+  # a bare string would be indexed character by character by the overlay.
+  list(
+    type = "discrete",
+    title = colour_col,
+    labels = I(format(value)),
+    colors = I(unname(col2hex(pal_colours$orig[1])))
+  )
 }
 
 
@@ -136,7 +166,7 @@ build_discrete_legend <- function(data, fill_col, label_col) {
   list(
     type = "discrete",
     title = label_col,
-    labels = unname(names(color_label_map)),
-    colors = unname(color_label_map)
+    labels = I(unname(names(color_label_map))),
+    colors = I(unname(color_label_map))
   )
 }

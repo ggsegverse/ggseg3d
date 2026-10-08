@@ -573,3 +573,65 @@ test_that("text_by works with tract atlas", {
   )
   expect_true(any(grepl("fa:", hover_texts, fixed = TRUE)))
 })
+
+test_that("one matched region does not paint the rest of the hemisphere", {
+  p <- ggseg3d(
+    .data = data.frame(region = "precentral", p = 0.5),
+    hemisphere = "left",
+    colour_by = "p",
+    na_colour = "darkgrey"
+  )
+
+  colours <- table(p$x$meshes[[1]]$colors)
+
+  expect_gt(colours[["darkgrey"]], colours[["#440154"]])
+  expect_identical(p$x$colorbar$type, "discrete")
+  expect_identical(as.character(p$x$colorbar$labels), "0.5")
+})
+
+test_that("na_alpha fades unmatched cortical regions per vertex", {
+  args <- list(
+    .data = data.frame(region = "precentral", p = 0.5),
+    hemisphere = "left",
+    colour_by = "p"
+  )
+
+  faded <- do.call(ggseg3d, c(args, na_alpha = 0.3))
+  opaque <- do.call(ggseg3d, c(args, na_alpha = 1))
+
+  expect_false(identical(faded$x$meshes, opaque$x$meshes))
+  expect_null(opaque$x$meshes[[1]]$vertexAlphas)
+  expect_setequal(unique(faded$x$meshes[[1]]$vertexAlphas), c(1, 0.3))
+  expect_length(
+    faded$x$meshes[[1]]$vertexAlphas,
+    length(faded$x$meshes[[1]]$colors)
+  )
+})
+
+test_that("na_alpha fades unmatched subcortical regions per mesh", {
+  args <- list(
+    .data = data.frame(region = "thalamus", p = 0.5),
+    atlas = aseg(),
+    colour_by = "p"
+  )
+
+  faded <- do.call(ggseg3d, c(args, na_alpha = 0.4))
+  opaque <- do.call(ggseg3d, c(args, na_alpha = 1))
+
+  expect_false(identical(faded$x$meshes, opaque$x$meshes))
+  expect_setequal(
+    unique(vapply(faded$x$meshes, function(m) m$opacity, numeric(1))),
+    c(1, 0.4)
+  )
+  expect_identical(
+    unique(vapply(opaque$x$meshes, function(m) m$opacity, numeric(1))),
+    1
+  )
+})
+
+test_that("ggseg3d rejects an out-of-range na_alpha", {
+  expect_error(
+    ggseg3d(hemisphere = "left", na_alpha = 1.5),
+    "between 0 and 1"
+  )
+})

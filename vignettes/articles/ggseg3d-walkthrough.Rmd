@@ -228,7 +228,7 @@ Fade unmatched regions with `na_alpha` and wrap everything in a glass brain:
 #| label: wt-subcortical
 #| eval: false
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
@@ -246,7 +246,7 @@ ggseg3d(
 #| label: wt-snap-subcortical
 #| echo: false
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 

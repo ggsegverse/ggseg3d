@@ -41,8 +41,10 @@ that colour as the value}
 \item{na_colour}{String. Either name, hex of RGB for colour of NA in
 colour.}
 
-\item{na_alpha}{Numeric. A number between 0 and 1 to control
-transparency of NA-regions.}
+\item{na_alpha}{Numeric between 0 and 1. Opacity of regions with no
+value in \code{.data}: \code{1} (default) draws them opaque in \code{na_colour},
+lower values fade them. Cortical and cerebellar surfaces fade
+per vertex, subcortical structures and tracts per mesh.}
 
 \item{material}{Named list of rgl material properties passed to
 \code{\link[rgl:tmesh3d]{rgl::tmesh3d()}}. Controls how the mesh surface is shaded.}

@@ -21,8 +21,10 @@
 #'   that colour as the value
 #' @param na_colour String. Either name, hex of RGB for colour of NA in
 #'   colour.
-#' @param na_alpha Numeric. A number between 0 and 1 to control
-#'   transparency of NA-regions.
+#' @param na_alpha Numeric between 0 and 1. Opacity of regions with no
+#'   value in `.data`: `1` (default) draws them opaque in `na_colour`,
+#'   lower values fade them. Cortical and cerebellar surfaces fade
+#'   per vertex, subcortical structures and tracts per mesh.
 #' @param ... Type-specific arguments passed to the atlas method.
 #'   See section **Type-specific arguments** below.
 #'
@@ -160,7 +162,8 @@ prepare_brain_meshes.cortical_atlas <- function(
     colour_by,
     palette,
     na_colour,
-    label_by
+    label_by,
+    na_alpha
   )
   meshes <- build_cortical_meshes(
     result$atlas_data,
@@ -170,7 +173,8 @@ prepare_brain_meshes.cortical_atlas <- function(
     edge_by,
     brain_meshes,
     text_by = text_by,
-    label_by = label_by
+    label_by = label_by,
+    na_alpha = na_alpha
   )
 
   list(meshes = meshes, legend_data = result$legend_data)
@@ -197,7 +201,8 @@ prepare_brain_meshes.subcortical_atlas <- function(
     colour_by,
     palette,
     na_colour,
-    label_by
+    label_by,
+    na_alpha
   )
   meshes <- build_subcortical_meshes(
     result$atlas_data,
@@ -236,14 +241,16 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     colour_by,
     palette,
     na_colour,
-    label_by
+    label_by,
+    na_alpha
   )
   surface_meshes <- build_cerebellar_meshes(
     result$atlas_data,
     na_colour,
     text_by = text_by,
     label_by = label_by,
-    opacity = surface_opacity
+    opacity = surface_opacity,
+    na_alpha = na_alpha
   )
 
   if (has_deep) {
@@ -253,7 +260,8 @@ prepare_brain_meshes.cerebellar_atlas <- function(
       colour_by,
       palette,
       na_colour,
-      label_by
+      label_by,
+      na_alpha
     )
     deep_meshes <- build_subcortical_meshes(
       deep_result$atlas_data,
@@ -305,7 +313,8 @@ prepare_brain_meshes.tract_atlas <- function(
     colour_by,
     palette,
     na_colour,
-    label_by
+    label_by,
+    na_alpha
   )
   atlas_data <- result$atlas_data
   atlas_centerlines <- build_centerline_data(atlas, tube_radius, tube_segments)
@@ -352,6 +361,7 @@ prepare_brain_meshes <- function(atlas, ...) {
 #' @param colour_by Column name for colour values
 #' @param label_by Column name for labels
 #' @param na_colour Colour for NA values
+#' @param na_alpha Alpha applied to regions with no data
 #' @param palette Colour palette specification
 #'
 #' @return List with `atlas_data` and `legend_data`
@@ -362,13 +372,15 @@ apply_colours_and_legend <- function(
   colour_by,
   palette,
   na_colour,
-  label_by
+  label_by,
+  na_alpha = 1
 ) {
   colour_result <- apply_colour_palette(
     atlas_data,
     colour_by,
     palette,
-    na_colour
+    na_colour,
+    na_alpha
   )
   atlas_data <- colour_result$data
 
