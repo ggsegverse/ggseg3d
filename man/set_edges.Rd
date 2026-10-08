@@ -40,3 +40,15 @@ ggsegray(hemisphere = "left", edge_by = "region") |>
   pan_camera("left lateral")
 }
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

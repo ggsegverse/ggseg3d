@@ -6,7 +6,8 @@
 \usage{
 resolve_brain_mesh(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial", "sphere", "smoothwm", "orig"),
+  surface = c("inflated", "semi-inflated", "white", "pial", "midthickness", "sphere",
+    "smoothwm", "orig"),
   brain_meshes = NULL
 )
 }
@@ -14,7 +15,8 @@ resolve_brain_mesh(
 \item{hemisphere}{\code{"lh"} or \code{"rh"}}
 
 \item{surface}{Surface type: \code{"inflated"}, \code{"semi-inflated"}, \code{"white"},
-\code{"pial"}, \code{"sphere"}, \code{"smoothwm"}, \code{"orig"}}
+\code{"pial"}, \code{"midthickness"}, \code{"sphere"}, \code{"smoothwm"} or \code{"orig"}.
+\code{\link[=ggseg3d]{ggseg3d()}} additionally accepts \code{"LCBC"}, an alias for \code{"inflated"}.}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
 \code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}

@@ -179,3 +179,34 @@ make_uniform_palette_atlas <- function(colour = "#000000") {
     palette = c("Left-Caudate" = colour, "Right-Caudate" = colour)
   )
 }
+
+# Subcortical atlas carrying the same `label` twice, the shape that used to
+# draw a region once per duplicate row. ggseg.formats warns about this at
+# construction, which is not what the ggseg3d tests are checking.
+make_duplicate_label_atlas <- function() {
+  triangle <- function(offset) {
+    list(
+      vertices = data.frame(
+        x = offset + c(0, 1, 0),
+        y = c(0, 0, 1),
+        z = c(0, 0, 0)
+      ),
+      faces = data.frame(i = 1, j = 2, k = 3)
+    )
+  }
+
+  labels <- c("Left-Caudate", "Right-Caudate", "Left-Caudate")
+  meshes <- data.frame(label = labels, stringsAsFactors = FALSE)
+  meshes$mesh <- list(triangle(0), triangle(10), triangle(20))
+
+  suppressWarnings(subcortical_atlas_fixture(
+    core = data.frame(
+      label = labels,
+      region = c("caudate", "caudate", "caudate"),
+      hemi = c("left", "right", "left"),
+      stringsAsFactors = FALSE
+    ),
+    meshes = meshes,
+    palette = c("Left-Caudate" = "#123456", "Right-Caudate" = "#654321")
+  ))
+}

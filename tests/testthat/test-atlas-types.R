@@ -117,3 +117,36 @@ test_that("prepare_mesh_atlas_data merges user data", {
   expect_true("value" %in% names(result))
   expect_identical(result$value[result$label == "Left-Caudate"], 100)
 })
+
+test_that("duplicated atlas labels are dropped once, with a warning", {
+  atlas <- make_duplicate_label_atlas()
+
+  expect_warning(
+    atlas_data <- prepare_mesh_atlas_data(atlas, NULL),
+    "Left-Caudate"
+  )
+
+  expect_identical(nrow(atlas_data), 2L)
+  expect_identical(sort(atlas_data$label), c("Left-Caudate", "Right-Caudate"))
+})
+
+test_that("a duplicated label draws one mesh, not two", {
+  atlas <- make_duplicate_label_atlas()
+
+  expect_warning(
+    widget <- ggseg3d(atlas = atlas),
+    "duplicated atlas row"
+  )
+
+  expect_length(widget$x$meshes, 2L)
+})
+
+test_that("unique atlas labels pass through untouched", {
+  atlas <- ggseg.formats::set_atlas_palette(
+    make_uniform_palette_atlas(),
+    c("Left-Caudate" = "#123456", "Right-Caudate" = "#654321")
+  )
+
+  expect_silent(atlas_data <- prepare_mesh_atlas_data(atlas, NULL))
+  expect_identical(nrow(atlas_data), 2L)
+})

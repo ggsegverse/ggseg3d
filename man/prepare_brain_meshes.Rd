@@ -72,10 +72,12 @@ prepare_brain_meshes(atlas, ...)
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{surface}{Surface type: \code{"inflated"} (default), \code{"semi-inflated"},
-\code{"white"}, \code{"pial"}. Use \code{"LCBC"} as alias for \code{"inflated"}.}
+\item{surface}{Surface type: \code{"inflated"}, \code{"semi-inflated"}, \code{"white"},
+\code{"pial"}, \code{"midthickness"}, \code{"sphere"}, \code{"smoothwm"} or \code{"orig"}.
+\code{\link[=ggseg3d]{ggseg3d()}} additionally accepts \code{"LCBC"}, an alias for \code{"inflated"}.}
 
-\item{hemisphere}{Character vector of hemispheres: \code{"right"}, \code{"left"}.}
+\item{hemisphere}{Character vector of hemispheres: \code{"left"}, \code{"right"}.
+\code{"lh"} and \code{"rh"} are accepted as well.}
 
 \item{label_by}{String. Column name used as hover label for each region.}
 
@@ -84,12 +86,12 @@ region label.}
 
 \item{colour_by}{String. Column name mapped to mesh colours.}
 
-\item{palette}{String. Vector of colour names or HEX colours. Can also
-be a named numeric vector, with colours as names, and breakpoint for
-that colour as the value}
+\item{palette}{Character vector of colour names or hex colours. May
+instead be a named numeric vector whose names are the colours and whose
+values are the breakpoints those colours sit at.}
 
-\item{na_colour}{String. Either name, hex of RGB for colour of NA in
-colour.}
+\item{na_colour}{String. Colour drawn for regions with no value in
+\code{.data}, as a colour name or a hex code.}
 
 \item{na_alpha}{Numeric between 0 and 1. Opacity of regions with no
 value in \code{.data}: \code{1} (default) draws them opaque in \code{na_colour},
@@ -109,9 +111,9 @@ Defaults to \code{0.3} when deep nuclei are present and \code{1} otherwise.}
 \item{tract_color}{\code{"palette"} (default) or \code{"orientation"}
 (direction-based RGB colouring)}
 
-\item{tube_radius}{Numeric tube radius (default 5 when \code{NULL}).}
+\item{tube_radius}{Numeric tube radius.}
 
-\item{tube_segments}{Integer tube segment count (default 8 when \code{NULL}).}
+\item{tube_segments}{Integer tube segment count.}
 }
 \value{
 List with \code{meshes} (list of mesh entries) and \code{legend_data}

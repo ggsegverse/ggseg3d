@@ -16,11 +16,11 @@
 #' @param colour_by String. Column name mapped to mesh colours.
 #' @param label,text,colour `r lifecycle::badge("deprecated")` Use
 #'   `label_by`, `text_by`, and `colour_by` instead.
-#' @param palette String. Vector of colour names or HEX colours. Can also
-#'   be a named numeric vector, with colours as names, and breakpoint for
-#'   that colour as the value
-#' @param na_colour String. Either name, hex of RGB for colour of NA in
-#'   colour.
+#' @param palette Character vector of colour names or hex colours. May
+#'   instead be a named numeric vector whose names are the colours and whose
+#'   values are the breakpoints those colours sit at.
+#' @param na_colour String. Colour drawn for regions with no value in
+#'   `.data`, as a colour name or a hex code.
 #' @param na_alpha Numeric between 0 and 1. Opacity of regions with no
 #'   value in `.data`: `1` (default) draws them opaque in `na_colour`,
 #'   lower values fade them. Cortical and cerebellar surfaces fade
@@ -48,6 +48,7 @@
 #' ggseg3d() |> set_legend(FALSE)
 #' ggseg3d() |> set_background("black")
 #'
+#' @family brain plots
 #' @export
 ggseg3d <- function(
   .data = NULL,
@@ -131,9 +132,8 @@ prepare_brain_meshes.default <- function(atlas, ...) {
 
 #' @method prepare_brain_meshes cortical_atlas
 #' @inheritParams ggseg3d
-#' @param surface Surface type: `"inflated"` (default), `"semi-inflated"`,
-#'   `"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.
-#' @param hemisphere Character vector of hemispheres: `"right"`, `"left"`.
+#' @param hemisphere Character vector of hemispheres: `"left"`, `"right"`.
+#'   `"lh"` and `"rh"` are accepted as well.
 #' @param edge_by Column name for region boundary edge grouping
 #' @inheritParams resolve_brain_mesh
 #' @export
@@ -155,6 +155,7 @@ prepare_brain_meshes.cortical_atlas <- function(
   ...
 ) {
   surface <- if (surface == "LCBC") "inflated" else surface
+  hemisphere <- normalize_hemisphere(hemisphere)
 
   atlas_data <- prepare_atlas_data(atlas, .data)
   result <- apply_colours_and_legend(
@@ -163,7 +164,8 @@ prepare_brain_meshes.cortical_atlas <- function(
     palette,
     na_colour,
     label_by,
-    na_alpha
+    na_alpha,
+    text_by = text_by
   )
   meshes <- build_cortical_meshes(
     result$atlas_data,
@@ -202,7 +204,8 @@ prepare_brain_meshes.subcortical_atlas <- function(
     palette,
     na_colour,
     label_by,
-    na_alpha
+    na_alpha,
+    text_by = text_by
   )
   meshes <- build_subcortical_meshes(
     result$atlas_data,
@@ -242,7 +245,8 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     palette,
     na_colour,
     label_by,
-    na_alpha
+    na_alpha,
+    text_by = text_by
   )
   surface_meshes <- build_cerebellar_meshes(
     result$atlas_data,
@@ -261,7 +265,8 @@ prepare_brain_meshes.cerebellar_atlas <- function(
       palette,
       na_colour,
       label_by,
-      na_alpha
+      na_alpha,
+      text_by = text_by
     )
     deep_meshes <- build_subcortical_meshes(
       deep_result$atlas_data,
@@ -285,8 +290,8 @@ prepare_brain_meshes.cerebellar_atlas <- function(
 #' @method prepare_brain_meshes tract_atlas
 #' @param tract_color `"palette"` (default) or `"orientation"`
 #'   (direction-based RGB colouring)
-#' @param tube_radius Numeric tube radius (default 5 when `NULL`).
-#' @param tube_segments Integer tube segment count (default 8 when `NULL`).
+#' @param tube_radius Numeric tube radius.
+#' @param tube_segments Integer tube segment count.
 #' @export
 #' @rdname prepare_brain_meshes
 #' @keywords internal
@@ -314,7 +319,8 @@ prepare_brain_meshes.tract_atlas <- function(
     palette,
     na_colour,
     label_by,
-    na_alpha
+    na_alpha,
+    text_by = text_by
   )
   atlas_data <- result$atlas_data
   atlas_centerlines <- build_centerline_data(atlas, tube_radius, tube_segments)
@@ -360,6 +366,7 @@ prepare_brain_meshes <- function(atlas, ...) {
 #'   needs (label, colour, and either vertices or mesh).
 #' @param colour_by Column name for colour values
 #' @param label_by Column name for labels
+#' @param text_by Column name for hover text, or `NULL`
 #' @param na_colour Colour for NA values
 #' @param na_alpha Alpha applied to regions with no data
 #' @param palette Colour palette specification
@@ -373,8 +380,18 @@ apply_colours_and_legend <- function(
   palette,
   na_colour,
   label_by,
-  na_alpha = 1
+  na_alpha = 1,
+  text_by = NULL,
+  call = rlang::caller_env()
 ) {
+  check_plot_columns(
+    atlas_data,
+    colour_by = colour_by,
+    label_by = label_by,
+    text_by = text_by,
+    call = call
+  )
+
   colour_result <- apply_colour_palette(
     atlas_data,
     colour_by,

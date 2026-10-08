@@ -43,3 +43,15 @@ ggseg3d(hemisphere = "left") |>
   set_orthographic() |>
   pan_camera("left lateral")
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}}
+}
+\concept{brain modifiers}

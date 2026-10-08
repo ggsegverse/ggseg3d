@@ -16,18 +16,18 @@ add_glassbrain(
 \arguments{
 \item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
-\item{hemisphere}{Character vector. Hemispheres to add: "left", "right",
-or both.}
+\item{hemisphere}{Character vector. Hemispheres to add: \code{"left"},
+\code{"right"}, or both. \code{"lh"} and \code{"rh"} are accepted as well.}
 
-\item{surface}{Character. Surface type. Defaults to \code{"inflated"}, which
-is supplied by \code{ggseg.formats} and requires no additional dependency.
-Other surfaces (\code{"pial"}, \code{"white"}, etc.) are drawn from \code{ggseg.meshes}.}
+\item{surface}{Surface type: \code{"inflated"}, \code{"semi-inflated"}, \code{"white"},
+\code{"pial"}, \code{"midthickness"}, \code{"sphere"}, \code{"smoothwm"} or \code{"orig"}.
+\code{\link[=ggseg3d]{ggseg3d()}} additionally accepts \code{"LCBC"}, an alias for \code{"inflated"}.}
 
 \item{colour}{Character. Colour for the glass brain surface (hex or named).}
 
 \item{opacity}{Numeric. Transparency of the glass brain (0-1).}
 
-\item{brain_meshes}{Optional user-supplied brain meshes. See
+\item{brain_meshes}{Optional user-supplied mesh data. Passed through to
 \code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
 }
 \value{
@@ -37,7 +37,8 @@ The input object (modified), for piping.
 Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
 Particularly useful for subcortical and tract visualizations where spatial
 context helps interpretation. Works with both htmlwidget (\code{ggseg3d}) and
-rgl (\code{ggsegray}) objects.
+rgl (\code{ggsegray}) objects. The default \code{"inflated"} surface ships with
+\code{ggseg.formats}; every other surface is drawn from \code{ggseg.meshes}.
 }
 \examples{
 \donttest{
@@ -51,3 +52,15 @@ ggsegray(atlas = aseg()) |>
   pan_camera("right lateral")
 }
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

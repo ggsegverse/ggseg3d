@@ -2,6 +2,22 @@
 
 ## Bug fixes
 
+- A duplicated `label` in an atlas now draws its region once, with a warning
+  naming the duplicates, instead of once per duplicate row at double the
+  vertex count and double darkness under transparency.
+
+- A `colour_by`, `label_by` or `text_by` column that is not in the atlas data
+  now raises one error naming the typo and the columns available. `colour_by`
+  used to fail inside tibble's recycling code, `label_by` fell back to
+  `label`, and `text_by` silently did nothing.
+
+- `add_glassbrain()` accepts the `"lh"`/`"rh"` hemisphere spellings the rest
+  of the package takes, and errors on an unrecognised one instead of silently
+  returning the plot unchanged.
+
+- `surface = "midthickness"` now reaches `ggseg.meshes`; the surface shipped
+  but no ggseg3d function would accept the name.
+
 - Data with a single distinct value no longer colours every region as if it
   had data: regions with no value keep `na_colour`, and the legend shows a
   single swatch instead of disappearing.
@@ -36,6 +52,20 @@
   changed, and piping was never supported off `print()`.
 
 ## Documentation
+
+- `surface` is documented once, in `resolve_brain_mesh()`, instead of four
+  mutually inconsistent lists; `sphere`, `smoothwm` and `orig` are now
+  documented where a `ggseg3d()` user looks.
+
+- The documented `tube_radius` and `tube_segments` defaults were wrong in both
+  places they appeared (5 and 8); they are 2 and 10.
+
+- `surface_opacity` now appears in the "Type-specific arguments" section, and
+  the nine widget modifiers cross-reference each other.
+
+- Vignette examples passed the `names`-column spelling (`"superior parietal"`)
+  as a `region` value, and full tract names for tracula; neither joined.
+  Figures regenerated.
 
 - Roxygen markdown is now enabled, so cross-references and formatting in the
   help pages render as intended. Previously `?ggsegray` and `?ggseg3d` showed

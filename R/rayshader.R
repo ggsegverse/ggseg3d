@@ -7,6 +7,7 @@
 #' rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
 #'
 #' @inheritParams ggseg3d
+#' @param atlas A `ggseg_atlas` object carrying 3D geometry.
 #' @param material Named list of rgl material properties passed to
 #'   [rgl::tmesh3d()]. Controls how the mesh surface is shaded.
 #'
@@ -42,6 +43,7 @@
 #'   set_background("black")
 #' }
 #'
+#' @family brain plots
 #' @export
 ggsegray <- function(
   .data = NULL,

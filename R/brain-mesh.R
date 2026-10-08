@@ -10,7 +10,8 @@
 #'
 #' @param hemisphere `"lh"` or `"rh"`
 #' @param surface Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
-#'   `"pial"`, `"sphere"`, `"smoothwm"`, `"orig"`
+#'   `"pial"`, `"midthickness"`, `"sphere"`, `"smoothwm"` or `"orig"`.
+#'   [ggseg3d()] additionally accepts `"LCBC"`, an alias for `"inflated"`.
 #' @param brain_meshes Optional user-supplied mesh data. Passed through to
 #'   [ggseg.formats::get_brain_mesh()] for format details.
 #'
@@ -29,6 +30,7 @@ resolve_brain_mesh <- function(
     "semi-inflated",
     "white",
     "pial",
+    "midthickness",
     "sphere",
     "smoothwm",
     "orig"

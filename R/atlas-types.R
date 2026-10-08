@@ -61,9 +61,46 @@ has_atlas_centerlines <- function(atlas) {
 #' @keywords internal
 #' @noRd
 with_plot_colours <- function(atlas, atlas_data) {
+  atlas_data <- drop_duplicate_labels(atlas_data)
   palette <- ggseg.formats::atlas_plot_palette(atlas)
   atlas_data$colour <- unname(palette[atlas_data$label])
   atlas_data
+}
+
+
+#' Keep one geometry row per label
+#'
+#' `label` is the key the palette and every geometry slot join on, so a
+#' duplicated label fans one region into several rows: the renderer draws it
+#' twice, doubling its vertex count and double-darkening it under alpha
+#' compositing. ggseg.formats warns about this at construction, but only once
+#' per session, so an atlas restored from a package `.rda` reaches the plot
+#' silently. Legend assembly already de-duplicates on `label`; this does the
+#' same for the geometry.
+#'
+#' @param atlas_data Data frame with a `label` column
+#'
+#' @return `atlas_data` with at most one row per `label`
+#' @keywords internal
+#' @noRd
+drop_duplicate_labels <- function(atlas_data) {
+  if (!"label" %in% names(atlas_data)) {
+    return(atlas_data)
+  }
+
+  is_duplicate <- duplicated(atlas_data$label)
+  if (!any(is_duplicate)) {
+    return(atlas_data)
+  }
+
+  dupes <- unique(atlas_data$label[is_duplicate]) # nolint: object_usage_linter
+  cli::cli_warn(c(
+    "Dropping {sum(is_duplicate)} duplicated atlas row{?s}: {.val {dupes}}.",
+    "i" = "{.field label} must be unique; a duplicate draws the same region
+           more than once."
+  ))
+
+  atlas_data[!is_duplicate, , drop = FALSE]
 }
 
 

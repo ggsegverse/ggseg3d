@@ -635,3 +635,25 @@ test_that("ggseg3d rejects an out-of-range na_alpha", {
     "between 0 and 1"
   )
 })
+
+test_that("a column name that is not in the atlas data is reported once", {
+  expect_error(
+    ggseg3d(hemisphere = "left", colour_by = "p_vlaue"),
+    "colour_by"
+  )
+  expect_error(
+    ggseg3d(hemisphere = "left", label_by = "regoin"),
+    "label_by"
+  )
+  expect_error(
+    ggseg3d(hemisphere = "left", text_by = "nmaes"),
+    "text_by"
+  )
+})
+
+test_that("the unknown-column error names the columns available", {
+  expect_error(
+    ggseg3d(hemisphere = "left", colour_by = "p_vlaue"),
+    "Available columns"
+  )
+})

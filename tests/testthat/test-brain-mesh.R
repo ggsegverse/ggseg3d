@@ -657,3 +657,11 @@ test_that("resolve_brain_mesh returns 1-based faces for both index bases", {
   expect_identical(min(unlist(pial$faces)), 1L)
   expect_identical(max(unlist(pial$faces)), nrow(pial$vertices))
 })
+
+test_that("resolve_brain_mesh reaches the midthickness surface", {
+  skip_if_not_installed("ggseg.meshes")
+  mesh <- resolve_brain_mesh("lh", "midthickness")
+
+  expect_true(all(c("vertices", "faces") %in% names(mesh)))
+  expect_gt(nrow(mesh$vertices), 0)
+})
