@@ -30,7 +30,7 @@ test_that("Check that ggseg3d is working", {
     )
   )
 
-  dk_regions <- ggseg.formats::atlas_regions(dk())
+  dk_regions <- sort(unique(ggseg.formats::atlas_regions(dk())))
   some_data <- data.frame(
     region = dk_regions[1:4],
     p = sample(seq(0, 0.5, 0.001), 4),
@@ -82,7 +82,7 @@ test_that("ggseg3d with inflated surface", {
 
 test_that("ggseg3d handles edge_by parameter", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:4],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:4],
     lobe = c("temporal", "insular", "frontal", "parietal"),
     stringsAsFactors = FALSE
   )
@@ -102,7 +102,7 @@ test_that("ggseg3d default colorbar is present", {
 
 test_that("ggseg3d with custom palette", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:2],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:2],
     p = c(0.1, 0.9),
     stringsAsFactors = FALSE
   )
@@ -129,7 +129,7 @@ test_that("ggseg3d with label_by parameter", {
 
 test_that("deprecated params trigger warnings", {
   some_data <- data.frame(
-    region = ggseg.formats::atlas_regions(dk())[1:2],
+    region = sort(unique(ggseg.formats::atlas_regions(dk())))[1:2],
     p = c(0.1, 0.5),
     stringsAsFactors = FALSE
   )
@@ -537,7 +537,7 @@ test_that("vertices_to_text returns NA vector when column is missing", {
 })
 
 test_that("text_by works with subcortical atlas", {
-  aseg_regions <- ggseg.formats::atlas_regions(aseg())
+  aseg_regions <- sort(unique(ggseg.formats::atlas_regions(aseg())))
   some_data <- data.frame(
     region = aseg_regions[1:2],
     p = c(0.1, 0.5),
@@ -556,7 +556,7 @@ test_that("text_by works with subcortical atlas", {
 })
 
 test_that("text_by works with tract atlas", {
-  tracula_regions <- ggseg.formats::atlas_regions(tracula())
+  tracula_regions <- sort(unique(ggseg.formats::atlas_regions(tracula())))
   some_data <- data.frame(
     region = tracula_regions[1:2],
     fa = c(0.45, 0.55),
@@ -572,4 +572,88 @@ test_that("text_by works with tract atlas", {
     character(1)
   )
   expect_true(any(grepl("fa:", hover_texts, fixed = TRUE)))
+})
+
+test_that("one matched region does not paint the rest of the hemisphere", {
+  p <- ggseg3d(
+    .data = data.frame(region = "precentral", p = 0.5),
+    hemisphere = "left",
+    colour_by = "p",
+    na_colour = "darkgrey"
+  )
+
+  colours <- table(p$x$meshes[[1]]$colors)
+
+  expect_gt(colours[["darkgrey"]], colours[["#440154"]])
+  expect_identical(p$x$colorbar$type, "discrete")
+  expect_identical(as.character(p$x$colorbar$labels), "0.5")
+})
+
+test_that("na_alpha fades unmatched cortical regions per vertex", {
+  args <- list(
+    .data = data.frame(region = "precentral", p = 0.5),
+    hemisphere = "left",
+    colour_by = "p"
+  )
+
+  faded <- do.call(ggseg3d, c(args, na_alpha = 0.3))
+  opaque <- do.call(ggseg3d, c(args, na_alpha = 1))
+
+  expect_false(identical(faded$x$meshes, opaque$x$meshes))
+  expect_null(opaque$x$meshes[[1]]$vertexAlphas)
+  expect_setequal(unique(faded$x$meshes[[1]]$vertexAlphas), c(1, 0.3))
+  expect_length(
+    faded$x$meshes[[1]]$vertexAlphas,
+    length(faded$x$meshes[[1]]$colors)
+  )
+})
+
+test_that("na_alpha fades unmatched subcortical regions per mesh", {
+  args <- list(
+    .data = data.frame(region = "thalamus", p = 0.5),
+    atlas = aseg(),
+    colour_by = "p"
+  )
+
+  faded <- do.call(ggseg3d, c(args, na_alpha = 0.4))
+  opaque <- do.call(ggseg3d, c(args, na_alpha = 1))
+
+  expect_false(identical(faded$x$meshes, opaque$x$meshes))
+  expect_setequal(
+    unique(vapply(faded$x$meshes, function(m) m$opacity, numeric(1))),
+    c(1, 0.4)
+  )
+  expect_identical(
+    unique(vapply(opaque$x$meshes, function(m) m$opacity, numeric(1))),
+    1
+  )
+})
+
+test_that("ggseg3d rejects an out-of-range na_alpha", {
+  expect_error(
+    ggseg3d(hemisphere = "left", na_alpha = 1.5),
+    "between 0 and 1"
+  )
+})
+
+test_that("a column name that is not in the atlas data is reported once", {
+  expect_error(
+    ggseg3d(hemisphere = "left", colour_by = "p_vlaue"),
+    "colour_by"
+  )
+  expect_error(
+    ggseg3d(hemisphere = "left", label_by = "regoin"),
+    "label_by"
+  )
+  expect_error(
+    ggseg3d(hemisphere = "left", text_by = "nmaes"),
+    "text_by"
+  )
+})
+
+test_that("the unknown-column error names the columns available", {
+  expect_error(
+    ggseg3d(hemisphere = "left", colour_by = "p_vlaue"),
+    "Available columns"
+  )
 })

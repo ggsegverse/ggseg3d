@@ -45,13 +45,53 @@ test_that("build_legend_data returns discrete legend for categorical data", {
   expect_length(result$colors, 3)
 })
 
-test_that("build_legend_data returns NULL when data_min equals data_max", {
+test_that("build_legend_data returns a single swatch when all values match", {
   result <- build_legend_data(
     is_numeric = TRUE,
     data_min = 5,
     data_max = 5,
     palette = NULL,
-    pal_colours = NULL,
+    pal_colours = get_palette(c("blue", "red")),
+    colour_col = "value",
+    label_col = "region",
+    fill_col = "new_col",
+    data = data.frame()
+  )
+
+  expect_identical(result$type, "discrete")
+  expect_identical(result$title, "value")
+  expect_identical(as.character(result$labels), "5")
+  expect_identical(as.character(result$colors), "#0000FF")
+})
+
+test_that("a single legend label survives JSON auto-unboxing", {
+  skip_if_not_installed("jsonlite")
+  result <- build_legend_data(
+    is_numeric = TRUE,
+    data_min = 5,
+    data_max = 5,
+    palette = NULL,
+    pal_colours = get_palette(c("blue", "red")),
+    colour_col = "value",
+    label_col = "region",
+    fill_col = "new_col",
+    data = data.frame()
+  )
+
+  # A bare string would reach the overlay as three characters.
+  expect_match(
+    as.character(jsonlite::toJSON(result, auto_unbox = TRUE)),
+    '"labels":\\["5"\\]'
+  )
+})
+
+test_that("build_legend_data returns no legend when nothing matched", {
+  result <- build_legend_data(
+    is_numeric = TRUE,
+    data_min = NA,
+    data_max = NA,
+    palette = NULL,
+    pal_colours = get_palette(c("blue", "red")),
     colour_col = "value",
     label_col = "region",
     fill_col = "new_col",

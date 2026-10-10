@@ -74,3 +74,56 @@ test_that("apply_colour_palette handles single constant value", {
   expect_true(result$is_numeric)
   expect_identical(result$data_min, result$data_max)
 })
+
+test_that("a single matched value leaves unmatched regions NA", {
+  atlas_data <- data.frame(
+    label = c("a", "b"),
+    my_value = c(5, NA),
+    stringsAsFactors = FALSE
+  )
+
+  result <- apply_colour_palette(
+    atlas_data,
+    "my_value",
+    c("blue", "red"),
+    "#AABBCC"
+  )
+
+  expect_identical(result$data$new_col, c("blue", NA))
+  expect_identical(result$data$colour, c("#0000FF", "#AABBCC"))
+})
+
+test_that("apply_colour_palette fades only regions without data", {
+  atlas_data <- data.frame(
+    label = c("a", "b", "c"),
+    my_value = c(1, 3, NA),
+    stringsAsFactors = FALSE
+  )
+
+  result <- apply_colour_palette(
+    atlas_data,
+    "my_value",
+    c("blue", "red"),
+    "#CCCCCC",
+    na_alpha = 0.25
+  )
+
+  expect_identical(result$data$alpha, c(1, 1, 0.25))
+})
+
+test_that("apply_colour_palette rejects an out-of-range na_alpha", {
+  atlas_data <- data.frame(
+    label = "a",
+    my_value = 1,
+    stringsAsFactors = FALSE
+  )
+
+  expect_error(
+    apply_colour_palette(atlas_data, "my_value", NULL, "#CCCCCC", 2),
+    "between 0 and 1"
+  )
+  expect_error(
+    apply_colour_palette(atlas_data, "my_value", NULL, "#CCCCCC", NA),
+    "between 0 and 1"
+  )
+})

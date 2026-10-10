@@ -1,13 +1,104 @@
-# ggseg3d (development version)
+# ggseg3d 2.1.3
+
+## Bug fixes
+
+- A duplicated `label` in an atlas now draws its region once, with a warning
+  naming the duplicates, instead of once per duplicate row at double the
+  vertex count and double darkness under transparency.
+
+- A `colour_by`, `label_by` or `text_by` column that is not in the atlas data
+  now raises one error naming the typo and the columns available. `colour_by`
+  used to fail inside tibble's recycling code, `label_by` fell back to
+  `label`, and `text_by` silently did nothing.
+
+- `add_glassbrain()` accepts the `"lh"`/`"rh"` hemisphere spellings the rest
+  of the package takes, and errors on an unrecognised one instead of silently
+  returning the plot unchanged.
+
+- `surface = "midthickness"` now reaches `ggseg.meshes`; the surface shipped
+  but no ggseg3d function would accept the name.
+
+- Data with a single distinct value no longer colours every region as if it
+  had data: regions with no value keep `na_colour`, and the legend shows a
+  single swatch instead of disappearing.
+
+- `na_alpha` now does what it documents. Regions with no value in `.data` fade
+  per vertex on cortical and cerebellar surfaces and per mesh on subcortical
+  structures and tracts. It was accepted and ignored in every previous
+  release. Values outside 0-1 are now an error.
+
+- Transparent meshes are drawn front-faces-only and without depth writes, so
+  a requested opacity renders as asked instead of blending the mesh against
+  its own back faces.
+
+- Mesh face indices now follow the `face_index_base` attribute `ggseg.meshes`
+  publishes, falling back to the smallest index used. The previous heuristic
+  inspected only the `i` column, so a 0-based mesh that put no vertex 0 there
+  would have reached the renderer without being shifted.
+
+- A numeric `colour_by` column matching no atlas region no longer fails with
+  `'from' must be a finite number`.
+
+- Atlases whose colour lookup table gives every region the same colour (often
+  black) no longer render as a single indistinguishable brain. Region colours
+  now come from `ggseg.formats::atlas_plot_palette()`, which substitutes
+  distinguishable colours and warns that the atlas colour table is what needs
+  fixing. Previously `ggseg3d()` read `atlas$palette` directly and drew such
+  atlases faithfully as one solid silhouette, while the same atlas plotted
+  correctly in 2D through `ggseg`.
+
+- `print()` on a `ggsegray` object now returns the object invisibly, as print
+  methods are expected to. It still renders the scene; only the return value
+  changed, and piping was never supported off `print()`.
+
+## Documentation
+
+- `surface` is documented once, in `resolve_brain_mesh()`, instead of four
+  mutually inconsistent lists; `sphere`, `smoothwm` and `orig` are now
+  documented where a `ggseg3d()` user looks.
+
+- The documented `tube_radius` and `tube_segments` defaults were wrong in both
+  places they appeared (5 and 8); they are 2 and 10.
+
+- `surface_opacity` now appears in the "Type-specific arguments" section, and
+  the nine widget modifiers cross-reference each other.
+
+- Vignette examples passed the `names`-column spelling (`"superior parietal"`)
+  as a `region` value, and full tract names for tracula; neither joined.
+  Figures regenerated.
+
+- Roxygen markdown is now enabled, so cross-references and formatting in the
+  help pages render as intended. Previously `?ggsegray` and `?ggseg3d` showed
+  literal text such as `[pan_camera()]` instead of a link, and the deprecation
+  badge on `label`, `text` and `colour` never rendered.
+
+- The error raised for a non-atlas input now points at
+  `ggseg.extra::create_cortical_from_labels()`; the function it named before
+  does not exist.
+
+## Internal
+
+- All atlas reads now go through the `ggseg.formats` accessors
+  (`atlas_vertices()`, `atlas_meshes()`, `atlas_centerlines()`,
+  `atlas_plot_palette()`) instead of reaching into `atlas$core`,
+  `atlas$palette` and `atlas$data`, except one presence check that reads
+  `atlas$data` because the accessors abort rather than return `NULL`. This
+  requires a newer `ggseg.formats`; `DESCRIPTION` carries the floor.
+
+- Atlas objects predating the unified `ggseg_atlas` layout, which stored
+  `vertices` or `meshes` at the top level instead of under `data`, are no
+  longer accepted. They are rejected up front with the usual
+  "must be a ggseg_atlas object with 3D data" error rather than failing deeper
+  in rendering. No released atlas package ships that layout.
+
+- `png` and `rayshader` moved from `Suggests` to `Config/Needs/website`; they
+  are used only by the pkgdown-only articles, which are not part of the built
+  package.
 
 - Test fixtures now resolve region names dynamically via
   `ggseg.formats::atlas_regions()` instead of hard-coding schema-specific
   strings, so `ggseg3d` checks cleanly against both the released and
   development `ggseg.formats` atlas schema. Geometry snapshots skip on CRAN.
-
-- `print()` on a `ggsegray` object now returns the object invisibly, as print
-  methods are expected to. It still renders the scene; only the return value
-  changed, and piping was never supported off `print()`.
 
 # ggseg3d 2.1.2
 

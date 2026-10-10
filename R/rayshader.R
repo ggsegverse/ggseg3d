@@ -7,6 +7,7 @@
 #' rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
 #'
 #' @inheritParams ggseg3d
+#' @param atlas A `ggseg_atlas` object carrying 3D geometry.
 #' @param material Named list of rgl material properties passed to
 #'   [rgl::tmesh3d()]. Controls how the mesh surface is shaded.
 #'
@@ -42,6 +43,7 @@
 #'   set_background("black")
 #' }
 #'
+#' @family brain plots
 #' @export
 ggsegray <- function(
   .data = NULL,
@@ -146,7 +148,7 @@ knit_print.ggsegray <- function(x, ...) {
 #' Convert mesh entry to rgl mesh3d object
 #'
 #' Converts the internal mesh_entry list structure (as built by
-#' [make_mesh_entry()]) into an [rgl::tmesh3d()] object for rgl rendering.
+#' `make_mesh_entry()`) into an [rgl::tmesh3d()] object for rgl rendering.
 #'
 #' @param mesh_entry A mesh entry list with vertices, faces, colors,
 #'   colorMode, and opacity.
@@ -180,6 +182,9 @@ mesh_entry_to_mesh3d <- function(mesh_entry, ...) {
   }
 
   alpha <- mesh_entry$opacity %||% 1
+  if (!is.null(mesh_entry$vertexAlphas)) {
+    alpha <- alpha * mesh_entry$vertexAlphas
+  }
 
   material <- list(
     color = mesh_entry$colors,

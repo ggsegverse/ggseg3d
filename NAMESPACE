@@ -27,33 +27,47 @@ export(snapshot_brain)
 export(tracula)
 export(updateGgseg3dBackground)
 export(updateGgseg3dCamera)
-importFrom(dplyr,distinct)
-importFrom(dplyr,filter)
-importFrom(dplyr,full_join)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,select)
-importFrom(dplyr,summarise)
-importFrom(ggseg.formats,aseg)
-importFrom(ggseg.formats,dk)
-importFrom(ggseg.formats,tracula)
-importFrom(graphics,par)
-importFrom(graphics,plot.new)
-importFrom(graphics,plot.window)
-importFrom(graphics,rect)
-importFrom(graphics,text)
-importFrom(htmlwidgets,createWidget)
-importFrom(htmlwidgets,shinyRenderWidget)
-importFrom(htmlwidgets,shinyWidgetOutput)
-importFrom(htmlwidgets,sizingPolicy)
+importFrom(dplyr,
+  distinct,
+  filter,
+  full_join,
+  left_join,
+  mutate,
+  select,
+  summarise
+)
+importFrom(ggseg.formats,
+  aseg,
+  dk,
+  tracula
+)
+importFrom(graphics,
+  par,
+  plot.new,
+  plot.window,
+  rect,
+  text
+)
+importFrom(htmlwidgets,
+  createWidget,
+  shinyRenderWidget,
+  shinyWidgetOutput,
+  sizingPolicy
+)
 importFrom(knitr,knit_print)
-importFrom(lifecycle,deprecate_warn)
-importFrom(lifecycle,deprecated)
-importFrom(rlang,"%||%")
-importFrom(rlang,.data)
-importFrom(scales,brewer_pal)
-importFrom(scales,colour_ramp)
-importFrom(scales,gradient_n_pal)
-importFrom(scales,rescale)
+importFrom(lifecycle,
+  deprecate_warn,
+  deprecated
+)
+importFrom(rlang,
+  "%||%",
+  .data
+)
+importFrom(scales,
+  brewer_pal,
+  colour_ramp,
+  gradient_n_pal,
+  rescale
+)
 importFrom(tidyr,unite)
 importFrom(webshot2,webshot)

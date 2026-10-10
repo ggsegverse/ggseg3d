@@ -5,20 +5,10 @@
 \alias{ggseg3d-package}
 \title{ggseg3d: Plot brain segmentations in 3D}
 \description{
-Plotting results from analyses done on data derived from brain
-segmentations is a common need, but may be quite laborious.
-Results from such analyses are usually easier to interpret if
-the plot can mimmick the shape and position in the brain it
-represents.
-}
-\details{
-This package contains data from various brain parcellations,
-with convenient functions to inspect the results directly on
-a brain-plot using interactive 3D mesh visualizations powered
-by Three.js via htmlwidgets.
-
-The package uses `ggseg_atlas` objects from ggseg.formats
-that contain 3D vertex mappings.
+Plots statistics on interactive 3D brain meshes, rendered with Three.js
+through htmlwidgets. Atlases are \code{ggseg_atlas} objects from
+\code{ggseg.formats}; \code{dk}, \code{aseg} and \code{tracula} are re-exported here for
+convenience.
 }
 \seealso{
 Useful links:
@@ -34,6 +24,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Athanasia Mo Mowinckel \email{a.m.mowinckel@psykologi.uio.no} (\href{https://orcid.org/0000-0002-5756-0223}{ORCID})
   \item Didac Vidal-Piñeiro \email{d.v.pineiro@psykologi.uio.no} (\href{https://orcid.org/0000-0001-9997-9156}{ORCID})
 }
 
