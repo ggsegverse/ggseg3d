@@ -37,6 +37,7 @@ Imports:
     webshot2
 Suggests:
     ggseg.meshes,
+    jsonlite,
     rgl,
     rmarkdown,
     shiny,

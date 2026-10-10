@@ -22,7 +22,7 @@ is_unified_atlas <- function(atlas) {
 #' `ggseg3d` that inspects atlas structure directly; every read of the
 #' geometry itself goes through the ggseg.formats accessors.
 #'
-#' @param atlas A `ggseg_atlas` object
+#' @inheritParams prepare_brain_meshes
 #'
 #' @return Named logical vector with `vertices`, `meshes` and `centerlines`
 #' @keywords internal
@@ -54,7 +54,7 @@ has_atlas_centerlines <- function(atlas) {
 #' every region the same colour. Reading `atlas$palette` instead renders such
 #' atlases as a single indistinguishable silhouette.
 #'
-#' @param atlas A `ggseg_atlas` object
+#' @inheritParams prepare_brain_meshes
 #' @param atlas_data Data frame with a `label` column
 #'
 #' @return `atlas_data` with a `colour` column
