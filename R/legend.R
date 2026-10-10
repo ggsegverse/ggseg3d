@@ -1,3 +1,30 @@
+#' Which legend a colour column calls for
+#'
+#' A numeric column spans a range only when it has at least one non-missing
+#' value and its extremes differ; otherwise there is a single swatch to draw,
+#' or nothing at all when no value matched the atlas.
+#'
+#' @param is_numeric Whether the colour variable is numeric
+#' @param data_min Minimum data value
+#' @param data_max Maximum data value
+#'
+#' @return One of `"continuous"`, `"single_value"`, `"discrete"` or `"none"`
+#' @keywords internal
+#' @noRd
+legend_kind <- function(is_numeric, data_min, data_max) {
+  if (!is_numeric) {
+    return("discrete")
+  }
+  if (is.na(data_min)) {
+    return("none")
+  }
+  if (data_min == data_max) {
+    return("single_value")
+  }
+  "continuous"
+}
+
+
 #' Build legend data structure
 #'
 #' Creates the appropriate legend data structure based on whether the
@@ -28,25 +55,23 @@ build_legend_data <- function(
   fill_col,
   data
 ) {
-  if (is_numeric && !is.na(data_min) && data_min != data_max) {
-    return(build_continuous_legend(
+  switch(
+    legend_kind(is_numeric, data_min, data_max),
+    continuous = build_continuous_legend(
       palette,
       pal_colours,
       colour_col,
       data_min,
       data_max
-    ))
-  }
-
-  if (is_numeric && !is.na(data_min) && data_min == data_max) {
-    return(build_single_value_legend(pal_colours, colour_col, data_min))
-  }
-
-  if (!is_numeric) {
-    return(build_discrete_legend(data, fill_col, label_col))
-  }
-
-  NULL
+    ),
+    single_value = build_single_value_legend(
+      pal_colours,
+      colour_col,
+      data_min
+    ),
+    discrete = build_discrete_legend(data, fill_col, label_col),
+    none = NULL
+  )
 }
 
 
