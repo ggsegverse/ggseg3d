@@ -62,6 +62,22 @@ test_that("build_legend_data returns a single swatch when all values match", {
   expect_identical(result$title, "value")
   expect_identical(as.character(result$labels), "5")
   expect_identical(as.character(result$colors), "#0000FF")
+})
+
+test_that("a single legend label survives JSON auto-unboxing", {
+  skip_if_not_installed("jsonlite")
+  result <- build_legend_data(
+    is_numeric = TRUE,
+    data_min = 5,
+    data_max = 5,
+    palette = NULL,
+    pal_colours = get_palette(c("blue", "red")),
+    colour_col = "value",
+    label_col = "region",
+    fill_col = "new_col",
+    data = data.frame()
+  )
+
   # A bare string would reach the overlay as three characters.
   expect_match(
     as.character(jsonlite::toJSON(result, auto_unbox = TRUE)),
