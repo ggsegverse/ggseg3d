@@ -46,6 +46,89 @@ merge_atlas_data <- function(.data, atlas_data) {
 }
 
 
+#' Check that the columns a plot maps actually exist
+#'
+#' A column name that is not in the prepared atlas data used to fail three
+#' different ways: `colour_by` reached `atlas_data[[colour_by]]` as `NULL` and
+#' died inside tibble's recycling code, `label_by` silently fell back to
+#' `label`, and `text_by` silently produced no hover text. Validating all three
+#' here means one message naming the typo and the columns available instead.
+#'
+#' @param atlas_data Prepared atlas data frame
+#' @param colour_by,label_by,text_by Column names, or `NULL` when unset
+#' @param call Environment to report the error against
+#'
+#' @return `invisible()`, called for its side effect
+#' @keywords internal
+#' @noRd
+check_plot_columns <- function(
+  atlas_data,
+  colour_by = NULL,
+  label_by = NULL,
+  text_by = NULL,
+  call = rlang::caller_env()
+) {
+  requested <- c(colour_by = colour_by, label_by = label_by, text_by = text_by)
+  unknown <- requested[!requested %in% names(atlas_data)]
+
+  if (length(unknown) == 0) {
+    return(invisible())
+  }
+
+  # Geometry columns are list columns of vertices or meshes; naming them as
+  # candidates for a colour or label would be misleading.
+  geometry_cols <- c("vertices", "mesh", "points", "tangents")
+  available <- setdiff(names(atlas_data), geometry_cols) # nolint: object_usage_linter, line_length_linter
+
+  cli::cli_abort(
+    c(
+      "{.arg {names(unknown)}} names {?a column/columns} that the atlas data
+       does not have: {.val {unname(unknown)}}.",
+      "i" = "Available columns: {.field {available}}."
+    ),
+    call = call
+  )
+}
+
+
+#' Canonical hemisphere names
+#'
+#' [resolve_brain_mesh()] takes `"lh"`/`"rh"` while the plotting functions take
+#' `"left"`/`"right"`, so both spellings reach user-facing arguments. Both are
+#' accepted and mapped to the long form the atlas data uses.
+#'
+#' @param hemisphere Character vector of hemisphere names
+#' @param call Environment to report the error against
+#'
+#' @return Unique character vector of `"left"` and/or `"right"`
+#' @keywords internal
+#' @noRd
+normalize_hemisphere <- function(hemisphere, call = rlang::caller_env()) {
+  canonical <- c(
+    left = "left",
+    right = "right",
+    lh = "left",
+    rh = "right"
+  )
+
+  matched <- canonical[as.character(hemisphere)]
+
+  if (anyNA(matched)) {
+    unknown <- unique(hemisphere[is.na(matched)]) # nolint: object_usage_linter
+    cli::cli_abort(
+      c(
+        "{.arg hemisphere} must be {.val left} or {.val right}, not
+         {.val {unknown}}.",
+        "i" = "{.val lh} and {.val rh} are accepted as well."
+      ),
+      call = call
+    )
+  }
+
+  unique(unname(matched))
+}
+
+
 col2hex <- function(colour) {
   col <- grDevices::col2rgb(colour)
   grDevices::rgb(
@@ -68,7 +151,8 @@ make_mesh_entry <- function(
   edge_color = NULL,
   edge_width = NULL,
   vertex_labels = NULL,
-  vertex_texts = NULL
+  vertex_texts = NULL,
+  vertex_alphas = NULL
 ) {
   entry <- list(
     name = name,
@@ -103,6 +187,12 @@ make_mesh_entry <- function(
 
   if (!is.null(vertex_texts)) {
     entry$vertexTexts <- unname(vertex_texts)
+  }
+
+  # An all-opaque mesh needs no alpha channel, and omitting it keeps the
+  # renderer on the cheaper 3-component colour attribute.
+  if (!is.null(vertex_alphas) && any(vertex_alphas < 1)) {
+    entry$vertexAlphas <- unname(as.numeric(vertex_alphas))
   }
 
   entry

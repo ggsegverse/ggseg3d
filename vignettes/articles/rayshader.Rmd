@@ -12,7 +12,7 @@ dir.create("img", showWarnings = FALSE)
 options(rgl.useNULL = TRUE)
 
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 ```

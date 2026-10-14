@@ -89,3 +89,20 @@ test_that("add_glassbrain works with white surface", {
     add_glassbrain(hemisphere = "left", surface = "white")
   expect_s3_class(p, c("ggseg3d", "htmlwidget"))
 })
+
+test_that("add_glassbrain accepts the lh/rh hemisphere spellings", {
+  p <- ggseg3d(hemisphere = "left")
+  n_before <- length(p$x$meshes)
+
+  expect_length(add_glassbrain(p, hemisphere = "lh")$x$meshes, n_before + 1L)
+  expect_length(
+    add_glassbrain(p, hemisphere = c("lh", "rh"))$x$meshes,
+    n_before + 2L
+  )
+})
+
+test_that("add_glassbrain rejects an unknown hemisphere name", {
+  p <- ggseg3d(hemisphere = "left")
+
+  expect_error(add_glassbrain(p, hemisphere = "lefty"), "lefty")
+})

@@ -165,8 +165,8 @@ example_data <- tibble(
     "precentral",
     "postcentral",
     "insula",
-    "superior parietal",
-    "inferior parietal",
+    "superiorparietal",
+    "inferiorparietal",
     "supramarginal",
     "cuneus",
     "pericalcarine"

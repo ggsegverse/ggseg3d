@@ -24,8 +24,7 @@ ggsegray(
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{atlas}{A `ggseg_atlas` object containing 3D vertex mappings, or a
-string naming an atlas function (deprecated).}
+\item{atlas}{A \code{ggseg_atlas} object carrying 3D geometry.}
 
 \item{label_by}{String. Column name used as hover label for each region.}
 
@@ -34,69 +33,78 @@ region label.}
 
 \item{colour_by}{String. Column name mapped to mesh colours.}
 
-\item{palette}{String. Vector of colour names or HEX colours. Can also
-be a named numeric vector, with colours as names, and breakpoint for
-that colour as the value}
+\item{palette}{Character vector of colour names or hex colours. May
+instead be a named numeric vector whose names are the colours and whose
+values are the breakpoints those colours sit at.}
 
-\item{na_colour}{String. Either name, hex of RGB for colour of NA in
-colour.}
+\item{na_colour}{String. Colour drawn for regions with no value in
+\code{.data}, as a colour name or a hex code.}
 
-\item{na_alpha}{Numeric. A number between 0 and 1 to control
-transparency of NA-regions.}
+\item{na_alpha}{Numeric between 0 and 1. Opacity of regions with no
+value in \code{.data}: \code{1} (default) draws them opaque in \code{na_colour},
+lower values fade them. Cortical and cerebellar surfaces fade
+per vertex, subcortical structures and tracts per mesh.}
 
 \item{material}{Named list of rgl material properties passed to
-[rgl::tmesh3d()]. Controls how the mesh surface is shaded.}
+\code{\link[rgl:tmesh3d]{rgl::tmesh3d()}}. Controls how the mesh surface is shaded.}
 
 \item{...}{Type-specific arguments passed to the atlas method.
-See section **Type-specific arguments** below.}
+See section \strong{Type-specific arguments} below.}
 
-\item{label, text, colour}{`r lifecycle::badge("deprecated")` Use
-`label_by`, `text_by`, and `colour_by` instead.}
+\item{label, text, colour}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use
+\code{label_by}, \code{text_by}, and \code{colour_by} instead.}
 }
 \value{
-An object of class `ggsegray` (invisibly), which wraps the
-  rgl device ID. Pipe into [pan_camera()], [add_glassbrain()], or
-  [set_background()] to modify the scene.
+An object of class \code{ggsegray} (invisibly), which wraps the
+rgl device ID. Pipe into \code{\link[=pan_camera]{pan_camera()}}, \code{\link[=add_glassbrain]{add_glassbrain()}}, or
+\code{\link[=set_background]{set_background()}} to modify the scene.
 }
 \description{
 Creates an rgl 3D scene from a brain atlas. Uses the same atlas
-preparation pipeline as [ggseg3d()] but outputs to rgl instead of
-htmlwidgets. The resulting scene can be piped into [pan_camera()],
-[add_glassbrain()], and [set_background()], then rendered with
-rayshader's `render_highquality()` or captured with `rgl::snapshot3d()`.
+preparation pipeline as \code{\link[=ggseg3d]{ggseg3d()}} but outputs to rgl instead of
+htmlwidgets. The resulting scene can be piped into \code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=add_glassbrain]{add_glassbrain()}}, and \code{\link[=set_background]{set_background()}}, then rendered with
+rayshader's \code{render_highquality()} or captured with \code{rgl::snapshot3d()}.
 }
 \section{Material properties}{
 
 Useful material list entries:
 \describe{
-  \item{`specular`}{`"black"` (matte) or `"white"` (glossy).}
-  \item{`shininess`}{Specular exponent. Higher = tighter highlights.}
-  \item{`lit`}{`FALSE` disables lighting.}
-  \item{`alpha`}{Transparency, 0 (invisible) to 1 (opaque).}
-  \item{`smooth`}{`TRUE` for Gouraud shading, `FALSE` for flat.}
+\item{\code{specular}}{\code{"black"} (matte) or \code{"white"} (glossy).}
+\item{\code{shininess}}{Specular exponent. Higher = tighter highlights.}
+\item{\code{lit}}{\code{FALSE} disables lighting.}
+\item{\code{alpha}}{Transparency, 0 (invisible) to 1 (opaque).}
+\item{\code{smooth}}{\code{TRUE} for Gouraud shading, \code{FALSE} for flat.}
 }
 
-See [rgl::material3d()] for the full list.
+See \code{\link[rgl:material3d]{rgl::material3d()}} for the full list.
 }
 
 \section{Type-specific arguments}{
 
-Cortical atlases (`cortical_atlas`):
+Cortical atlases (\code{cortical_atlas}):
 \describe{
-  \item{`surface`}{Surface type: `"LCBC"` (default, alias for
-    inflated), `"inflated"`, `"semi-inflated"`, `"white"`, `"pial"`.}
-  \item{`hemisphere`}{Character vector of hemispheres: `"right"`,
-    `"left"`.}
-  \item{`edge_by`}{Column name for region boundary edges.}
-  \item{`brain_meshes`}{Custom brain mesh data.}
+\item{\code{surface}}{\code{"LCBC"} (default, an alias for \code{"inflated"}) or any
+surface \code{\link[=resolve_brain_mesh]{resolve_brain_mesh()}} accepts.}
+\item{\code{hemisphere}}{Character vector of hemispheres: \code{"left"},
+\code{"right"}, or their \code{"lh"}/\code{"rh"} spellings.}
+\item{\code{edge_by}}{Column name for region boundary edges.}
+\item{\code{brain_meshes}}{Custom brain mesh data.}
 }
 
-Tract atlases (`tract_atlas`):
+Cerebellar atlases (\code{cerebellar_atlas}):
 \describe{
-  \item{`tract_color`}{`"palette"` (default) or `"orientation"`
-    (direction-based RGB).}
-  \item{`tube_radius`}{Tube radius (numeric, default 5).}
-  \item{`tube_segments`}{Tube segment count (integer, default 8).}
+\item{\code{surface_opacity}}{Opacity of the cerebellar surface mesh.
+Defaults to \code{0.3} when the atlas carries deep nuclei, so they stay
+visible through the surface, and \code{1} otherwise.}
+}
+
+Tract atlases (\code{tract_atlas}):
+\describe{
+\item{\code{tract_color}}{\code{"palette"} (default) or \code{"orientation"}
+(direction-based RGB).}
+\item{\code{tube_radius}}{Tube radius (numeric, default \code{2}).}
+\item{\code{tube_segments}}{Tube segment count (integer, default \code{10}).}
 }
 }
 
@@ -113,3 +121,8 @@ ggsegray(atlas = aseg()) |>
 }
 
 }
+\seealso{
+Other brain plots:
+\code{\link[=ggseg3d]{ggseg3d()}}
+}
+\concept{brain plots}

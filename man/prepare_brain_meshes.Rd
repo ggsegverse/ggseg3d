@@ -67,15 +67,17 @@
 prepare_brain_meshes(atlas, ...)
 }
 \arguments{
-\item{atlas}{A `ggseg_atlas` object}
+\item{atlas}{A \code{ggseg_atlas} object}
 
 \item{.data}{A data.frame to use for plot aesthetics. Must include a
 column called "region" corresponding to regions.}
 
-\item{surface}{Surface type: `"inflated"` (default), `"semi-inflated"`,
-`"white"`, `"pial"`. Use `"LCBC"` as alias for `"inflated"`.}
+\item{surface}{Surface type: \code{"inflated"}, \code{"semi-inflated"}, \code{"white"},
+\code{"pial"}, \code{"midthickness"}, \code{"sphere"}, \code{"smoothwm"} or \code{"orig"}.
+\code{\link[=ggseg3d]{ggseg3d()}} additionally accepts \code{"LCBC"}, an alias for \code{"inflated"}.}
 
-\item{hemisphere}{Character vector of hemispheres: `"right"`, `"left"`.}
+\item{hemisphere}{Character vector of hemispheres: \code{"left"}, \code{"right"}.
+\code{"lh"} and \code{"rh"} are accepted as well.}
 
 \item{label_by}{String. Column name used as hover label for each region.}
 
@@ -84,38 +86,40 @@ region label.}
 
 \item{colour_by}{String. Column name mapped to mesh colours.}
 
-\item{palette}{String. Vector of colour names or HEX colours. Can also
-be a named numeric vector, with colours as names, and breakpoint for
-that colour as the value}
+\item{palette}{Character vector of colour names or hex colours. May
+instead be a named numeric vector whose names are the colours and whose
+values are the breakpoints those colours sit at.}
 
-\item{na_colour}{String. Either name, hex of RGB for colour of NA in
-colour.}
+\item{na_colour}{String. Colour drawn for regions with no value in
+\code{.data}, as a colour name or a hex code.}
 
-\item{na_alpha}{Numeric. A number between 0 and 1 to control
-transparency of NA-regions.}
+\item{na_alpha}{Numeric between 0 and 1. Opacity of regions with no
+value in \code{.data}: \code{1} (default) draws them opaque in \code{na_colour},
+lower values fade them. Cortical and cerebellar surfaces fade
+per vertex, subcortical structures and tracts per mesh.}
 
 \item{edge_by}{Column name for region boundary edge grouping}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
-[ggseg.formats::get_brain_mesh()] for format details.}
+\code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
 
 \item{...}{Type-specific arguments passed to methods}
 
 \item{surface_opacity}{Numeric opacity for the cerebellar surface mesh.
-Defaults to `0.3` when deep nuclei are present and `1` otherwise.}
+Defaults to \code{0.3} when deep nuclei are present and \code{1} otherwise.}
 
-\item{tract_color}{`"palette"` (default) or `"orientation"`
+\item{tract_color}{\code{"palette"} (default) or \code{"orientation"}
 (direction-based RGB colouring)}
 
-\item{tube_radius}{Numeric tube radius (default 5 when `NULL`).}
+\item{tube_radius}{Numeric tube radius.}
 
-\item{tube_segments}{Integer tube segment count (default 8 when `NULL`).}
+\item{tube_segments}{Integer tube segment count.}
 }
 \value{
-List with `meshes` (list of mesh entries) and `legend_data`
+List with \code{meshes} (list of mesh entries) and \code{legend_data}
 }
 \description{
 S3 generic that dispatches to atlas-type-specific preparation methods.
-Builds mesh data structures and legend data from a `ggseg_atlas`.
+Builds mesh data structures and legend data from a \code{ggseg_atlas}.
 }
 \keyword{internal}

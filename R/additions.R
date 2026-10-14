@@ -3,20 +3,18 @@
 #' Adds a translucent brain surface to a ggseg3d plot for anatomical reference.
 #' Particularly useful for subcortical and tract visualizations where spatial
 #' context helps interpretation. Works with both htmlwidget (`ggseg3d`) and
-#' rgl (`ggsegray`) objects.
+#' rgl (`ggsegray`) objects. The default `"inflated"` surface ships with
+#' `ggseg.formats`; every other surface is drawn from `ggseg.meshes`.
 #'
 #' @param p A `ggseg3d` widget or `ggsegray` rgl object.
-#' @param hemisphere Character vector. Hemispheres to add: "left", "right",
-#'   or both.
-#' @param surface Character. Surface type. Defaults to `"inflated"`, which
-#'   is supplied by `ggseg.formats` and requires no additional dependency.
-#'   Other surfaces (`"pial"`, `"white"`, etc.) are drawn from `ggseg.meshes`.
+#' @param hemisphere Character vector. Hemispheres to add: `"left"`,
+#'   `"right"`, or both. `"lh"` and `"rh"` are accepted as well.
 #' @param colour Character. Colour for the glass brain surface (hex or named).
 #' @param opacity Numeric. Transparency of the glass brain (0-1).
-#' @param brain_meshes Optional user-supplied brain meshes. See
-#'   [ggseg.formats::get_brain_mesh()] for format details.
+#' @inheritParams resolve_brain_mesh
 #'
 #' @return The input object (modified), for piping.
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -57,9 +55,8 @@ add_glassbrain <- function(
 
   colour <- if (grepl("^#", colour)) colour else col2hex(colour)
   hemi_map <- c("left" = "lh", "right" = "rh")
-  cortical_hemis <- intersect(hemisphere, c("left", "right"))
 
-  entries <- lapply(cortical_hemis, function(hemi) {
+  entries <- lapply(normalize_hemisphere(hemisphere), function(hemi) {
     hemi_short <- hemi_map[hemi]
     mesh <- resolve_brain_mesh(
       hemisphere = hemi_short,
@@ -103,7 +100,7 @@ add_glassbrain <- function(
 #' Sets the camera position for a ggseg3d widget or ggsegray rgl scene
 #' to standard anatomical views or custom positions.
 #'
-#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @inheritParams add_glassbrain
 #' @param camera string, list, or numeric vector. Camera position preset
 #'   name, custom eye position list, or `c(x, y, z)` for rgl.
 #'
@@ -124,6 +121,7 @@ add_glassbrain <- function(
 #' }
 #'
 #' @return The input object (modified), for piping.
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -170,10 +168,11 @@ pan_camera <- function(p, camera) {
 #'
 #' Changes the background color of a ggseg3d widget or ggsegray rgl scene.
 #'
-#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @inheritParams add_glassbrain
 #' @param colour string. Background color (hex or named color)
 #'
 #' @return The input object (modified), for piping.
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -208,10 +207,11 @@ set_background <- function(p, colour = "#ffffff") {
 #' For htmlwidget output, toggles legend visibility. For rgl output,
 #' draws or removes the legend overlay.
 #'
-#' @param p A ggseg3d or ggsegray object
+#' @inheritParams add_glassbrain
 #' @param show logical. Whether to show the legend (default: TRUE)
 #'
 #' @return The input object, modified
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -244,6 +244,7 @@ set_legend <- function(p, show = TRUE) {
 #' @param height numeric. Widget height in pixels (NULL for default)
 #'
 #' @return ggseg3d widget object with updated dimensions
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -268,13 +269,14 @@ set_dimensions <- function(p, width = NULL, height = NULL) {
 #' htmlwidget (`ggseg3d`) and rgl (`ggsegray`) objects. For rgl,
 #' edges must have been computed at creation time via `edge_by`.
 #'
-#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @inheritParams add_glassbrain
 #' @param colour string. Edge colour (hex or named color). Set to NULL to
 #'   hide edges.
 #' @param width numeric. Width of edge lines (default: 1). Note: line width > 1
 #'   may not render on all systems due to WebGL limitations.
 #'
 #' @return The input object (modified), for piping.
+#' @family brain modifiers
 #' @export
 #'
 #' @section Lifecycle:
@@ -337,10 +339,11 @@ set_edges <- function(p, colour = "black", width = 1) {
 #' Useful for screenshots where accurate color reproduction is needed,
 #' such as atlas creation pipelines that extract contours from images.
 #'
-#' @param p ggseg3d widget object
+#' @inheritParams set_dimensions
 #' @param flat logical. Enable flat shading (default: TRUE)
 #'
 #' @return ggseg3d widget object with updated shading
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -358,13 +361,14 @@ set_flat_shading <- function(p, flat = TRUE) {
 #' Uses orthographic projection instead of perspective. This eliminates
 #' perspective distortion and ensures consistent sizing across all views.
 #'
-#' @param p ggseg3d widget object
+#' @inheritParams set_dimensions
 #' @param ortho logical. Enable orthographic mode (default: TRUE)
 #' @param frustum_size numeric. Size of the orthographic frustum. Controls
 #'   how much of the scene is visible. Default 220 works well for brain meshes.
 #'   Use the same value across all views for consistent sizing.
 #'
 #' @return ggseg3d widget object with updated camera mode
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -385,7 +389,7 @@ set_orthographic <- function(p, ortho = TRUE, frustum_size = 220) {
 #' Use this to centre each hemisphere at the origin for atlas-creation
 #' snapshots, or to reapply anatomical positioning after manual edits.
 #'
-#' @param p ggseg3d widget object
+#' @inheritParams set_dimensions
 #' @param positioning How to position hemispheres:
 #'   - "anatomical": Medial surfaces adjacent at midline. Left at negative
 #'     x, right at positive x. Default for displaying both hemispheres
@@ -398,6 +402,7 @@ set_orthographic <- function(p, ortho = TRUE, frustum_size = 220) {
 #'   and glassbrain meshes are left untouched.
 #'
 #' @return ggseg3d widget object with repositioned meshes
+#' @family brain modifiers
 #' @export
 #'
 #' @examples
@@ -451,7 +456,7 @@ set_positioning <- function(p, positioning = c("anatomical", "centered")) {
 #' Takes a screenshot of a ggseg3d widget and saves it as a PNG image.
 #' Requires a Chrome-based browser to be installed.
 #'
-#' @param p ggseg3d widget object
+#' @inheritParams set_dimensions
 #' @param file string. Output file path (should end in .png)
 #' @param width numeric. Image width in pixels (default: 600)
 #' @param height numeric. Image height in pixels (default: 500)

@@ -7,7 +7,7 @@
 set_legend(p, show = TRUE)
 }
 \arguments{
-\item{p}{A ggseg3d or ggsegray object}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{show}{logical. Whether to show the legend (default: TRUE)}
 }
@@ -25,3 +25,15 @@ ggseg3d() |> set_legend(FALSE)
 ggsegray(hemisphere = "left") |> set_legend()
 }
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

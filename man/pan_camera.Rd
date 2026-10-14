@@ -7,25 +7,25 @@
 pan_camera(p, camera)
 }
 \arguments{
-\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{camera}{string, list, or numeric vector. Camera position preset
-  name, custom eye position list, or `c(x, y, z)` for rgl.
+name, custom eye position list, or \code{c(x, y, z)} for rgl.
 
 \strong{Available camera presets:}
 \itemize{
-\item `left lateral` or `left_lateral`
-\item `left medial` or `left_medial`
-\item `right lateral` or `right_lateral`
-\item `right medial` or `right_medial`
-\item `left superior` or `left_superior`
-\item `right superior` or `right_superior`
-\item `left inferior` or `left_inferior`
-\item `right inferior` or `right_inferior`
-\item `left anterior` or `left_anterior`
-\item `right anterior` or `right_anterior`
-\item `left posterior` or `left_posterior`
-\item `right posterior` or `right_posterior`
+\item \verb{left lateral} or \code{left_lateral}
+\item \verb{left medial} or \code{left_medial}
+\item \verb{right lateral} or \code{right_lateral}
+\item \verb{right medial} or \code{right_medial}
+\item \verb{left superior} or \code{left_superior}
+\item \verb{right superior} or \code{right_superior}
+\item \verb{left inferior} or \code{left_inferior}
+\item \verb{right inferior} or \code{right_inferior}
+\item \verb{left anterior} or \code{left_anterior}
+\item \verb{right anterior} or \code{right_anterior}
+\item \verb{left posterior} or \code{left_posterior}
+\item \verb{right posterior} or \code{right_posterior}
 }}
 }
 \value{
@@ -43,3 +43,15 @@ ggsegray(atlas = dk(), hemisphere = "left") |>
   pan_camera("left lateral")
 }
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

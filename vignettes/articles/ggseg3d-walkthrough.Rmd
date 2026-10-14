@@ -76,7 +76,7 @@ Add `text_by` to surface values in the hover tooltip:
 ```{r}
 #| label: wt-plot-data
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
@@ -119,7 +119,7 @@ ggseg3d(
 #| label: wt-snap-palette-named
 #| echo: false
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
@@ -192,7 +192,7 @@ By default, edges appear wherever adjacent vertices have different colours.
 #| label: wt-edge-by
 #| eval: false
 lobe_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.2, 0.4, 0.3, 0.5),
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
@@ -206,7 +206,7 @@ ggseg3d(.data = lobe_data, atlas = dk(), colour_by = "p", edge_by = "lobe") |>
 #| label: wt-snap-edge-by
 #| echo: false
 lobe_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.2, 0.4, 0.3, 0.5),
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
@@ -228,7 +228,7 @@ Fade unmatched regions with `na_alpha` and wrap everything in a glass brain:
 #| label: wt-subcortical
 #| eval: false
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
@@ -246,7 +246,7 @@ ggseg3d(
 #| label: wt-snap-subcortical
 #| echo: false
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
@@ -289,14 +289,13 @@ ggseg3d(atlas = tracula()) |>
 
 ### Mapping data to tracts
 
-Data mapping works the same way as cortical and subcortical atlases — the `region` column matches tract names:
+Data mapping works the same way as cortical and subcortical atlases — the `region` column matches the atlas' tract abbreviations (`af`, `cst`, `cbd`, `uf`, ...):
 
 ```{r}
 #| label: wt-tracula-data
 #| eval: false
 tract_data <- tibble(
-  region = c("arcuate fasciculus", "corticospinal tract",
-             "cingulum bundle", "uncinate fasciculus"),
+  region = c("af", "cst", "cbd", "uf"),
   fa = c(0.45, 0.55, 0.40, 0.35)
 )
 
@@ -313,8 +312,7 @@ ggseg3d(
 #| label: wt-snap-tracula-data
 #| echo: false
 tract_data <- tibble(
-  region = c("arcuate fasciculus", "corticospinal tract",
-             "cingulum bundle", "uncinate fasciculus"),
+  region = c("af", "cst", "cbd", "uf"),
   fa = c(0.45, 0.55, 0.40, 0.35)
 )
 
@@ -440,7 +438,7 @@ image_write(combined, "figure1_all_views.png")
 #| label: wt-snap-multi-panel
 #| echo: false
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
@@ -499,8 +497,9 @@ Lighting adds depth but shifts colours.
 ```{r}
 #| label: wt-flat-shading
 #| eval: false
-ggseg3d() |>
-  set_flat_shading()
+ggseg3d(hemisphere = "left") |>
+  set_flat_shading() |>
+  pan_camera("left lateral")
 ```
 
 ```{r}
@@ -512,7 +511,7 @@ ggseg3d(hemisphere = "left") |>
   snapshot_brain("img/wt-flat-shading.png")
 ```
 
-![Both hemispheres with flat shading — uniform colour per region, no highlights or shadows, colours exactly matching the atlas palette.](img/wt-flat-shading.png "Flat shading for exact colour reproduction")
+![A left hemisphere with flat shading — uniform colour per region, no highlights or shadows, colours exactly matching the atlas palette.](img/wt-flat-shading.png "Flat shading for exact colour reproduction")
 
 ## Orthographic projection
 
@@ -522,8 +521,9 @@ Orthographic projection removes that depth cue, so every region appears at the s
 ```{r}
 #| label: wt-orthographic
 #| eval: false
-ggseg3d() |>
-  set_orthographic()
+ggseg3d(hemisphere = "left") |>
+  set_orthographic() |>
+  pan_camera("left lateral")
 ```
 
 ```{r}
@@ -535,7 +535,7 @@ ggseg3d(hemisphere = "left") |>
   snapshot_brain("img/wt-orthographic.png")
 ```
 
-![Both hemispheres in orthographic projection — regions appear the same size whether they face the camera or sit behind the brain.](img/wt-orthographic.png "Orthographic projection removes perspective distortion")
+![A left hemisphere in orthographic projection — regions appear the same size whether they face the camera or sit behind the brain.](img/wt-orthographic.png "Orthographic projection removes perspective distortion")
 
 ## Same atlas for 2D and 3D
 

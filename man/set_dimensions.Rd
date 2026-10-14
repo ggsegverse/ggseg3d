@@ -23,3 +23,15 @@ Changes the width and height of a ggseg3d widget.
 ggseg3d() |>
   set_dimensions(width = 800, height = 600)
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_background]{set_background()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

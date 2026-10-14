@@ -7,7 +7,7 @@
 set_background(p, colour = "#ffffff")
 }
 \arguments{
-\item{p}{A `ggseg3d` widget or `ggsegray` rgl object.}
+\item{p}{A \code{ggseg3d} widget or \code{ggsegray} rgl object.}
 
 \item{colour}{string. Background color (hex or named color)}
 }
@@ -24,3 +24,15 @@ ggseg3d() |> set_background("black")
 ggsegray(atlas = dk()) |> set_background("black")
 }
 }
+\seealso{
+Other brain modifiers:
+\code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=pan_camera]{pan_camera()}},
+\code{\link[=set_dimensions]{set_dimensions()}},
+\code{\link[=set_edges]{set_edges()}},
+\code{\link[=set_flat_shading]{set_flat_shading()}},
+\code{\link[=set_legend]{set_legend()}},
+\code{\link[=set_orthographic]{set_orthographic()}},
+\code{\link[=set_positioning]{set_positioning()}}
+}
+\concept{brain modifiers}

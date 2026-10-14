@@ -25,9 +25,9 @@ string and have \code{'px'} appended.}
 is useful if you want to save an expression in a variable.}
 }
 \value{
-`ggseg3dOutput` returns an HTML widget output element for use in
-  a Shiny UI. `renderGgseg3d` returns a render function for use in a
-  Shiny server.
+\code{ggseg3dOutput} returns an HTML widget output element for use in
+a Shiny UI. \code{renderGgseg3d} returns a render function for use in a
+Shiny server.
 }
 \description{
 Output and render functions for using ggseg3d within Shiny

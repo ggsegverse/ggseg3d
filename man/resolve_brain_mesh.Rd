@@ -6,31 +6,33 @@
 \usage{
 resolve_brain_mesh(
   hemisphere = c("lh", "rh"),
-  surface = c("inflated", "semi-inflated", "white", "pial", "sphere", "smoothwm", "orig"),
+  surface = c("inflated", "semi-inflated", "white", "pial", "midthickness", "sphere",
+    "smoothwm", "orig"),
   brain_meshes = NULL
 )
 }
 \arguments{
-\item{hemisphere}{`"lh"` or `"rh"`}
+\item{hemisphere}{\code{"lh"} or \code{"rh"}}
 
-\item{surface}{Surface type: `"inflated"`, `"semi-inflated"`, `"white"`,
-`"pial"`, `"sphere"`, `"smoothwm"`, `"orig"`}
+\item{surface}{Surface type: \code{"inflated"}, \code{"semi-inflated"}, \code{"white"},
+\code{"pial"}, \code{"midthickness"}, \code{"sphere"}, \code{"smoothwm"} or \code{"orig"}.
+\code{\link[=ggseg3d]{ggseg3d()}} additionally accepts \code{"LCBC"}, an alias for \code{"inflated"}.}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
-[ggseg.formats::get_brain_mesh()] for format details.}
+\code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
 }
 \value{
 list with vertices (data.frame with x, y, z) and faces
-  (data.frame with i, j, k), or NULL if mesh not found
+(data.frame with i, j, k), or NULL if mesh not found
 }
 \description{
 Resolves and prepares a brain surface mesh for rendering. Delegates to
-[ggseg.formats::get_brain_mesh()] for inflated surfaces and to
-[ggseg.meshes::get_cortical_mesh()] for pial, white, semi-inflated, and
+\code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for inflated surfaces and to
+\code{\link[ggseg.meshes:get_cortical_mesh]{ggseg.meshes::get_cortical_mesh()}} for pial, white, semi-inflated, and
 other surfaces. Returned meshes use the shared anatomical axis convention
-(`x` = left-right, `y` = anterior-posterior, `z` = superior-inferior) with
-`lh` positioned at `x <= 0` and `rh` at `x >= 0`, medial edges meeting at
-the midline (`x = 0`).
+(\code{x} = left-right, \code{y} = anterior-posterior, \code{z} = superior-inferior) with
+\code{lh} positioned at \code{x <= 0} and \code{rh} at \code{x >= 0}, medial edges meeting at
+the midline (\code{x = 0}).
 }
 \examples{
 mesh <- resolve_brain_mesh("lh", "inflated")

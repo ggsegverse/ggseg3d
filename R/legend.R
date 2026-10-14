@@ -1,3 +1,30 @@
+#' Which legend a colour column calls for
+#'
+#' A numeric column spans a range only when it has at least one non-missing
+#' value and its extremes differ; otherwise there is a single swatch to draw,
+#' or nothing at all when no value matched the atlas.
+#'
+#' @param is_numeric Whether the colour variable is numeric
+#' @param data_min Minimum data value
+#' @param data_max Maximum data value
+#'
+#' @return One of `"continuous"`, `"single_value"`, `"discrete"` or `"none"`
+#' @keywords internal
+#' @noRd
+legend_kind <- function(is_numeric, data_min, data_max) {
+  if (!is_numeric) {
+    return("discrete")
+  }
+  if (is.na(data_min)) {
+    return("none")
+  }
+  if (data_min == data_max) {
+    return("single_value")
+  }
+  "continuous"
+}
+
+
 #' Build legend data structure
 #'
 #' Creates the appropriate legend data structure based on whether the
@@ -28,21 +55,49 @@ build_legend_data <- function(
   fill_col,
   data
 ) {
-  if (is_numeric && !is.na(data_min) && data_min != data_max) {
-    return(build_continuous_legend(
+  switch(
+    legend_kind(is_numeric, data_min, data_max),
+    continuous = build_continuous_legend(
       palette,
       pal_colours,
       colour_col,
       data_min,
       data_max
-    ))
-  }
+    ),
+    single_value = build_single_value_legend(
+      pal_colours,
+      colour_col,
+      data_min
+    ),
+    discrete = build_discrete_legend(data, fill_col, label_col),
+    none = NULL
+  )
+}
 
-  if (!is_numeric) {
-    return(build_discrete_legend(data, fill_col, label_col))
-  }
 
-  NULL
+#' Build single-swatch legend
+#'
+#' A numeric column whose matched values are all identical has no range to
+#' draw a colourbar over, but it still needs a legend: without one there is
+#' nothing to tell the reader that the single palette colour means one value
+#' and the `na_colour` regions carry no data at all.
+#'
+#' @param pal_colours Processed palette colours
+#' @param colour_col Name of the colour column (used as title)
+#' @param value The single data value
+#'
+#' @return List with discrete legend specification
+#' @keywords internal
+#' @noRd
+build_single_value_legend <- function(pal_colours, colour_col, value) {
+  # I() keeps a single label an array through htmlwidgets' auto-unboxing;
+  # a bare string would be indexed character by character by the overlay.
+  list(
+    type = "discrete",
+    title = colour_col,
+    labels = I(format(value)),
+    colors = I(unname(col2hex(pal_colours$orig[1])))
+  )
 }
 
 
@@ -136,7 +191,7 @@ build_discrete_legend <- function(data, fill_col, label_col) {
   list(
     type = "discrete",
     title = label_col,
-    labels = unname(names(color_label_map)),
-    colors = unname(color_label_map)
+    labels = I(unname(names(color_label_map))),
+    colors = I(unname(color_label_map))
   )
 }
