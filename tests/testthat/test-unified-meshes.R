@@ -46,7 +46,7 @@ test_that("build_subcortical_meshes handles subcort data", {
   atlas_data <- data.frame(
     label = "Left-Caudate",
     region = "caudate",
-    hemi = "subcort",
+    hemi = NA_character_,
     colour = "#FF0000",
     stringsAsFactors = FALSE
   )
@@ -66,7 +66,7 @@ test_that("build_tract_meshes handles tract data with legacy meshes", {
   atlas_data <- data.frame(
     label = "tract1",
     region = "tract 1",
-    hemi = "subcort",
+    hemi = NA_character_,
     colour = "#FF0000",
     stringsAsFactors = FALSE
   )

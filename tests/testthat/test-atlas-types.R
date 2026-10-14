@@ -47,7 +47,7 @@ test_that("data_merge_mesh joins user data with atlas", {
   atlas_data <- data.frame(
     label = c("a", "b"),
     region = c("region a", "region b"),
-    hemi = c("subcort", "subcort"),
+    hemi = c(NA_character_, NA_character_),
     stringsAsFactors = FALSE
   )
   atlas_data$mesh <- list(list(), list())
@@ -130,15 +130,21 @@ test_that("duplicated atlas labels are dropped once, with a warning", {
   expect_identical(sort(atlas_data$label), c("Left-Caudate", "Right-Caudate"))
 })
 
-test_that("a duplicated label draws one mesh, not two", {
+# This used to assert that ggseg3d() warned and drew one mesh. Since
+# ggseg.formats made a unique core label a construction-time invariant, the
+# class predicate rejects a duplicated-label atlas before the renderer sees
+# it, so the de-duplication below ggseg3d() is no longer reachable from here.
+# prepare_mesh_atlas_data() still de-duplicates, and the test above still
+# covers it. Refusing the object outright is the stricter behaviour; if the
+# renderer should instead tolerate a malformed atlas, this is the test to
+# change back.
+test_that("ggseg3d() refuses an atlas with a duplicated label", {
   atlas <- make_duplicate_label_atlas()
 
-  expect_warning(
-    widget <- ggseg3d(atlas = atlas),
-    "duplicated atlas row"
+  expect_error(
+    ggseg3d(atlas = atlas),
+    "3D data"
   )
-
-  expect_length(widget$x$meshes, 2L)
 })
 
 test_that("unique atlas labels pass through untouched", {

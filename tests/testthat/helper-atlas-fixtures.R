@@ -3,12 +3,12 @@
 # layout. Tests supply the meaningful data (core, vertices, meshes, ...) and
 # these helpers assemble a valid ggseg_atlas.
 
-# `names` carries the long-form display name and is part of the core schema, so
-# ggseg.formats asks atlas authors for it at construction. Fixtures care about
-# geometry rather than display names, so fall back to the region name.
-core_with_names <- function(core) {
-  if (!"names" %in% names(core)) {
-    core$names <- core$region
+# `display` carries the long-form display name and is part of the core schema,
+# so ggseg.formats asks atlas authors for it at construction. Fixtures care
+# about geometry rather than display names, so fall back to the region name.
+core_with_display <- function(core) {
+  if (!"display" %in% names(core)) {
+    core$display <- core$region
   }
   core
 }
@@ -23,7 +23,7 @@ cerebellar_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "cerebellar",
-    core = core_with_names(core),
+    core = core_with_display(core),
     data = ggseg.formats::ggseg_data_cerebellar(
       vertices = vertices,
       meshes = meshes
@@ -62,7 +62,7 @@ subcortical_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "subcortical",
-    core = core_with_names(core),
+    core = core_with_display(core),
     data = ggseg.formats::ggseg_data_subcortical(meshes = meshes),
     palette = palette
   )
@@ -78,7 +78,7 @@ tract_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "tract",
-    core = core_with_names(core),
+    core = core_with_display(core),
     data = ggseg.formats::ggseg_data_tract(
       centerlines = centerlines,
       meshes = meshes
@@ -97,7 +97,7 @@ cortical_atlas_fixture <- function(
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
     type = "cortical",
-    core = core_with_names(core),
+    core = core_with_display(core),
     data = ggseg.formats::ggseg_data_cortical(
       geom = geom,
       vertices = vertices
@@ -183,6 +183,12 @@ make_uniform_palette_atlas <- function(colour = "#000000") {
 # Subcortical atlas carrying the same `label` twice, the shape that used to
 # draw a region once per duplicate row. ggseg.formats warns about this at
 # construction, which is not what the ggseg3d tests are checking.
+# ggseg.formats forbids a duplicated core label at construction, so this
+# cannot be built through the constructor any more. The duplicate is injected
+# afterwards instead, which is a truer fixture for what these tests cover:
+# not an atlas the constructor would accept, but a malformed one -- hand-built,
+# legacy or third-party -- reaching the renderer, which must still refuse to
+# draw the same mesh twice.
 make_duplicate_label_atlas <- function() {
   triangle <- function(offset) {
     list(
@@ -195,18 +201,27 @@ make_duplicate_label_atlas <- function() {
     )
   }
 
-  labels <- c("Left-Caudate", "Right-Caudate", "Left-Caudate")
+  labels <- c("Left-Caudate", "Right-Caudate")
   meshes <- data.frame(label = labels, stringsAsFactors = FALSE)
-  meshes$mesh <- list(triangle(0), triangle(10), triangle(20))
+  meshes$mesh <- list(triangle(0), triangle(10))
 
-  suppressWarnings(subcortical_atlas_fixture(
+  atlas <- suppressWarnings(subcortical_atlas_fixture(
     core = data.frame(
       label = labels,
-      region = c("caudate", "caudate", "caudate"),
-      hemi = c("left", "right", "left"),
+      region = c("caudate", "caudate"),
+      hemi = c("left", "right"),
       stringsAsFactors = FALSE
     ),
     meshes = meshes,
     palette = c("Left-Caudate" = "#123456", "Right-Caudate" = "#654321")
   ))
+
+  duplicated_row <- atlas$core[atlas$core$label == "Left-Caudate", ]
+  atlas$core <- rbind(atlas$core, duplicated_row)
+  duplicated_mesh <- atlas$data$meshes[
+    atlas$data$meshes$label == "Left-Caudate",
+  ]
+  duplicated_mesh$mesh <- list(triangle(20))
+  atlas$data$meshes <- rbind(atlas$data$meshes, duplicated_mesh)
+  atlas
 }

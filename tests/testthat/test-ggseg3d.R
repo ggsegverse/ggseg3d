@@ -197,7 +197,7 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
     core = data.frame(
       label = "tract_a",
       region = "tract a",
-      hemi = "subcort",
+      hemi = NA_character_,
       stringsAsFactors = FALSE
     ),
     centerlines = cl_data,
@@ -226,7 +226,7 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
     core = data.frame(
       label = "Left-Caudate",
       region = "caudate",
-      hemi = "subcort",
+      hemi = NA_character_,
       stringsAsFactors = FALSE
     ),
     meshes = meshes_data,
@@ -265,7 +265,7 @@ test_that("prepare_brain_meshes uses orientation coloring for tracts", {
     core = data.frame(
       label = "tract_a",
       region = "tract a",
-      hemi = "subcort",
+      hemi = NA_character_,
       stringsAsFactors = FALSE
     ),
     centerlines = cl_data,
