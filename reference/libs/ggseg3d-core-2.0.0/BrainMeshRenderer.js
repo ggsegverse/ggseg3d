@@ -127,33 +127,44 @@
     addMesh(meshData) {
       const { vertices, faces, colors, colorMode, opacity, name, hoverText,
               edgeColor, edgeWidth, boundaryEdges, vertexLabels,
-              vertexTexts } = meshData;
+              vertexTexts, vertexAlphas } = meshData;
 
       let geometry;
       let material;
 
+      // htmlwidgets serialises a length-one R vector as a bare number.
+      const alphas = vertexAlphas === null || vertexAlphas === undefined
+        ? null
+        : (Array.isArray(vertexAlphas) ? vertexAlphas : [vertexAlphas]);
+
       if (colorMode === 'vertexcolor') {
-        geometry = this._createIndexedGeometry(vertices, faces, colors);
+        geometry = this._createIndexedGeometry(vertices, faces, colors, alphas);
       } else {
         geometry = this._createFaceColorGeometry(vertices, faces, colors);
       }
 
       geometry.computeVertexNormals();
 
+      // A per-vertex alpha channel makes the mesh transparent even at
+      // opacity 1. Transparent meshes are drawn front-faces-only and without
+      // depth writes: a closed shell rendered DoubleSide blends its own back
+      // faces against its front faces, so the alpha asked for reads far more
+      // opaque than it is, and three.js does not sort triangles within one
+      // mesh, so the result would also depend on buffer order.
+      const hasVertexAlpha = alphas !== null && alphas.length > 0;
+      const isTransparent = opacity < 1 || hasVertexAlpha;
+      const materialOptions = {
+        vertexColors: true,
+        side: isTransparent ? THREE.FrontSide : THREE.DoubleSide,
+        transparent: isTransparent,
+        depthWrite: !isTransparent,
+        opacity: opacity
+      };
+
       if (this.options.flatShading) {
-        material = new THREE.MeshBasicMaterial({
-          vertexColors: true,
-          side: THREE.DoubleSide,
-          transparent: opacity < 1,
-          opacity: opacity
-        });
+        material = new THREE.MeshBasicMaterial(materialOptions);
       } else {
-        material = new THREE.MeshPhongMaterial({
-          vertexColors: true,
-          side: THREE.DoubleSide,
-          transparent: opacity < 1,
-          opacity: opacity
-        });
+        material = new THREE.MeshPhongMaterial(materialOptions);
       }
 
       const mesh = new THREE.Mesh(geometry, material);
@@ -211,7 +222,7 @@
       this.meshes.push(lines);
     }
 
-    _createIndexedGeometry(vertices, faces, colors) {
+    _createIndexedGeometry(vertices, faces, colors, vertexAlphas) {
       const geometry = new THREE.BufferGeometry();
 
       const positions = new Float32Array(vertices.x.length * 3);
@@ -230,14 +241,22 @@
       }
       geometry.setIndex(new THREE.BufferAttribute(indices, 1));
 
-      const colorAttr = new Float32Array(vertices.x.length * 3);
+      // itemSize 4 is what switches three.js to USE_COLOR_ALPHA, where the
+      // vertex alpha multiplies the material opacity.
+      const hasAlpha = Array.isArray(vertexAlphas) && vertexAlphas.length > 0;
+      const itemSize = hasAlpha ? 4 : 3;
+      const colorAttr = new Float32Array(vertices.x.length * itemSize);
       for (let i = 0; i < colors.length; i++) {
         const color = new THREE.Color(colors[i]);
-        colorAttr[i * 3] = color.r;
-        colorAttr[i * 3 + 1] = color.g;
-        colorAttr[i * 3 + 2] = color.b;
+        colorAttr[i * itemSize] = color.r;
+        colorAttr[i * itemSize + 1] = color.g;
+        colorAttr[i * itemSize + 2] = color.b;
+        if (hasAlpha) {
+          const a = vertexAlphas[i];
+          colorAttr[i * itemSize + 3] = a === undefined || a === null ? 1 : a;
+        }
       }
-      geometry.setAttribute('color', new THREE.BufferAttribute(colorAttr, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colorAttr, itemSize));
 
       return geometry;
     }

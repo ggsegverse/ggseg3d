@@ -1,11 +1,16 @@
 # Render brain atlas with rgl
 
 Creates an rgl 3D scene from a brain atlas. Uses the same atlas
-preparation pipeline as \[ggseg3d()\] but outputs to rgl instead of
-htmlwidgets. The resulting scene can be piped into \[pan_camera()\],
-\[add_glassbrain()\], and \[set_background()\], then rendered with
-rayshader's \`render_highquality()\` or captured with
-\`rgl::snapshot3d()\`.
+preparation pipeline as
+[`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md)
+but outputs to rgl instead of htmlwidgets. The resulting scene can be
+piped into
+[`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md),
+[`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md),
+and
+[`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md),
+then rendered with rayshader's `render_highquality()` or captured with
+[`rgl::snapshot3d()`](https://dmurdoch.github.io/rgl/dev/reference/snapshot.html).
 
 ## Usage
 
@@ -36,8 +41,7 @@ ggsegray(
 
 - atlas:
 
-  A \`ggseg_atlas\` object containing 3D vertex mappings, or a string
-  naming an atlas function (deprecated).
+  A `ggseg_atlas` object carrying 3D geometry.
 
 - label_by:
 
@@ -53,100 +57,124 @@ ggsegray(
 
 - palette:
 
-  String. Vector of colour names or HEX colours. Can also be a named
-  numeric vector, with colours as names, and breakpoint for that colour
-  as the value
+  Character vector of colour names or hex colours. May instead be a
+  named numeric vector whose names are the colours and whose values are
+  the breakpoints those colours sit at.
 
 - na_colour:
 
-  String. Either name, hex of RGB for colour of NA in colour.
+  String. Colour drawn for regions with no value in `.data`, as a colour
+  name or a hex code.
 
 - na_alpha:
 
-  Numeric. A number between 0 and 1 to control transparency of
-  NA-regions.
+  Numeric between 0 and 1. Opacity of regions with no value in `.data`:
+  `1` (default) draws them opaque in `na_colour`, lower values fade
+  them. Cortical and cerebellar surfaces fade per vertex, subcortical
+  structures and tracts per mesh.
 
 - material:
 
-  Named list of rgl material properties passed to \[rgl::tmesh3d()\].
+  Named list of rgl material properties passed to
+  [`rgl::tmesh3d()`](https://dmurdoch.github.io/rgl/dev/reference/mesh3d.html).
   Controls how the mesh surface is shaded.
 
 - ...:
 
   Type-specific arguments passed to the atlas method. See section
-  \*\*Type-specific arguments\*\* below.
+  **Type-specific arguments** below.
 
 - label, text, colour:
 
-  \`r lifecycle::badge("deprecated")\` Use \`label_by\`, \`text_by\`,
-  and \`colour_by\` instead.
+  **\[deprecated\]** Use `label_by`, `text_by`, and `colour_by` instead.
 
 ## Value
 
-An object of class \`ggsegray\` (invisibly), which wraps the rgl device
-ID. Pipe into \[pan_camera()\], \[add_glassbrain()\], or
-\[set_background()\] to modify the scene.
+An object of class `ggsegray` (invisibly), which wraps the rgl device
+ID. Pipe into
+[`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md),
+[`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md),
+or
+[`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md)
+to modify the scene.
 
 ## Material properties
 
 Useful material list entries:
 
-- \`specular\`:
+- `specular`:
 
-  \`"black"\` (matte) or \`"white"\` (glossy).
+  `"black"` (matte) or `"white"` (glossy).
 
-- \`shininess\`:
+- `shininess`:
 
   Specular exponent. Higher = tighter highlights.
 
-- \`lit\`:
+- `lit`:
 
-  \`FALSE\` disables lighting.
+  `FALSE` disables lighting.
 
-- \`alpha\`:
+- `alpha`:
 
   Transparency, 0 (invisible) to 1 (opaque).
 
-- \`smooth\`:
+- `smooth`:
 
-  \`TRUE\` for Gouraud shading, \`FALSE\` for flat.
+  `TRUE` for Gouraud shading, `FALSE` for flat.
 
-See \[rgl::material3d()\] for the full list.
+See
+[`rgl::material3d()`](https://dmurdoch.github.io/rgl/dev/reference/material.html)
+for the full list.
 
 ## Type-specific arguments
 
-Cortical atlases (\`cortical_atlas\`):
+Cortical atlases (`cortical_atlas`):
 
-- \`surface\`:
+- `surface`:
 
-  Surface type: \`"LCBC"\` (default, alias for inflated),
-  \`"inflated"\`, \`"semi-inflated"\`, \`"white"\`, \`"pial"\`.
+  `"LCBC"` (default, an alias for `"inflated"`) or any surface
+  [`resolve_brain_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/resolve_brain_mesh.md)
+  accepts.
 
-- \`hemisphere\`:
+- `hemisphere`:
 
-  Character vector of hemispheres: \`"right"\`, \`"left"\`.
+  Character vector of hemispheres: `"left"`, `"right"`, or their
+  `"lh"`/`"rh"` spellings.
 
-- \`edge_by\`:
+- `edge_by`:
 
   Column name for region boundary edges.
 
-- \`brain_meshes\`:
+- `brain_meshes`:
 
   Custom brain mesh data.
 
-Tract atlases (\`tract_atlas\`):
+Cerebellar atlases (`cerebellar_atlas`):
 
-- \`tract_color\`:
+- `surface_opacity`:
 
-  \`"palette"\` (default) or \`"orientation"\` (direction-based RGB).
+  Opacity of the cerebellar surface mesh. Defaults to `0.3` when the
+  atlas carries deep nuclei, so they stay visible through the surface,
+  and `1` otherwise.
 
-- \`tube_radius\`:
+Tract atlases (`tract_atlas`):
 
-  Tube radius (numeric, default 5).
+- `tract_color`:
 
-- \`tube_segments\`:
+  `"palette"` (default) or `"orientation"` (direction-based RGB).
 
-  Tube segment count (integer, default 8).
+- `tube_radius`:
+
+  Tube radius (numeric, default `2`).
+
+- `tube_segments`:
+
+  Tube segment count (integer, default `10`).
+
+## See also
+
+Other brain plots:
+[`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md)
 
 ## Examples
 

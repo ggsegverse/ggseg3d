@@ -66,7 +66,7 @@ column that matches the atlas, then map a variable to `colour_by`. Add
 ``` r
 
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
@@ -161,7 +161,7 @@ regions within the same lobe:
 ``` r
 
 lobe_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.2, 0.4, 0.3, 0.5),
   lobe = c("frontal", "parietal", "insula", "parietal")
 )
@@ -187,7 +187,7 @@ regions with `na_alpha` and wrap everything in a glass brain:
 ``` r
 
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 
@@ -232,13 +232,13 @@ faint cortical outline.
 ### Mapping data to tracts
 
 Data mapping works the same way as cortical and subcortical atlases —
-the `region` column matches tract names:
+the `region` column matches the atlas’ tract abbreviations (`af`, `cst`,
+`cbd`, `uf`, …):
 
 ``` r
 
 tract_data <- tibble(
-  region = c("arcuate fasciculus", "corticospinal tract",
-             "cingulum bundle", "uncinate fasciculus"),
+  region = c("af", "cst", "cbd", "uf"),
   fa = c(0.45, 0.55, 0.40, 0.35)
 )
 
@@ -396,15 +396,16 @@ colour — useful for atlas illustrations or mask extraction:
 
 ``` r
 
-ggseg3d() |>
-  set_flat_shading()
+ggseg3d(hemisphere = "left") |>
+  set_flat_shading() |>
+  pan_camera("left lateral")
 ```
 
-![Both hemispheres with flat shading — uniform colour per region, no
+![A left hemisphere with flat shading — uniform colour per region, no
 highlights or shadows, colours exactly matching the atlas
 palette.](img/wt-flat-shading.png "Flat shading for exact colour reproduction")
 
-Both hemispheres with flat shading — uniform colour per region, no
+A left hemisphere with flat shading — uniform colour per region, no
 highlights or shadows, colours exactly matching the atlas palette.
 
 ## Orthographic projection
@@ -415,15 +416,16 @@ scale regardless of distance from the camera:
 
 ``` r
 
-ggseg3d() |>
-  set_orthographic()
+ggseg3d(hemisphere = "left") |>
+  set_orthographic() |>
+  pan_camera("left lateral")
 ```
 
-![Both hemispheres in orthographic projection — regions appear the same
+![A left hemisphere in orthographic projection — regions appear the same
 size whether they face the camera or sit behind the
 brain.](img/wt-orthographic.png "Orthographic projection removes perspective distortion")
 
-Both hemispheres in orthographic projection — regions appear the same
+A left hemisphere in orthographic projection — regions appear the same
 size whether they face the camera or sit behind the brain.
 
 ## Same atlas for 2D and 3D

@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,9 +48,37 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="ggseg3d-development-version">ggseg3d (development version)<a class="anchor" aria-label="anchor" href="#ggseg3d-development-version"></a></h2>
-<ul><li><p>Test fixtures now resolve region names dynamically via <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html" class="external-link">ggseg.formats::atlas_regions()</a></code> instead of hard-coding schema-specific strings, so <code>ggseg3d</code> checks cleanly against both the released and development <code>ggseg.formats</code> atlas schema. Geometry snapshots skip on CRAN.</p></li>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li><p>A duplicated <code>label</code> in an atlas now draws its region once, with a warning naming the duplicates, instead of once per duplicate row at double the vertex count and double darkness under transparency.</p></li>
+<li><p>A <code>colour_by</code>, <code>label_by</code> or <code>text_by</code> column that is not in the atlas data now raises one error naming the typo and the columns available. <code>colour_by</code> used to fail inside tibble’s recycling code, <code>label_by</code> fell back to <code>label</code>, and <code>text_by</code> silently did nothing.</p></li>
+<li><p><code><a href="../reference/add_glassbrain.html">add_glassbrain()</a></code> accepts the <code>"lh"</code>/<code>"rh"</code> hemisphere spellings the rest of the package takes, and errors on an unrecognised one instead of silently returning the plot unchanged.</p></li>
+<li><p><code>surface = "midthickness"</code> now reaches <code>ggseg.meshes</code>; the surface shipped but no ggseg3d function would accept the name.</p></li>
+<li><p>Data with a single distinct value no longer colours every region as if it had data: regions with no value keep <code>na_colour</code>, and the legend shows a single swatch instead of disappearing.</p></li>
+<li><p><code>na_alpha</code> now does what it documents. Regions with no value in <code>.data</code> fade per vertex on cortical and cerebellar surfaces and per mesh on subcortical structures and tracts. It was accepted and ignored in every previous release. Values outside 0-1 are now an error.</p></li>
+<li><p>Transparent meshes are drawn front-faces-only and without depth writes, so a requested opacity renders as asked instead of blending the mesh against its own back faces.</p></li>
+<li><p>Mesh face indices now follow the <code>face_index_base</code> attribute <code>ggseg.meshes</code> publishes, falling back to the smallest index used. The previous heuristic inspected only the <code>i</code> column, so a 0-based mesh that put no vertex 0 there would have reached the renderer without being shifted.</p></li>
+<li><p>A numeric <code>colour_by</code> column matching no atlas region no longer fails with <code>'from' must be a finite number</code>.</p></li>
+<li><p>Atlases whose colour lookup table gives every region the same colour (often black) no longer render as a single indistinguishable brain. Region colours now come from <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_plot_palette.html" class="external-link">ggseg.formats::atlas_plot_palette()</a></code>, which substitutes distinguishable colours and warns that the atlas colour table is what needs fixing. Previously <code><a href="../reference/ggseg3d.html">ggseg3d()</a></code> read <code>atlas$palette</code> directly and drew such atlases faithfully as one solid silhouette, while the same atlas plotted correctly in 2D through <code>ggseg</code>.</p></li>
 <li><p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> on a <code>ggsegray</code> object now returns the object invisibly, as print methods are expected to. It still renders the scene; only the return value changed, and piping was never supported off <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p></li>
 </ul></div>
+<div class="section level3">
+<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<ul><li><p><code>surface</code> is documented once, in <code><a href="../reference/resolve_brain_mesh.html">resolve_brain_mesh()</a></code>, instead of four mutually inconsistent lists; <code>sphere</code>, <code>smoothwm</code> and <code>orig</code> are now documented where a <code><a href="../reference/ggseg3d.html">ggseg3d()</a></code> user looks.</p></li>
+<li><p>The documented <code>tube_radius</code> and <code>tube_segments</code> defaults were wrong in both places they appeared (5 and 8); they are 2 and 10.</p></li>
+<li><p><code>surface_opacity</code> now appears in the “Type-specific arguments” section, and the nine widget modifiers cross-reference each other.</p></li>
+<li><p>Vignette examples passed the <code>names</code>-column spelling (<code>"superior parietal"</code>) as a <code>region</code> value, and full tract names for tracula; neither joined. Figures regenerated.</p></li>
+<li><p>Roxygen markdown is now enabled, so cross-references and formatting in the help pages render as intended. Previously <code><a href="../reference/ggsegray.html">?ggsegray</a></code> and <code><a href="../reference/ggseg3d.html">?ggseg3d</a></code> showed literal text such as <code>[pan_camera()]</code> instead of a link, and the deprecation badge on <code>label</code>, <code>text</code> and <code>colour</code> never rendered.</p></li>
+<li><p>The error raised for a non-atlas input now points at <code>ggseg.extra::create_cortical_from_labels()</code>; the function it named before does not exist.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-development-version">Internal<a class="anchor" aria-label="anchor" href="#internal-development-version"></a></h3>
+<ul><li><p>All atlas reads now go through the <code>ggseg.formats</code> accessors (<code>atlas_vertices()</code>, <code>atlas_meshes()</code>, <code>atlas_centerlines()</code>, <code>atlas_plot_palette()</code>) instead of reaching into <code>atlas$core</code>, <code>atlas$palette</code> and <code>atlas$data</code>, except one presence check that reads <code>atlas$data</code> because the accessors abort rather than return <code>NULL</code>. This requires a newer <code>ggseg.formats</code>; <code>DESCRIPTION</code> carries the floor.</p></li>
+<li><p>Atlas objects predating the unified <code>ggseg_atlas</code> layout, which stored <code>vertices</code> or <code>meshes</code> at the top level instead of under <code>data</code>, are no longer accepted. They are rejected up front with the usual “must be a ggseg_atlas object with 3D data” error rather than failing deeper in rendering. No released atlas package ships that layout.</p></li>
+<li><p><code>png</code> and <code>rayshader</code> moved from <code>Suggests</code> to <code>Config/Needs/website</code>; they are used only by the pkgdown-only articles, which are not part of the built package.</p></li>
+<li><p>Test fixtures now resolve region names dynamically via <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html" class="external-link">ggseg.formats::atlas_regions()</a></code> instead of hard-coding schema-specific strings, so <code>ggseg3d</code> checks cleanly against both the released and development <code>ggseg.formats</code> atlas schema. Geometry snapshots skip on CRAN.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.2" id="ggseg3d-212">ggseg3d 2.1.2<a class="anchor" aria-label="anchor" href="#ggseg3d-212"></a></h2><p class="text-muted">CRAN release: 2026-07-02</p>
 <ul><li>decouples tests from ggseg.formats internal workings.</li>

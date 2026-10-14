@@ -124,7 +124,11 @@
     }
 
     _createDiscrete(config) {
-      const { title, labels, colors } = config;
+      const { title } = config;
+      // htmlwidgets serialises a length-one R vector as a bare string, which
+      // would otherwise be walked character by character below.
+      const labels = Array.isArray(config.labels) ? config.labels : [config.labels];
+      const colors = Array.isArray(config.colors) ? config.colors : [config.colors];
 
       this.element = document.createElement('div');
       this.element.className = 'ggseg3d-legend';

@@ -37,7 +37,7 @@ the variable you care about:
 library(dplyr)
 
 some_data <- tibble(
-  region = c("precentral", "postcentral", "insula", "superior parietal"),
+  region = c("precentral", "postcentral", "insula", "superiorparietal"),
   p = c(0.01, 0.04, 0.2, 0.5)
 )
 
@@ -45,12 +45,12 @@ ggseg3d(.data = some_data, atlas = dk(), colour_by = "p", text_by = "p") |>
   pan_camera("right lateral")
 ```
 
-![Right hemisphere with four cortical regions coloured on a blue-to-red
+![Right hemisphere with four cortical regions coloured on a viridis
 scale by p-value; unmatched regions shown in
 grey.](img/intro-plot-data.png "Four regions mapped by p-value")
 
-Right hemisphere with four cortical regions coloured on a blue-to-red
-scale by p-value; unmatched regions shown in grey.
+Right hemisphere with four cortical regions coloured on a viridis scale
+by p-value; unmatched regions shown in grey.
 
 `text_by = "p"` adds the p-value to the hover tooltip so you can inspect
 individual regions without a separate table.
@@ -65,7 +65,7 @@ wraps them in a translucent cortex for anatomical context:
 ``` r
 
 subcort_data <- tibble(
-  region = c("Thalamus", "Caudate", "Hippocampus"),
+  region = c("thalamus", "caudate", "hippocampus"),
   p = c(0.2, 0.5, 0.8)
 )
 

@@ -1,7 +1,7 @@
 # Prepare brain meshes and legend data
 
 S3 generic that dispatches to atlas-type-specific preparation methods.
-Builds mesh data structures and legend data from a \`ggseg_atlas\`.
+Builds mesh data structures and legend data from a `ggseg_atlas`.
 
 ## Usage
 
@@ -73,7 +73,7 @@ prepare_brain_meshes(atlas, ...)
 
 - atlas:
 
-  A \`ggseg_atlas\` object
+  A `ggseg_atlas` object
 
 - .data:
 
@@ -82,12 +82,15 @@ prepare_brain_meshes(atlas, ...)
 
 - surface:
 
-  Surface type: \`"inflated"\` (default), \`"semi-inflated"\`,
-  \`"white"\`, \`"pial"\`. Use \`"LCBC"\` as alias for \`"inflated"\`.
+  Surface type: `"inflated"`, `"semi-inflated"`, `"white"`, `"pial"`,
+  `"midthickness"`, `"sphere"`, `"smoothwm"` or `"orig"`.
+  [`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md)
+  additionally accepts `"LCBC"`, an alias for `"inflated"`.
 
 - hemisphere:
 
-  Character vector of hemispheres: \`"right"\`, \`"left"\`.
+  Character vector of hemispheres: `"left"`, `"right"`. `"lh"` and
+  `"rh"` are accepted as well.
 
 - label_by:
 
@@ -103,18 +106,21 @@ prepare_brain_meshes(atlas, ...)
 
 - palette:
 
-  String. Vector of colour names or HEX colours. Can also be a named
-  numeric vector, with colours as names, and breakpoint for that colour
-  as the value
+  Character vector of colour names or hex colours. May instead be a
+  named numeric vector whose names are the colours and whose values are
+  the breakpoints those colours sit at.
 
 - na_colour:
 
-  String. Either name, hex of RGB for colour of NA in colour.
+  String. Colour drawn for regions with no value in `.data`, as a colour
+  name or a hex code.
 
 - na_alpha:
 
-  Numeric. A number between 0 and 1 to control transparency of
-  NA-regions.
+  Numeric between 0 and 1. Opacity of regions with no value in `.data`:
+  `1` (default) draws them opaque in `na_colour`, lower values fade
+  them. Cortical and cerebellar surfaces fade per vertex, subcortical
+  structures and tracts per mesh.
 
 - edge_by:
 
@@ -123,7 +129,8 @@ prepare_brain_meshes(atlas, ...)
 - brain_meshes:
 
   Optional user-supplied mesh data. Passed through to
-  \[ggseg.formats::get_brain_mesh()\] for format details.
+  [`ggseg.formats::get_brain_mesh()`](https://ggsegverse.github.io/ggseg.formats/reference/get_brain_mesh.html)
+  for format details.
 
 - ...:
 
@@ -131,22 +138,22 @@ prepare_brain_meshes(atlas, ...)
 
 - surface_opacity:
 
-  Numeric opacity for the cerebellar surface mesh. Defaults to \`0.3\`
-  when deep nuclei are present and \`1\` otherwise.
+  Numeric opacity for the cerebellar surface mesh. Defaults to `0.3`
+  when deep nuclei are present and `1` otherwise.
 
 - tract_color:
 
-  \`"palette"\` (default) or \`"orientation"\` (direction-based RGB
+  `"palette"` (default) or `"orientation"` (direction-based RGB
   colouring)
 
 - tube_radius:
 
-  Numeric tube radius (default 5 when \`NULL\`).
+  Numeric tube radius.
 
 - tube_segments:
 
-  Integer tube segment count (default 8 when \`NULL\`).
+  Integer tube segment count.
 
 ## Value
 
-List with \`meshes\` (list of mesh entries) and \`legend_data\`
+List with `meshes` (list of mesh entries) and `legend_data`

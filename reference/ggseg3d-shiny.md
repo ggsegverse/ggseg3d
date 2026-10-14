@@ -38,9 +38,8 @@ renderGgseg3d(expr, env = parent.frame(), quoted = FALSE)
 
 ## Value
 
-\`ggseg3dOutput\` returns an HTML widget output element for use in a
-Shiny UI. \`renderGgseg3d\` returns a render function for use in a Shiny
-server.
+`ggseg3dOutput` returns an HTML widget output element for use in a Shiny
+UI. `renderGgseg3d` returns a render function for use in a Shiny server.
 
 ## Examples
 
