@@ -1,4 +1,4 @@
-# ggseg3d 2.1.3
+# ggseg3d (development version)
 
 ## Bug fixes
 
