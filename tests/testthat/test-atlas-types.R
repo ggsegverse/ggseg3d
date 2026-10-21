@@ -143,8 +143,18 @@ test_that("ggseg3d() refuses an atlas with a duplicated label", {
 
   expect_error(
     ggseg3d(atlas = atlas),
-    "3D data"
+    class = "ggseg.formats_invalid_atlas"
   )
+})
+
+# The structural complaint has to come before the 3D one. This atlas carries
+# meshes; what is wrong with it is its core, and reporting "no 3D data" sends
+# the reader looking at geometry that is in fact there.
+test_that("ggseg3d() says what is actually wrong with a stale atlas", {
+  atlas <- make_duplicate_label_atlas()
+
+  expect_error(ggseg3d(atlas = atlas), "duplicat")
+  expect_true(any(atlas_3d_components(atlas)))
 })
 
 test_that("unique atlas labels pass through untouched", {
