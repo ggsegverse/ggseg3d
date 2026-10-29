@@ -1,0 +1,13 @@
+on:
+  pull_request:
+  workflow_dispatch:
+
+name: ecosystem-check.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  ecosystem-check:
+    uses: ggsegverse/.github/.github/workflows/ecosystem-check.yaml@feat/reusable-ecosystem-check
+    secrets: inherit
