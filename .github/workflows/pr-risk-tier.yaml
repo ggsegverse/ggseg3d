@@ -1,0 +1,18 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+name: pr-risk-tier.yaml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-risk-tier:
+    uses: ggsegverse/.github/.github/workflows/pr-risk-tier.yaml@main
+    secrets: inherit
+    with:
+      # The exported 3D surface and the htmlwidget contract. The widget's JS payload shape is consumed by inst/htmlwidgets, and atlas packages assert on what ggseg3d() returns.
+      extra-t2-paths: |
+        R/ggseg3d.R R/brain-mesh.R R/widget.R R/widget-output.R R/atlas-types.R
