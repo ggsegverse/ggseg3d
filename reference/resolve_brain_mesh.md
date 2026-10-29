@@ -3,7 +3,7 @@
 Resolves and prepares a brain surface mesh for rendering. Delegates to
 [`ggseg.formats::get_brain_mesh()`](https://ggsegverse.github.io/ggseg.formats/reference/get_brain_mesh.html)
 for inflated surfaces and to
-[`ggseg.meshes::get_cortical_mesh()`](https://ggsegverse.github.io/ggseg.meshes/reference/get_cortical_mesh.html)
+[`ggseg.meshes::get_cortical_mesh()`](https://rdrr.io/pkg/ggseg.meshes/man/get_cortical_mesh.html)
 for pial, white, semi-inflated, and other surfaces. Returned meshes use
 the shared anatomical axis convention (`x` = left-right, `y` =
 anterior-posterior, `z` = superior-inferior) with `lh` positioned at
