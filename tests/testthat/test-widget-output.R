@@ -25,22 +25,6 @@ test_that("renderGgseg3d with quoted expression", {
   expect_type(render_fn, "closure")
 })
 
-test_that("updateGgseg3dCamera builds correct message type", {
-  mock_session <- list(
-    sendCustomMessage = function(type, message) {
-      list(type = type, message = message)
-    }
-  )
-
-  result <- mock_session$sendCustomMessage(
-    paste0("ggseg3d-camera-", "brain_plot"),
-    "left lateral"
-  )
-
-  expect_identical(result$type, "ggseg3d-camera-brain_plot")
-  expect_identical(result$message, "left lateral")
-})
-
 test_that("updateGgseg3dBackground converts named color to hex", {
   converted <- col2hex("red")
   expect_identical(converted, "#FF0000")
