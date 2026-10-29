@@ -94,6 +94,11 @@ ggseg3d <- function(
     atlas
   }
 
+  # Asserted before the 3D question is asked: an atlas built against an older
+  # `core` schema is a structural problem, and blaming its 3D data sends the
+  # reader looking at geometry that is in fact there.
+  ggseg.formats::assert_ggseg_atlas(atlas)
+
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
       "Atlas must be a {.cls ggseg_atlas} object with 3D data.",
