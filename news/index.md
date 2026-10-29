@@ -4,6 +4,13 @@
 
 ### Bug fixes
 
+- [`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md)
+  says why an atlas it rejects is invalid. An atlas carrying meshes but
+  built against an older `core` schema failed with “must be a
+  `<ggseg_atlas>` object with 3D data”, which sends the reader looking
+  at geometry that is in fact there; the structural complaint is now
+  reported first.
+
 - A duplicated `label` in an atlas now draws its region once, with a
   warning naming the duplicates, instead of once per duplicate row at
   double the vertex count and double darkness under transparency.
