@@ -1,5 +1,15 @@
 # ggseg3d (development version)
 
+## Improvements
+
+- A cerebellar atlas is drawn on the surface it says its vertex indices
+  address, read with `ggseg.formats::atlas_surface()`, rather than always on
+  SUIT. An atlas naming a surface ggseg3d cannot resolve now errors instead of
+  being drawn on SUIT, which would have misplaced every region while still
+  producing a plot. `prepare_brain_meshes()` also takes `brain_meshes` for a
+  cerebellar atlas, matching the cortical path, so a surface distributed
+  outside the ggsegverse can be supplied directly.
+
 ## Bug fixes
 
 - `ggseg3d()` says why an atlas it rejects is invalid. An atlas carrying

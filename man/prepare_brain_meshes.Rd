@@ -46,6 +46,7 @@
   na_colour = "darkgrey",
   na_alpha = 1,
   surface_opacity = NULL,
+  brain_meshes = NULL,
   ...
 )
 

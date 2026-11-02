@@ -665,3 +665,49 @@ test_that("resolve_brain_mesh reaches the midthickness surface", {
   expect_true(all(c("vertices", "faces") %in% names(mesh)))
   expect_gt(nrow(mesh$vertices), 0)
 })
+
+
+describe("resolve_cerebellar_mesh()", {
+  it("resolves the surface the atlas names", {
+    mesh <- resolve_cerebellar_mesh("suit")
+    expect_named(mesh, c("vertices", "faces"))
+  })
+
+  it("refuses a surface it cannot resolve rather than substituting SUIT", {
+    # Substituting would misplace every region while still drawing a plot.
+    expect_error(
+      resolve_cerebellar_mesh("hippunfold"),
+      "not available"
+    )
+  })
+
+  it("prefers a user-supplied mesh, looked up by surface name", {
+    custom <- list(
+      vertices = data.frame(x = 1:3, y = 1:3, z = 0),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+    expect_identical(
+      resolve_cerebellar_mesh("hippunfold", list(hippunfold = custom)),
+      custom
+    )
+  })
+
+  it("falls back to a mesh supplied under the name cerebellum", {
+    custom <- list(
+      vertices = data.frame(x = 1:3, y = 1:3, z = 0),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+    expect_identical(
+      resolve_cerebellar_mesh("suit", list(cerebellum = custom)),
+      custom
+    )
+  })
+
+  it("errors informatively when the bundled mesh is missing", {
+    local_mocked_bindings(
+      get_cerebellar_mesh = function(...) NULL,
+      .package = "ggseg.formats"
+    )
+    expect_error(resolve_cerebellar_mesh("suit"), "is not available")
+  })
+})

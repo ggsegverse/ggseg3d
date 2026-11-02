@@ -238,6 +238,7 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   surface_opacity = NULL,
+  brain_meshes = NULL,
   ...
 ) {
   has_deep <- has_atlas_meshes(atlas)
@@ -259,7 +260,9 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     text_by = text_by,
     label_by = label_by,
     opacity = surface_opacity,
-    na_alpha = na_alpha
+    na_alpha = na_alpha,
+    surface = ggseg.formats::atlas_surface(atlas),
+    brain_meshes = brain_meshes
   )
 
   if (has_deep) {

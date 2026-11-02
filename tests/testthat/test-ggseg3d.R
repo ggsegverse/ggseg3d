@@ -443,7 +443,7 @@ test_that("build_cerebellar_meshes errors when mesh unavailable", {
   )
   expect_error(
     build_cerebellar_meshes(data.frame(), "darkgrey"),
-    "SUIT cerebellar mesh"
+    "Cerebellar surface .* is not available"
   )
 })
 

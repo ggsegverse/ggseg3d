@@ -433,20 +433,48 @@ build_cortical_meshes <- function(
 #' @inheritParams apply_colours_and_legend
 #' @keywords internal
 #' @noRd
+#' Resolve the surface a flatmap atlas's vertex indices address
+#'
+#' The surface is named by the atlas rather than assumed, so an atlas that
+#' unfolds something other than SUIT is drawn on its own surface or fails
+#' saying so -- never silently drawn on SUIT, which would misplace every
+#' region while still producing a plot.
+#'
+#' A user-supplied `brain_meshes` is honoured first, mirroring the cortical
+#' path, and is looked up by surface name and then by the mesh's own name.
+#' @noRd
+resolve_cerebellar_mesh <- function(surface, brain_meshes = NULL) {
+  if (!is.null(brain_meshes)) {
+    supplied <- brain_meshes[[surface]] %||% brain_meshes[["cerebellum"]]
+    if (!is.null(supplied)) {
+      return(supplied)
+    }
+  }
+
+  mesh <- ggseg.formats::get_cerebellar_mesh(surface)
+
+  if (is.null(mesh)) {
+    cli::cli_abort(c(
+      "Cerebellar surface {.val {surface}} is not available.",
+      "i" = "Pass the mesh through {.arg brain_meshes} to draw this atlas."
+    ))
+  }
+
+  mesh
+}
+
+
 build_cerebellar_meshes <- function(
   atlas_data,
   na_colour,
   text_by = NULL,
   label_by = "region",
   opacity = 1,
-  na_alpha = 1
+  na_alpha = 1,
+  surface = "suit",
+  brain_meshes = NULL
 ) {
-  mesh <- ggseg.formats::get_cerebellar_mesh()
-
-  if (is.null(mesh)) {
-    cli::cli_abort("SUIT cerebellar mesh not available.")
-  }
-
+  mesh <- resolve_cerebellar_mesh(surface, brain_meshes)
   mesh <- as_one_based_mesh(mesh)
 
   n_vertices <- nrow(mesh$vertices)
