@@ -173,6 +173,44 @@ normalize_cortical_mesh <- function(mesh, hemisphere, rotate_axes) {
 }
 
 
+#' Warn when an atlas's vertex indices do not fit the mesh it is drawn on
+#'
+#' Vertex indices address one specific vertex space. An atlas built against a
+#' denser surface than the one being rendered -- fsaverage7 indices on an
+#' fsaverage5 mesh, say -- has most of its indices fall outside the mesh, and
+#' `map_vertex_values()` drops those silently. What is left is not a partial
+#' drawing of the atlas but the wrong vertices entirely, since the same index
+#' means a different place in each space.
+#'
+#' This warns rather than aborts because the atlas's 2D geometry is unaffected
+#' and still correct: only the 3D rendering is wrong, so a user plotting in 2D
+#' should not be stopped.
+#' @noRd
+warn_vertex_space_mismatch <- function(atlas_data, n_vertices, surface) {
+  idx <- unlist(atlas_data$vertices, use.names = FALSE)
+  if (length(idx) == 0) {
+    return(invisible(NULL))
+  }
+
+  outside <- sum(idx + 1L > n_vertices | idx < 0L)
+  if (outside == 0) {
+    return(invisible(NULL))
+  }
+
+  pct <- round(100 * outside / length(idx), 1) # nolint: object_usage_linter
+  cli::cli_warn(c(
+    "Atlas vertices do not fit the {.val {surface}} mesh.",
+    "x" = "{outside} of {length(idx)} ({pct}%) fall outside its
+           {n_vertices} vertices and are not drawn.",
+    "i" = "The atlas was built against a different surface, so the indices
+           that do fit point at the wrong places.",
+    "i" = "The 2D geometry is unaffected; this concerns 3D rendering only."
+  ))
+
+  invisible(NULL)
+}
+
+
 #' Scatter one value per atlas row onto the mesh vertices it covers
 #'
 #' Shared core of the `vertices_to_*()` helpers: every vertex of row `i`'s
@@ -385,6 +423,7 @@ build_cortical_meshes <- function(
     }
 
     n_vertices <- nrow(mesh$vertices)
+    warn_vertex_space_mismatch(hemi_data, n_vertices, surface)
     vertex_colors <- vertices_to_colors(hemi_data, n_vertices, na_colour)
     vertex_labels <- vertices_to_labels(hemi_data, n_vertices, na_label = "")
     vertex_alphas <- vertices_to_alphas(hemi_data, n_vertices, na_alpha)
@@ -450,6 +489,7 @@ build_cerebellar_meshes <- function(
   mesh <- as_one_based_mesh(mesh)
 
   n_vertices <- nrow(mesh$vertices)
+  warn_vertex_space_mismatch(atlas_data, n_vertices, "suit")
   vertex_colors <- vertices_to_colors(atlas_data, n_vertices, na_colour)
   vertex_labels <- vertices_to_labels(
     atlas_data,
