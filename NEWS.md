@@ -9,7 +9,8 @@
   many fall outside, and says the 2D geometry is unaffected -- it is, so a
   user plotting in 2D is told this does not concern them. Three shipped
   atlases turn out to be affected: `ggsegAal-lemaitreh`'s cortical atlases
-  carry fsaverage7 indices and lose 93.8% of them on the fsaverage5 mesh.
+  index into the full fsaverage surface, 163,842 vertices a hemisphere, and
+  lose 93.8% of them on the fsaverage5 mesh everything else is built on.
 
 ## Bug fixes
 
