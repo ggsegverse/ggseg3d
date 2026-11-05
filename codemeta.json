@@ -8,13 +8,13 @@
   "codeRepository": "https://github.com/ggsegverse/ggseg3d",
   "issueTracker": "https://github.com/ggsegverse/ggseg3d/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "2.1.2.9005",
+  "version": "2.1.2.9006",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.6.1 (2026-06-24)",
+  "runtimePlatform": "R version 4.6.2 (2026-10-29)",
   "provider": {
     "@id": "https://cran.r-project.org",
     "@type": "Organization",
@@ -279,7 +279,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "1630.325KB",
+  "fileSize": "1633.86KB",
   "citation": [
     {
       "@type": "CreativeWork",
