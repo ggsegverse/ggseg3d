@@ -7,8 +7,8 @@
 \description{
 Plots statistics on interactive 3D brain meshes, rendered with Three.js
 through htmlwidgets. Atlases are \code{ggseg_atlas} objects from
-\code{ggseg.formats}; \code{dk}, \code{aseg} and \code{tracula} are re-exported here for
-convenience.
+\code{ggseg.formats}; \code{dk}, \code{aseg}, \code{tracula} and the read-only atlas
+accessors are re-exported here for convenience.
 }
 \seealso{
 Useful links:
