@@ -665,3 +665,59 @@ test_that("resolve_brain_mesh reaches the midthickness surface", {
   expect_true(all(c("vertices", "faces") %in% names(mesh)))
   expect_gt(nrow(mesh$vertices), 0)
 })
+
+
+describe("warn_vertex_space_mismatch()", {
+  atlas_rows <- function(idx) {
+    d <- data.frame(label = "a", stringsAsFactors = FALSE)
+    d$vertices <- list(idx)
+    d
+  }
+
+  it("says nothing when every index fits the mesh", {
+    expect_no_warning(
+      warn_vertex_space_mismatch(atlas_rows(0:99), 100, "inflated")
+    )
+  })
+
+  it("warns when indices address a denser surface than the mesh", {
+    # The damage this catches: an atlas built on fsaverage7 and drawn on
+    # fsaverage5 keeps only the indices below the mesh size, and those point
+    # at different anatomy in the two spaces.
+    expect_warning(
+      warn_vertex_space_mismatch(atlas_rows(0:999), 100, "inflated"),
+      "do not fit"
+    )
+  })
+
+  it("reports how many fall outside, not just that some do", {
+    expect_warning(
+      warn_vertex_space_mismatch(atlas_rows(0:199), 100, "inflated"),
+      "100 of 200"
+    )
+  })
+
+  it("says the 2D geometry is unaffected, because it is", {
+    expect_warning(
+      warn_vertex_space_mismatch(atlas_rows(0:199), 100, "inflated"),
+      "2D geometry is unaffected"
+    )
+  })
+
+  it("warns on a negative index, which no mesh has", {
+    expect_warning(
+      warn_vertex_space_mismatch(atlas_rows(-5:5), 100, "inflated"),
+      "do not fit"
+    )
+  })
+
+  it("says nothing for an atlas carrying no vertices", {
+    d <- data.frame(label = character(0), stringsAsFactors = FALSE)
+    d$vertices <- list()
+    expect_no_warning(warn_vertex_space_mismatch(d, 100, "inflated"))
+  })
+
+  it("stays silent for a correctly built atlas", {
+    expect_no_warning(invisible(prepare_brain_meshes(ggseg.formats::dk())))
+  })
+})

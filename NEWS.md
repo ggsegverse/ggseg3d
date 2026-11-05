@@ -2,6 +2,18 @@
 
 ## Bug fixes
 
+- An atlas whose vertex indices do not fit the mesh it is being drawn on now
+  warns instead of rendering silently wrong. Indices address one specific
+  vertex space, so an atlas built against a denser surface has most of them
+  dropped and the rest pointing at the wrong places. The warning names how
+  many fall outside, and says the 2D geometry is unaffected -- it is, so a
+  user plotting in 2D is told this does not concern them. Three shipped
+  atlases turn out to be affected: `ggsegAal-lemaitreh`'s cortical atlases
+  index into the full fsaverage surface, 163,842 vertices a hemisphere, and
+  lose 93.8% of them on the fsaverage5 mesh everything else is built on.
+
+## Bug fixes
+
 - `ggseg3d()` says why an atlas it rejects is invalid. An atlas carrying
   meshes but built against an older `core` schema failed with "must be a
   `<ggseg_atlas>` object with 3D data", which sends the reader looking at
