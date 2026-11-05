@@ -27,7 +27,7 @@ Depends:
 Imports:
     cli,
     dplyr,
-    ggseg.formats (>= 0.0.4.9010),
+    ggseg.formats (>= 0.0.4.9015),
     htmlwidgets,
     knitr,
     lifecycle,
