@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,10 @@
 <h2 class="pkg-version" data-toc-text="development version" id="ggseg3d-development-version">ggseg3d (development version)<a class="anchor" aria-label="anchor" href="#ggseg3d-development-version"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>An atlas whose vertex indices do not fit the mesh it is being drawn on now warns instead of rendering silently wrong. Indices address one specific vertex space, so an atlas built against a denser surface has most of them dropped and the rest pointing at the wrong places. The warning names how many fall outside, and says the 2D geometry is unaffected – it is, so a user plotting in 2D is told this does not concern them. Three shipped atlases turn out to be affected: <code>ggsegAal-lemaitreh</code>’s cortical atlases index into the full fsaverage surface, 163,842 vertices a hemisphere, and lose 93.8% of them on the fsaverage5 mesh everything else is built on.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version-1"></a></h3>
 <ul><li><p><code><a href="../reference/ggseg3d.html">ggseg3d()</a></code> says why an atlas it rejects is invalid. An atlas carrying meshes but built against an older <code>core</code> schema failed with “must be a <code>&lt;ggseg_atlas&gt;</code> object with 3D data”, which sends the reader looking at geometry that is in fact there; the structural complaint is now reported first.</p></li>
 <li><p>A duplicated <code>label</code> in an atlas now draws its region once, with a warning naming the duplicates, instead of once per duplicate row at double the vertex count and double darkness under transparency.</p></li>
 <li><p>A <code>colour_by</code>, <code>label_by</code> or <code>text_by</code> column that is not in the atlas data now raises one error naming the typo and the columns available. <code>colour_by</code> used to fail inside tibble’s recycling code, <code>label_by</code> fell back to <code>label</code>, and <code>text_by</code> silently did nothing.</p></li>
