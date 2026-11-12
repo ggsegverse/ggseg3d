@@ -1,5 +1,13 @@
 # ggseg3d (development version)
 
+## New features
+
+- The read-only atlas accessors from `ggseg.formats` are re-exported, so
+  `atlas_palette()`, `atlas_regions()`, `atlas_meshes()` and their siblings
+  work after `library(ggseg3d)` and an atlas package, without attaching
+  `ggseg.formats`. Requires `ggseg.formats (>= 0.0.4.9015)`
+  (ggsegverse/ggseg#183).
+
 ## Bug fixes
 
 - An atlas whose vertex indices do not fit the mesh it is drawn on warns
