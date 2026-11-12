@@ -2,8 +2,8 @@
 
 Plots statistics on interactive 3D brain meshes, rendered with Three.js
 through htmlwidgets. Atlases are `ggseg_atlas` objects from
-`ggseg.formats`; `dk`, `aseg` and `tracula` are re-exported here for
-convenience.
+`ggseg.formats`; `dk`, `aseg`, `tracula` and the read-only atlas
+accessors are re-exported here for convenience.
 
 ## See also
 

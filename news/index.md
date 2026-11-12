@@ -2,6 +2,17 @@
 
 ## ggseg3d (development version)
 
+### New features
+
+- The read-only atlas accessors from `ggseg.formats` are re-exported, so
+  [`atlas_palette()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_palette.html),
+  [`atlas_regions()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html),
+  [`atlas_meshes()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_meshes.html)
+  and their siblings work after
+  [`library(ggseg3d)`](https://github.com/ggsegverse/ggseg3d) and an
+  atlas package, without attaching `ggseg.formats`. Requires
+  `ggseg.formats (>= 0.0.4.9015)` (ggsegverse/ggseg#183).
+
 ### Bug fixes
 
 - An atlas whose vertex indices do not fit the mesh it is being drawn on
@@ -113,12 +124,14 @@
 ### Internal
 
 - All atlas reads now go through the `ggseg.formats` accessors
-  (`atlas_vertices()`, `atlas_meshes()`, `atlas_centerlines()`,
-  `atlas_plot_palette()`) instead of reaching into `atlas$core`,
-  `atlas$palette` and `atlas$data`, except one presence check that reads
-  `atlas$data` because the accessors abort rather than return `NULL`.
-  This requires a newer `ggseg.formats`; `DESCRIPTION` carries the
-  floor.
+  ([`atlas_vertices()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_vertices.html),
+  [`atlas_meshes()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_meshes.html),
+  [`atlas_centerlines()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_centerlines.html),
+  [`atlas_plot_palette()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_plot_palette.html))
+  instead of reaching into `atlas$core`, `atlas$palette` and
+  `atlas$data`, except one presence check that reads `atlas$data`
+  because the accessors abort rather than return `NULL`. This requires a
+  newer `ggseg.formats`; `DESCRIPTION` carries the floor.
 
 - Atlas objects predating the unified `ggseg_atlas` layout, which stored
   `vertices` or `meshes` at the top level instead of under `data`, are
