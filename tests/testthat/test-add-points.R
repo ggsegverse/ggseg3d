@@ -42,7 +42,7 @@ describe("add_points()", {
   it("leaves the brain meshes in place", {
     before <- length(base()$x$meshes)
     p <- add_points(base(), sensors(2), x = x, y = y, z = z)
-    expect_identical(length(p$x$meshes), before + 1L)
+    expect_length(p$x$meshes, before + 1L)
   })
 
   it("puts each marker at its own coordinates", {
@@ -114,7 +114,7 @@ describe("add_points()", {
       p <- add_points(base(), sensors(0), x = x, y = y, z = z),
       "no rows"
     )
-    expect_identical(length(p$x$meshes), before)
+    expect_length(p$x$meshes, before)
   })
 
   it("rejects something that is not a data frame", {
@@ -158,6 +158,6 @@ describe("add_atlas()", {
     p$x$meshes[[1]]$isFlatmap <- TRUE
     out <- NULL
     expect_warning(out <- add_atlas(p, aseg()), "flat")
-    expect_identical(length(out$x$meshes), length(p$x$meshes))
+    expect_length(out$x$meshes, length(p$x$meshes))
   })
 })

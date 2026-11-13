@@ -95,7 +95,7 @@ recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
 #' inferior-superior. Markers are drawn as small spheres, so they shade and
 #' occlude like the rest of the scene rather than floating in front of it.
 #'
-#' @param p A `ggseg3d` widget or `ggsegray` rgl object.
+#' @inheritParams add_glassbrain
 #' @param data A data.frame of marker positions.
 #' @param x,y,z Columns of `data` holding the coordinates.
 #' @param colour Marker colour (hex or named), either one value or one per
