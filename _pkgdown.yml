@@ -14,15 +14,13 @@ reference:
   - title: Plotting
     desc: Core 3D visualization function
     contents:
-      - ggseg3d
-      - ggsegray
+      - has_concept("brain plots")
 
   - title: Widget Customization
     desc: Pipe-friendly functions to modify the 3D widget
     contents:
-      - pan_camera
-      - add_glassbrain
-      - starts_with("set")
+      # tracks @family brain modifiers
+      - has_concept("brain modifiers")
       - snapshot_brain
 
   - title: Mesh Utilities
