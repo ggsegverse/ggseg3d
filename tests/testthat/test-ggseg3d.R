@@ -353,7 +353,8 @@ test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
   )
   deep_meshes$mesh <- list(
     list(
-      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      # Left-hemisphere deep nuclei belong at x <= 0, per the axis contract.
+      vertices = data.frame(x = -(1:4), y = 1:4, z = 1:4),
       faces = data.frame(i = 1L, j = 2L, k = 3L)
     )
   )
@@ -400,7 +401,8 @@ test_that("cerebellar surface_opacity can be overridden", {
   )
   deep_meshes$mesh <- list(
     list(
-      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      # Left-hemisphere deep nuclei belong at x <= 0, per the axis contract.
+      vertices = data.frame(x = -(1:4), y = 1:4, z = 1:4),
       faces = data.frame(i = 1L, j = 2L, k = 3L)
     )
   )

@@ -166,7 +166,9 @@ make_uniform_palette_atlas <- function(colour = "#000000") {
     label = c("Left-Caudate", "Right-Caudate"),
     stringsAsFactors = FALSE
   )
-  meshes$mesh <- list(triangle(0), triangle(10))
+  # Left at x <= 0 and right at x >= 0: the shared axis contract, which
+  # the renderer now checks. A fixture that breaks it is warned about.
+  meshes$mesh <- list(triangle(-10), triangle(10))
 
   subcortical_atlas_fixture(
     core = data.frame(
@@ -203,7 +205,9 @@ make_duplicate_label_atlas <- function() {
 
   labels <- c("Left-Caudate", "Right-Caudate")
   meshes <- data.frame(label = labels, stringsAsFactors = FALSE)
-  meshes$mesh <- list(triangle(0), triangle(10))
+  # Left at x <= 0 and right at x >= 0: the shared axis contract, which
+  # the renderer now checks. A fixture that breaks it is warned about.
+  meshes$mesh <- list(triangle(-10), triangle(10))
 
   atlas <- suppressWarnings(subcortical_atlas_fixture(
     core = data.frame(

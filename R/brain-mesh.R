@@ -211,6 +211,79 @@ warn_vertex_space_mismatch <- function(atlas_data, n_vertices, surface) {
 }
 
 
+#' Warn when an atlas's meshes sit on the wrong side of the midline
+#'
+#' The shared axis contract puts `left` at `x <= 0` and `right` at `x >= 0`.
+#' ggseg3d selects hemispheres by the `hemi` label and `pan_camera()` is a
+#' fixed position, so an atlas that breaks the contract draws the opposite
+#' side under the right label and nothing gives it away: the picture looks
+#' entirely plausible. That is a categorical error rather than an imprecise
+#' one, which is why it is worth saying even though ggseg3d cannot fix the
+#' geometry -- only the atlas's own build can.
+#'
+#' Only rows that declare `left` or `right` can be judged: the contract is
+#' about geometry agreeing with a label, so a row with no hemisphere has
+#' nothing to disagree with. An atlas of lateralised structures that declares
+#' no `hemi` at all is a separate defect, and one that shows itself -- there,
+#' `ggseg3d(hemisphere = "left")` selects nothing rather than the wrong side.
+#'
+#' @param hemi Character vector of hemisphere labels, one per atlas row.
+#' @param meshes List of per-row meshes, each `NULL` or carrying `vertices`.
+#'
+#' @return `NULL`, invisibly. Called for the warning.
+#' @keywords internal
+#' @noRd
+warn_hemisphere_orientation <- function(hemi, meshes) {
+  if (length(hemi) == 0 || length(hemi) != length(meshes)) {
+    return(invisible(NULL))
+  }
+
+  centres <- vapply(
+    meshes,
+    function(mesh) {
+      if (is.null(mesh) || is.null(mesh$vertices$x)) {
+        return(NA_real_)
+      }
+      mean(mesh$vertices$x)
+    },
+    numeric(1)
+  )
+
+  side <- tolower(as.character(hemi))
+  placed <- side %in% c("left", "right") & !is.na(centres)
+  n_wrong_left <- sum(placed & side == "left" & centres > 0)
+  n_wrong_right <- sum(placed & side == "right" & centres < 0)
+  n_wrong <- n_wrong_left + n_wrong_right
+  if (n_wrong == 0) {
+    return(invisible(NULL))
+  }
+
+  n_placed <- sum(placed) # nolint: object_usage_linter
+  mirrored <- n_wrong_left > 0 && n_wrong_right > 0
+  affected <- if (n_wrong_left > 0) "left" else "right" # nolint: object_usage_linter
+  detail <- if (mirrored) {
+    "Both hemispheres are affected, so the atlas is mirrored in {.var x}."
+  } else {
+    "The {.val {affected}} hemisphere is affected."
+  }
+
+  cli::cli_warn(c(
+    "Atlas structures are on the wrong side of the midline.",
+    "x" = "{n_wrong} of {n_placed} left/right structures sit across the
+           midline from the hemisphere they are labelled.",
+    "x" = detail,
+    "i" = "Hemispheres are chosen by the {.field hemi} label and the camera is
+           a fixed position, so {.code pan_camera(\"left lateral\")} will show
+           the structures that are anatomically on the right.",
+    "i" = "The atlas needs rebuilding against the source volume's world
+           coordinates. This concerns 3D rendering only: the 2D geometry is
+           built separately and does not inherit this."
+  ))
+
+  invisible(NULL)
+}
+
+
 #' Scatter one value per atlas row onto the mesh vertices it covers
 #'
 #' Shared core of the `vertices_to_*()` helpers: every vertex of row `i`'s
@@ -613,6 +686,8 @@ build_subcortical_meshes <- function(
   text_by = NULL,
   label_by = "region"
 ) {
+  warn_hemisphere_orientation(atlas_data$hemi, atlas_data$mesh)
+
   meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
     mesh_data <- atlas_data$mesh[[i]]
     if (is.null(mesh_data)) {
@@ -682,12 +757,17 @@ build_tract_meshes <- function(
     return(list())
   }
 
-  meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
-    mesh_data <- if (has_centerlines) {
+  row_meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
+    if (has_centerlines) {
       tract_tube_mesh(atlas_data$label[i], atlas_centerlines)
     } else {
       atlas_data$mesh[[i]]
     }
+  })
+  warn_hemisphere_orientation(atlas_data$hemi, row_meshes)
+
+  meshes <- lapply(seq_len(nrow(atlas_data)), function(i) {
+    mesh_data <- row_meshes[[i]]
 
     if (is.null(mesh_data)) {
       return(NULL)

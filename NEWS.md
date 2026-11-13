@@ -2,6 +2,12 @@
 
 ## New features
 
+- An atlas whose structures sit on the wrong side of the midline warns
+  instead of rendering silently. Hemispheres are chosen by the `hemi` label
+  and the camera is a fixed position, so a mirrored atlas draws the opposite
+  side under the right label and looks entirely plausible
+  (ggsegverse/ggseg3d#64).
+
 - Parcel borders follow the parcellation rather than the mesh triangulation.
   Faces straddling a border are cut at the crossed edges' midpoints, removing
   the ~3 mm fringe along every border on an fsaverage5 surface. Turn it off
