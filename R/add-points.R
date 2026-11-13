@@ -1,86 +1,3 @@
-#' A unit sphere, as vertices and faces
-#'
-#' Markers are drawn as geometry rather than as a new primitive so that the
-#' renderer needs nothing it does not already do: a sphere is just another
-#' indexed mesh with per-vertex colours.
-#'
-#' @param segments Number of divisions around and over the sphere. Eight is
-#'   round enough at the size a marker is drawn and keeps a large montage
-#'   cheap -- a sphere costs `(segments + 1)^2` vertices.
-#' @return A list of `vertices` and `faces`, radius 1, centred on the origin.
-#' @keywords internal
-#' @noRd
-unit_sphere <- function(segments = 8L) {
-  phi <- seq(0, pi, length.out = segments + 1L)
-  theta <- seq(0, 2 * pi, length.out = segments + 1L)
-  grid <- expand.grid(phi = phi, theta = theta)
-
-  vertices <- data.frame(
-    x = sin(grid$phi) * cos(grid$theta),
-    y = sin(grid$phi) * sin(grid$theta),
-    z = cos(grid$phi)
-  )
-
-  n <- segments + 1L
-  ring <- seq_len(segments)
-  corner <- as.vector(outer(ring, (ring - 1L) * n, `+`))
-  faces <- data.frame(
-    i = c(corner, corner + 1L),
-    j = c(corner + 1L, corner + n + 1L),
-    k = c(corner + n, corner + n)
-  )
-  list(vertices = vertices, faces = faces)
-}
-
-
-#' Build one mesh holding every marker
-#'
-#' One entry rather than one per point: a montage is a single object to show,
-#' hide and name, and the renderer walks far fewer meshes.
-#' @noRd
-markers_mesh <- function(x, y, z, radius, colour, text = NULL) {
-  sphere <- unit_sphere()
-  n_v <- nrow(sphere$vertices)
-  n_f <- nrow(sphere$faces)
-  n_p <- length(x)
-
-  offset <- rep((seq_len(n_p) - 1L) * n_v, each = n_f)
-  list(
-    vertices = data.frame(
-      x = rep(x, each = n_v) + rep(radius, each = n_v) * sphere$vertices$x,
-      y = rep(y, each = n_v) + rep(radius, each = n_v) * sphere$vertices$y,
-      z = rep(z, each = n_v) + rep(radius, each = n_v) * sphere$vertices$z
-    ),
-    faces = data.frame(
-      i = rep(sphere$faces$i, n_p) + offset,
-      j = rep(sphere$faces$j, n_p) + offset,
-      k = rep(sphere$faces$k, n_p) + offset
-    ),
-    colours = rep(colour, each = n_v),
-    texts = if (is.null(text)) NULL else rep(text, each = n_v)
-  )
-}
-
-
-#' Recycle a per-marker argument to one value per marker
-#' @noRd
-recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
-  if (length(value) == 1L) {
-    return(rep(value, n))
-  }
-  if (length(value) != n) {
-    cli::cli_abort(
-      c(
-        "{.arg {arg}} must be length 1 or {n}, not {length(value)}.",
-        "i" = "One value for every marker, or one for all of them."
-      ),
-      call = call
-    )
-  }
-  value
-}
-
-
 #' Add points to a ggseg3d plot
 #'
 #' Draws markers at coordinates of your own -- electrode or sensor positions,
@@ -273,4 +190,87 @@ add_atlas <- function(p, atlas, ...) {
   }
 
   p
+}
+
+
+#' A unit sphere, as vertices and faces
+#'
+#' Markers are drawn as geometry rather than as a new primitive so that the
+#' renderer needs nothing it does not already do: a sphere is just another
+#' indexed mesh with per-vertex colours.
+#'
+#' @param segments Number of divisions around and over the sphere. Eight is
+#'   round enough at the size a marker is drawn and keeps a large montage
+#'   cheap -- a sphere costs `(segments + 1)^2` vertices.
+#' @return A list of `vertices` and `faces`, radius 1, centred on the origin.
+#' @keywords internal
+#' @noRd
+unit_sphere <- function(segments = 8L) {
+  phi <- seq(0, pi, length.out = segments + 1L)
+  theta <- seq(0, 2 * pi, length.out = segments + 1L)
+  grid <- expand.grid(phi = phi, theta = theta)
+
+  vertices <- data.frame(
+    x = sin(grid$phi) * cos(grid$theta),
+    y = sin(grid$phi) * sin(grid$theta),
+    z = cos(grid$phi)
+  )
+
+  n <- segments + 1L
+  ring <- seq_len(segments)
+  corner <- as.vector(outer(ring, (ring - 1L) * n, `+`))
+  faces <- data.frame(
+    i = c(corner, corner + 1L),
+    j = c(corner + 1L, corner + n + 1L),
+    k = c(corner + n, corner + n)
+  )
+  list(vertices = vertices, faces = faces)
+}
+
+
+#' Build one mesh holding every marker
+#'
+#' One entry rather than one per point: a montage is a single object to show,
+#' hide and name, and the renderer walks far fewer meshes.
+#' @noRd
+markers_mesh <- function(x, y, z, radius, colour, text = NULL) {
+  sphere <- unit_sphere()
+  n_v <- nrow(sphere$vertices)
+  n_f <- nrow(sphere$faces)
+  n_p <- length(x)
+
+  offset <- rep((seq_len(n_p) - 1L) * n_v, each = n_f)
+  list(
+    vertices = data.frame(
+      x = rep(x, each = n_v) + rep(radius, each = n_v) * sphere$vertices$x,
+      y = rep(y, each = n_v) + rep(radius, each = n_v) * sphere$vertices$y,
+      z = rep(z, each = n_v) + rep(radius, each = n_v) * sphere$vertices$z
+    ),
+    faces = data.frame(
+      i = rep(sphere$faces$i, n_p) + offset,
+      j = rep(sphere$faces$j, n_p) + offset,
+      k = rep(sphere$faces$k, n_p) + offset
+    ),
+    colours = rep(colour, each = n_v),
+    texts = if (is.null(text)) NULL else rep(text, each = n_v)
+  )
+}
+
+
+#' Recycle a per-marker argument to one value per marker
+#' @noRd
+recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
+  if (length(value) == 1L) {
+    return(rep(value, n))
+  }
+  if (length(value) != n) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be length 1 or {n}, not {length(value)}.",
+        "i" = "One value for every marker, or one for all of them."
+      ),
+      call = call
+    )
+  }
+  value
 }
