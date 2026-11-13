@@ -2,6 +2,14 @@
 
 ## New features
 
+- `add_points()` draws markers at coordinates of your own -- electrode and
+  sensor positions, stimulation sites. This was done with plotly's
+  `add_trace()` up to ggseg3d 1.6.5 and had no replacement after the move off
+  plotly (ggsegverse/ggseg3d#23).
+
+- `add_atlas()` draws a second atlas into an existing plot, so a subcortical
+  atlas can sit inside a cortical one (ggsegverse/ggseg3d#25).
+
 - Parcel borders follow the parcellation rather than the mesh triangulation.
   Faces straddling a border are cut at the crossed edges' midpoints, removing
   the ~3 mm fringe along every border on an fsaverage5 surface. Turn it off
