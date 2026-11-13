@@ -298,7 +298,7 @@ test_that("prepare_brain_meshes handles cerebellar atlas with vertices", {
     palette = c("left_I-IV" = "#FF0000")
   )
 
-  prepared <- prepare_brain_meshes(atlas)
+  prepared <- prepare_brain_meshes(atlas, split_boundaries = FALSE)
 
   expect_type(prepared, "list")
   expect_gt(length(prepared$meshes), 0)

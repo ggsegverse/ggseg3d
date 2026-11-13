@@ -382,6 +382,8 @@ vertices_to_alphas <- function(atlas_data, n_vertices, na_alpha = 1) {
 #' @param hemisphere Hemispheres to include
 #' @param surface Surface type
 #' @param edge_by Column for edge grouping (or NULL)
+#' @param split_boundaries Cut the faces that straddle a region boundary so
+#'   borders follow the parcellation rather than the triangulation.
 #'
 #' @return List of mesh data structures
 #' @importFrom rlang .data
@@ -398,7 +400,8 @@ build_cortical_meshes <- function(
   brain_meshes = NULL,
   text_by = NULL,
   label_by = "region",
-  na_alpha = 1
+  na_alpha = 1,
+  split_boundaries = TRUE
 ) {
   hemi_map <- c("right" = "rh", "left" = "lh")
 
@@ -431,13 +434,34 @@ build_cortical_meshes <- function(
     vertex_texts <- if (!is.null(text_by)) {
       vertices_to_text(hemi_data, n_vertices, text_by)
     }
-
-    if (!is.null(edge_by)) {
-      edge_groups <- vertices_to_groups(hemi_data, n_vertices, edge_by)
-      boundary <- find_boundary_edges(mesh$faces, edge_groups)
-    } else {
-      boundary <- find_boundary_edges(mesh$faces, vertex_colors)
+    edge_groups <- if (!is.null(edge_by)) {
+      vertices_to_groups(hemi_data, n_vertices, edge_by)
     }
+
+    if (split_boundaries) {
+      split <- split_mesh_boundaries(
+        mesh,
+        vertex_colors,
+        list(
+          colors = vertex_colors,
+          labels = vertex_labels,
+          alphas = vertex_alphas,
+          texts = vertex_texts,
+          edges = edge_groups
+        )
+      )
+      mesh <- split$mesh
+      vertex_colors <- split$vectors$colors
+      vertex_labels <- split$vectors$labels
+      vertex_alphas <- split$vectors$alphas
+      vertex_texts <- split$vectors$texts
+      edge_groups <- split$vectors$edges
+    }
+
+    boundary <- find_boundary_edges(
+      mesh$faces,
+      if (!is.null(edge_by)) edge_groups else vertex_colors
+    )
 
     edge_color <- if (!is.null(edge_by)) "#000000" else NULL
 
@@ -478,7 +502,8 @@ build_cerebellar_meshes <- function(
   text_by = NULL,
   label_by = "region",
   opacity = 1,
-  na_alpha = 1
+  na_alpha = 1,
+  split_boundaries = TRUE
 ) {
   mesh <- ggseg.formats::get_cerebellar_mesh()
 
@@ -500,6 +525,24 @@ build_cerebellar_meshes <- function(
 
   vertex_texts <- if (!is.null(text_by)) {
     vertices_to_text(atlas_data, n_vertices, text_by)
+  }
+
+  if (split_boundaries) {
+    split <- split_mesh_boundaries(
+      mesh,
+      vertex_colors,
+      list(
+        colors = vertex_colors,
+        labels = vertex_labels,
+        alphas = vertex_alphas,
+        texts = vertex_texts
+      )
+    )
+    mesh <- split$mesh
+    vertex_colors <- split$vectors$colors
+    vertex_labels <- split$vectors$labels
+    vertex_alphas <- split$vectors$alphas
+    vertex_texts <- split$vectors$texts
   }
 
   boundary <- find_boundary_edges(mesh$faces, vertex_colors)

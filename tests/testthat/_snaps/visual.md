@@ -4,8 +4,8 @@
       print(widget_summary(p), row.names = FALSE)
     Output
                  name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
-        left inflated      10242   20480   -83   0.0 -108.0 108.0 -72.9  73.0
-       right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
+        left inflated      15444   25614   -83   0.0 -108.0 108.0 -72.9  73.0
+       right inflated      15446   25616     0  81.8 -107.7 107.7 -73.3  73.3
         color_mode n_colors opacity is_flatmap
        vertexcolor       36       1      FALSE
        vertexcolor       36       1      FALSE
@@ -16,7 +16,7 @@
       print(widget_summary(lh), row.names = FALSE)
     Output
                 name n_vertices n_faces x_min x_max y_min y_max z_min z_max
-       left inflated      10242   20480   -83     0  -108   108 -72.9    73
+       left inflated      15444   25614   -83     0  -108   108 -72.9    73
         color_mode n_colors opacity is_flatmap
        vertexcolor       36       1      FALSE
 
@@ -26,7 +26,7 @@
       print(widget_summary(rh), row.names = FALSE)
     Output
                  name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
-       right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
+       right inflated      15446   25616     0  81.8 -107.7 107.7 -73.3  73.3
         color_mode n_colors opacity is_flatmap
        vertexcolor       36       1      FALSE
 
@@ -36,8 +36,8 @@
       print(widget_summary(p), row.names = FALSE)
     Output
              name n_vertices n_faces x_min x_max  y_min y_max z_min z_max  color_mode
-        left pial      10242   20480   -70     0 -104.7  68.9 -48.3  78.1 vertexcolor
-       right pial      10242   20480     0    70 -104.4  69.2 -48.4  79.2 vertexcolor
+        left pial      15444   25614   -70     0 -104.7  68.9 -48.3  78.1 vertexcolor
+       right pial      15446   25616     0    70 -104.4  69.2 -48.4  79.2 vertexcolor
        n_colors opacity is_flatmap
              36       1      FALSE
              36       1      FALSE
@@ -114,7 +114,7 @@
       print(widget_summary(p), row.names = FALSE)
     Output
              name n_vertices n_faces x_min x_max y_min y_max z_min z_max  color_mode
-       cerebellum      30013   57665 -53.6    56 -91.7     0 -64.6     0 vertexcolor
+       cerebellum      30595   58239 -53.6    56 -91.7     0 -64.6     0 vertexcolor
        n_colors opacity is_flatmap
               3       1      FALSE
 
@@ -126,8 +126,8 @@
                     name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
         glass brain left      10242   20480   -83   0.0 -108.0 108.0 -72.9  73.0
        glass brain right      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
-           left inflated      10242   20480   -83   0.0 -108.0 108.0 -72.9  73.0
-          right inflated      10242   20480     0  81.8 -107.7 107.7 -73.3  73.3
+           left inflated      15444   25614   -83   0.0 -108.0 108.0 -72.9  73.0
+          right inflated      15446   25616     0  81.8 -107.7 107.7 -73.3  73.3
         color_mode n_colors opacity is_flatmap
        vertexcolor        1     0.2      FALSE
        vertexcolor        1     0.2      FALSE
@@ -212,7 +212,7 @@
                     name n_vertices n_faces x_min x_max  y_min y_max z_min z_max
         glass brain left      10242   20480 -83.0   0.0 -108.0 108.0 -72.9  73.0
        glass brain right      10242   20480   0.0  81.8 -107.7 107.7 -73.3  73.3
-              cerebellum      30013   57665 -53.6  56.0  -91.7   0.0 -64.6   0.0
+              cerebellum      30595   58239 -53.6  56.0  -91.7   0.0 -64.6   0.0
         color_mode n_colors opacity is_flatmap
        vertexcolor        1    0.15      FALSE
        vertexcolor        1    0.15      FALSE
