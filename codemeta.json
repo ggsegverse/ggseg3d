@@ -8,7 +8,7 @@
   "codeRepository": "https://github.com/ggsegverse/ggseg3d",
   "issueTracker": "https://github.com/ggsegverse/ggseg3d/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "2.1.2.9008",
+  "version": "2.1.2.9009",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
