@@ -21,6 +21,7 @@
   na_alpha = 1,
   edge_by = NULL,
   brain_meshes = NULL,
+  split_boundaries = TRUE,
   ...
 )
 
@@ -46,6 +47,7 @@
   na_colour = "darkgrey",
   na_alpha = 1,
   surface_opacity = NULL,
+  split_boundaries = TRUE,
   ...
 )
 
@@ -102,6 +104,13 @@ per vertex, subcortical structures and tracts per mesh.}
 
 \item{brain_meshes}{Optional user-supplied mesh data. Passed through to
 \code{\link[ggseg.formats:get_brain_mesh]{ggseg.formats::get_brain_mesh()}} for format details.}
+
+\item{split_boundaries}{Draw parcel borders where the parcellation puts
+them, rather than on the nearest mesh edge (\code{TRUE}, the default). Faces
+straddling a border are cut along the crossed edges' midpoints, which
+removes the roughly one-triangle-wide fringe along every border -- about
+3 mm on an fsaverage5 surface. It costs around half the vertices again on
+the surfaces it touches; set \code{FALSE} for the smaller widget.}
 
 \item{...}{Type-specific arguments passed to methods}
 

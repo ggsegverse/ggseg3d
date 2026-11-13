@@ -140,6 +140,12 @@ prepare_brain_meshes.default <- function(atlas, ...) {
 #' @param hemisphere Character vector of hemispheres: `"left"`, `"right"`.
 #'   `"lh"` and `"rh"` are accepted as well.
 #' @param edge_by Column name for region boundary edge grouping
+#' @param split_boundaries Draw parcel borders where the parcellation puts
+#'   them, rather than on the nearest mesh edge (`TRUE`, the default). Faces
+#'   straddling a border are cut along the crossed edges' midpoints, which
+#'   removes the roughly one-triangle-wide fringe along every border -- about
+#'   3 mm on an fsaverage5 surface. It costs around half the vertices again on
+#'   the surfaces it touches; set `FALSE` for the smaller widget.
 #' @inheritParams resolve_brain_mesh
 #' @export
 #' @rdname prepare_brain_meshes
@@ -157,6 +163,7 @@ prepare_brain_meshes.cortical_atlas <- function(
   na_alpha = 1,
   edge_by = NULL,
   brain_meshes = NULL,
+  split_boundaries = TRUE,
   ...
 ) {
   surface <- if (surface == "LCBC") "inflated" else surface
@@ -181,7 +188,8 @@ prepare_brain_meshes.cortical_atlas <- function(
     brain_meshes,
     text_by = text_by,
     label_by = label_by,
-    na_alpha = na_alpha
+    na_alpha = na_alpha,
+    split_boundaries = split_boundaries
   )
 
   list(meshes = meshes, legend_data = result$legend_data)
@@ -223,6 +231,12 @@ prepare_brain_meshes.subcortical_atlas <- function(
 }
 
 #' @method prepare_brain_meshes cerebellar_atlas
+#' @param split_boundaries Draw parcel borders where the parcellation puts
+#'   them, rather than on the nearest mesh edge (`TRUE`, the default). Faces
+#'   straddling a border are cut along the crossed edges' midpoints, which
+#'   removes the roughly one-triangle-wide fringe along every border -- about
+#'   3 mm on an fsaverage5 surface. It costs around half the vertices again on
+#'   the surfaces it touches; set `FALSE` for the smaller widget.
 #' @param surface_opacity Numeric opacity for the cerebellar surface mesh.
 #'   Defaults to `0.3` when deep nuclei are present and `1` otherwise.
 #' @export
@@ -238,6 +252,7 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   na_colour = "darkgrey",
   na_alpha = 1,
   surface_opacity = NULL,
+  split_boundaries = TRUE,
   ...
 ) {
   has_deep <- has_atlas_meshes(atlas)
@@ -259,7 +274,8 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     text_by = text_by,
     label_by = label_by,
     opacity = surface_opacity,
-    na_alpha = na_alpha
+    na_alpha = na_alpha,
+    split_boundaries = split_boundaries
   )
 
   if (has_deep) {
