@@ -60,7 +60,7 @@ describe("split_boundary_faces()", {
     s <- split_boundary_faces(m$vertices, m$faces, m$labels)
     added <- s$vertices[-seq_len(s$n_original_vertices), ]
     coords <- paste(added$x, added$y, added$z)
-    expect_identical(length(unique(coords)), 2L)
+    expect_length(unique(coords), 2L)
     expect_identical(nrow(added), 4L)
   })
 
