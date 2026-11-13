@@ -98,10 +98,10 @@ Core 3D visualization function
 
 Pipe-friendly functions to modify the 3D widget
 
-- [`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md)
-  : Pan camera position of ggseg3d plot
 - [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md)
   : Add glass brain to ggseg3d plot
+- [`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md)
+  : Pan camera position of ggseg3d plot
 - [`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md)
   : Set background color of ggseg3d plot
 - [`set_dimensions()`](https://ggsegverse.github.io/ggseg3d/reference/set_dimensions.md)
