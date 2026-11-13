@@ -4,6 +4,12 @@
 
 ### New features
 
+- Parcel borders follow the parcellation rather than the mesh
+  triangulation. Faces straddling a border are cut at the crossed edges’
+  midpoints, removing the ~3 mm fringe along every border on an
+  fsaverage5 surface. Turn it off with `split_boundaries = FALSE` for a
+  smaller widget (ggsegverse/ggseg3d#9).
+
 - The read-only atlas accessors from `ggseg.formats` are re-exported, so
   [`atlas_palette()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_palette.html),
   [`atlas_regions()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html),

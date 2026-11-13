@@ -20,6 +20,7 @@ prepare_brain_meshes(
   na_alpha = 1,
   edge_by = NULL,
   brain_meshes = NULL,
+  split_boundaries = TRUE,
   ...
 )
 
@@ -47,6 +48,7 @@ prepare_brain_meshes(
   na_colour = "darkgrey",
   na_alpha = 1,
   surface_opacity = NULL,
+  split_boundaries = TRUE,
   ...
 )
 
@@ -131,6 +133,15 @@ prepare_brain_meshes(atlas, ...)
   Optional user-supplied mesh data. Passed through to
   [`ggseg.formats::get_brain_mesh()`](https://ggsegverse.github.io/ggseg.formats/reference/get_brain_mesh.html)
   for format details.
+
+- split_boundaries:
+
+  Draw parcel borders where the parcellation puts them, rather than on
+  the nearest mesh edge (`TRUE`, the default). Faces straddling a border
+  are cut along the crossed edges' midpoints, which removes the roughly
+  one-triangle-wide fringe along every border – about 3 mm on an
+  fsaverage5 surface. It costs around half the vertices again on the
+  surfaces it touches; set `FALSE` for the smaller widget.
 
 - ...:
 

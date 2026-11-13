@@ -70,6 +70,7 @@ Builds mesh data structures and legend data from a <code>ggseg_atlas</code>.</p>
 <span>  na_alpha <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  edge_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  brain_meshes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  split_boundaries <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -97,6 +98,7 @@ Builds mesh data structures and legend data from a <code>ggseg_atlas</code>.</p>
 <span>  na_colour <span class="op">=</span> <span class="st">"darkgrey"</span>,</span>
 <span>  na_alpha <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  surface_opacity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  split_boundaries <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -181,6 +183,15 @@ per vertex, subcortical structures and tracts per mesh.</p></dd>
 <dt id="arg-brain-meshes">brain_meshes<a class="anchor" aria-label="anchor" href="#arg-brain-meshes"></a></dt>
 <dd><p>Optional user-supplied mesh data. Passed through to
 <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/get_brain_mesh.html" class="external-link">ggseg.formats::get_brain_mesh()</a></code> for format details.</p></dd>
+
+
+<dt id="arg-split-boundaries">split_boundaries<a class="anchor" aria-label="anchor" href="#arg-split-boundaries"></a></dt>
+<dd><p>Draw parcel borders where the parcellation puts
+them, rather than on the nearest mesh edge (<code>TRUE</code>, the default). Faces
+straddling a border are cut along the crossed edges' midpoints, which
+removes the roughly one-triangle-wide fringe along every border – about
+3 mm on an fsaverage5 surface. It costs around half the vertices again on
+the surfaces it touches; set <code>FALSE</code> for the smaller widget.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
