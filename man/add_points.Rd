@@ -43,11 +43,23 @@ this was done with plotly's \code{add_trace()}; plotly is no longer the
 renderer, and this replaces it.
 }
 \details{
-Coordinates are taken in the same space the brain meshes are drawn in, so
-they are the atlas's coordinates, not MNI: the inflated surfaces ship
-centred on the origin with \code{x} left-right, \code{y} posterior-anterior and \code{z}
-inferior-superior. Markers are drawn as small spheres, so they shade and
-occlude like the rest of the scene rather than floating in front of it.
+Coordinates are taken in the space of the surface already drawn, with \code{x}
+left-right, \code{y} posterior-anterior and \code{z} inferior-superior. Which surface
+that is decides whether measured positions land where they should:
+
+\itemize{
+\item \code{"white"} and \code{"pial"} are the anatomical surfaces, spanning about
+x -67 to 67, y -103 to 69 and z -44 to 78. These are fsaverage surface
+coordinates, so positions recorded in a standard space land roughly
+where they belong without a transform.
+\item \code{"inflated"}, which \code{\link[=ggseg3d]{ggseg3d()}} draws by default, is not
+anatomical. Inflation moves every vertex, leaving a rounder surface
+spanning about x -83 to 82 and z -73 to 73. Measured positions do not
+correspond to it, so plot them on \code{surface = "pial"} instead.
+}
+
+Markers are drawn as small spheres, so they shade and occlude like the
+rest of the scene rather than floating in front of it.
 }
 \examples{
 sensors <- data.frame(
@@ -58,7 +70,8 @@ sensors <- data.frame(
 )
 
 \donttest{
-ggseg3d(atlas = dk(), hemisphere = "right") |>
+# on an anatomical surface, so the coordinates mean something
+ggseg3d(atlas = dk(), hemisphere = "right", surface = "pial") |>
   add_points(sensors, x = x, y = y, z = z, text = name)
 }
 }
@@ -66,6 +79,7 @@ ggseg3d(atlas = dk(), hemisphere = "right") |>
 Other brain modifiers:
 \code{\link[=add_atlas]{add_atlas()}},
 \code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=mesh_to_mni]{mesh_to_mni()}},
 \code{\link[=pan_camera]{pan_camera()}},
 \code{\link[=set_background]{set_background()}},
 \code{\link[=set_dimensions]{set_dimensions()}},

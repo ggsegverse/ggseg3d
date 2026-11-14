@@ -56,6 +56,7 @@ ggsegray(atlas = aseg()) |>
 Other brain modifiers:
 \code{\link[=add_atlas]{add_atlas()}},
 \code{\link[=add_points]{add_points()}},
+\code{\link[=mesh_to_mni]{mesh_to_mni()}},
 \code{\link[=pan_camera]{pan_camera()}},
 \code{\link[=set_background]{set_background()}},
 \code{\link[=set_dimensions]{set_dimensions()}},

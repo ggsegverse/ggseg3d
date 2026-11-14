@@ -163,11 +163,18 @@ normalize_cortical_mesh <- function(mesh, hemisphere, rotate_axes) {
     mesh$vertices$y <- v$x
   }
 
-  mesh$vertices$x <- if (hemisphere == "lh") {
-    mesh$vertices$x - max(mesh$vertices$x)
+  # Recorded rather than left implicit: this shift is the whole difference
+  # between what is drawn and the surface's own coordinates, and
+  # mesh_to_mni() needs it. Deriving it here, where it is applied, is what
+  # keeps it from becoming a constant that rots the next time the meshes are
+  # rebuilt.
+  shift <- if (hemisphere == "lh") {
+    -max(mesh$vertices$x)
   } else {
-    mesh$vertices$x - min(mesh$vertices$x)
+    -min(mesh$vertices$x)
   }
+  mesh$vertices$x <- mesh$vertices$x + shift
+  attr(mesh, "mni_shift") <- c(x = shift, y = 0, z = 0)
 
   mesh
 }

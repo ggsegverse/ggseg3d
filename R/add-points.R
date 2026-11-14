@@ -6,11 +6,23 @@
 #' renderer, and this replaces it.
 #'
 #' @details
-#' Coordinates are taken in the same space the brain meshes are drawn in, so
-#' they are the atlas's coordinates, not MNI: the inflated surfaces ship
-#' centred on the origin with `x` left-right, `y` posterior-anterior and `z`
-#' inferior-superior. Markers are drawn as small spheres, so they shade and
-#' occlude like the rest of the scene rather than floating in front of it.
+#' Coordinates are taken in the space of the surface already drawn, with `x`
+#' left-right, `y` posterior-anterior and `z` inferior-superior. Which surface
+#' that is decides whether measured positions land where they should:
+#'
+#' \itemize{
+#'   \item `"white"` and `"pial"` are the anatomical surfaces, spanning about
+#'     x -67 to 67, y -103 to 69 and z -44 to 78. These are fsaverage surface
+#'     coordinates, so positions recorded in a standard space land roughly
+#'     where they belong without a transform.
+#'   \item `"inflated"`, which [ggseg3d()] draws by default, is not
+#'     anatomical. Inflation moves every vertex, leaving a rounder surface
+#'     spanning about x -83 to 82 and z -73 to 73. Measured positions do not
+#'     correspond to it, so plot them on `surface = "pial"` instead.
+#' }
+#'
+#' Markers are drawn as small spheres, so they shade and occlude like the
+#' rest of the scene rather than floating in front of it.
 #'
 #' @inheritParams add_glassbrain
 #' @param data A data.frame of marker positions.
@@ -35,7 +47,8 @@
 #' )
 #'
 #' \donttest{
-#' ggseg3d(atlas = dk(), hemisphere = "right") |>
+#' # on an anatomical surface, so the coordinates mean something
+#' ggseg3d(atlas = dk(), hemisphere = "right", surface = "pial") |>
 #'   add_points(sensors, x = x, y = y, z = z, text = name)
 #' }
 add_points <- function(
