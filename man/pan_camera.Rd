@@ -45,7 +45,10 @@ ggsegray(atlas = dk(), hemisphere = "left") |>
 }
 \seealso{
 Other brain modifiers:
+\code{\link[=add_atlas]{add_atlas()}},
 \code{\link[=add_glassbrain]{add_glassbrain()}},
+\code{\link[=add_points]{add_points()}},
+\code{\link[=mesh_to_mni]{mesh_to_mni()}},
 \code{\link[=set_background]{set_background()}},
 \code{\link[=set_dimensions]{set_dimensions()}},
 \code{\link[=set_edges]{set_edges()}},
