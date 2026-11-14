@@ -149,3 +149,12 @@ ggseg3d(hemisphere = "left") |>
 
 Camera presets cover the standard anatomical views: `"left lateral"`, `"right medial"`, `"left superior"`, and so on.
 For anything else, pass a list with `eye` coordinates.
+
+## Beyond parcellations
+
+To put your own coordinates on the brain — electrode positions, stimulation
+targets, cluster peaks — see `add_points()`, and `mni_to_mesh()` for getting
+there from MNI. `add_atlas()` draws a second atlas into the same scene. The
+["Placing points and combining atlases"](https://ggsegverse.github.io/ggseg3d/articles/point-placement.html)
+article covers both, and why the surface you plot on decides whether measured
+coordinates land where they should.
