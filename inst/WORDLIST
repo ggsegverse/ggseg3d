@@ -1,4 +1,5 @@
 anisotropy
+aseg
 Athanasia
 caudate
 centerline
@@ -68,6 +69,7 @@ plotly's
 png
 Pre
 precentral
+putamen
 rayshader
 Rayshader
 rayshader's

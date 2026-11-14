@@ -26,6 +26,7 @@ They were taken straight off the pial surface, so they sit exactly on it:
 
 ```{r}
 #| label: pp-pial
+#| eval: false
 pial <- resolve_brain_mesh("rh", "pial")$vertices
 set.seed(7)
 pts <- pial[sample(nrow(pial), 14), ]
@@ -35,14 +36,19 @@ ggseg3d(atlas = dk(), hemisphere = "right", surface = "pial") |>
   pan_camera("right lateral")
 ```
 
+![Right hemisphere pial surface in DK atlas colours, with fourteen black markers spread across the lateral surface, each sitting on the cortex.](img/pp-pial.png "Points on the surface they were taken from")
+
 Change nothing but the surface and most of them disappear inside the brain:
 
 ```{r}
 #| label: pp-inflated
+#| eval: false
 ggseg3d(atlas = dk(), hemisphere = "right", surface = "inflated") |>
   add_points(pts, x = x, y = y, z = z, colour = "#111111", size = 4) |>
   pan_camera("right lateral")
 ```
+
+![The same right hemisphere inflated smooth, with only four of the fourteen markers still visible near the top edge; the rest are hidden inside the larger surface.](img/pp-inflated.png "The same coordinates on an inflated surface")
 
 Nothing went wrong in either plot.
 The inflated surface is simply a different shape, so a position on the real brain is not a position on it.
@@ -83,7 +89,8 @@ mesh_to_mni(-42, -20, 55, hemisphere = "lh", surface = "inflated")
 
 ### A worked example
 
-Three motor-cortex coordinates, converted and drawn:
+Three motor-cortex coordinates, converted and drawn.
+This one is live: drag to rotate, and hover a marker for its name.
 
 ```{r}
 #| label: pp-worked
@@ -111,10 +118,13 @@ ggseg3d(atlas = dk(), hemisphere = "left", surface = "pial") |>
 
 ```{r}
 #| label: pp-atlas
+#| eval: false
 ggseg3d(atlas = dk(), hemisphere = "left") |>
   add_atlas(aseg()) |>
   pan_camera("right lateral")
 ```
+
+![Medial view of the left hemisphere with aseg structures inside it: thalamus, hippocampus, caudate and putamen, the ventricles, brain stem and cerebellum, each in its own colour.](img/pp-atlas.png "Subcortical structures inside a cortical surface")
 
 Or the other way round, with the cortex as a translucent shell:
 
@@ -125,6 +135,8 @@ ggseg3d(atlas = aseg()) |>
   add_glassbrain(opacity = 0.12) |>
   pan_camera("right lateral")
 ```
+
+![The same subcortical structures seen through a faint translucent cortical shell, with the cerebellum extending past the shell at the lower left.](img/pp-glass.png "Subcortical structures under a glass brain")
 
 Two things to know.
 
@@ -137,7 +149,7 @@ If the second atlas needs a readable legend, build the plot from that one and ad
 
 ## Why the cerebellum sticks out
 
-Run that and the cerebellum extends past the glass brain.
+In the picture above the cerebellum extends past the glass brain.
 That is anatomically right — the cerebellum is not inside the cerebral cortex — but the default glass brain is the *inflated* surface, which is larger and rounder than any real brain.
 For judging whether something sits inside the cortex, use an anatomical shell:
 
