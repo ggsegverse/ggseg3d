@@ -1,3 +1,91 @@
+#' Convert between plot coordinates and a standard space
+#'
+#' `mesh_to_mni()` takes coordinates as the plot draws them and returns where
+#' they are in a standard space; `mni_to_mesh()` goes the other way, which is
+#' what you want for putting [add_points()] somewhere specific.
+#'
+#' @details
+#' The surfaces are fsaverage5, and fsaverage is an MNI305 average, so their
+#' coordinates already *are* MNI305 apart from a shift: each hemisphere is
+#' moved so it meets the midline at `x = 0`, which is what lets the two be
+#' drawn together. These functions add or remove that shift, reading it from
+#' the mesh rather than assuming it, so a rebuilt mesh cannot silently put
+#' every point in the wrong place.
+#'
+#' `space = "mni152"` applies FreeSurfer's published MNI305-to-MNI152
+#' transform on top. It moves a coordinate by roughly a millimetre.
+#'
+#' Only anatomical surfaces can be converted. An inflated or spherical
+#' surface has had every vertex moved, so a position on it does not
+#' correspond to a place in the brain, and asking is an error rather than a
+#' number that looks usable.
+#'
+#' @param x,y,z Numeric coordinates.
+#' @param hemisphere `"lh"` or `"rh"` -- which hemisphere's shift applies.
+#' @param surface The surface the coordinates belong to. One of `"white"`,
+#'   `"pial"`, `"midthickness"`, `"smoothwm"` or `"orig"`.
+#' @param space `"mni305"`, which fsaverage is, or `"mni152"`.
+#'
+#' @return A data.frame of `x`, `y` and `z`.
+#' @family brain modifiers
+#' @export
+#'
+#' @examples
+#' # where does a point in MNI space sit in the plot?
+#' mni_to_mesh(-42, -20, 55, hemisphere = "lh")
+#'
+#' # and back again
+#' mesh_to_mni(-43.2, -20, 55, hemisphere = "lh")
+mesh_to_mni <- function(
+  x,
+  y,
+  z,
+  hemisphere = c("lh", "rh"),
+  surface = "pial",
+  space = c("mni305", "mni152")
+) {
+  hemisphere <- match.arg(hemisphere)
+  space <- match.arg(space)
+  shift <- mesh_shift(hemisphere, surface)
+
+  out <- data.frame(
+    x = x - shift[["x"]],
+    y = y - shift[["y"]],
+    z = z - shift[["z"]]
+  )
+  if (identical(space, "mni152")) {
+    out <- apply_affine(out, mni305_to_mni152_matrix())
+  }
+  out
+}
+
+
+#' @rdname mesh_to_mni
+#' @export
+mni_to_mesh <- function(
+  x,
+  y,
+  z,
+  hemisphere = c("lh", "rh"),
+  surface = "pial",
+  space = c("mni305", "mni152")
+) {
+  hemisphere <- match.arg(hemisphere)
+  space <- match.arg(space)
+  shift <- mesh_shift(hemisphere, surface)
+
+  out <- data.frame(x = x, y = y, z = z)
+  if (identical(space, "mni152")) {
+    out <- apply_affine(out, solve(mni305_to_mni152_matrix()))
+  }
+  data.frame(
+    x = out$x + shift[["x"]],
+    y = out$y + shift[["y"]],
+    z = out$z + shift[["z"]]
+  )
+}
+
+
 #' Surfaces whose coordinates mean something anatomically
 #'
 #' Inflation and spherical registration move every vertex, so a point on an
@@ -92,92 +180,4 @@ mesh_shift <- function(hemisphere, surface, call = rlang::caller_env()) {
     )
   }
   shift
-}
-
-
-#' Convert between plot coordinates and a standard space
-#'
-#' `mesh_to_mni()` takes coordinates as the plot draws them and returns where
-#' they are in a standard space; `mni_to_mesh()` goes the other way, which is
-#' what you want for putting [add_points()] somewhere specific.
-#'
-#' @details
-#' The surfaces are fsaverage5, and fsaverage is an MNI305 average, so their
-#' coordinates already *are* MNI305 apart from a shift: each hemisphere is
-#' moved so it meets the midline at `x = 0`, which is what lets the two be
-#' drawn together. These functions add or remove that shift, reading it from
-#' the mesh rather than assuming it, so a rebuilt mesh cannot silently put
-#' every point in the wrong place.
-#'
-#' `space = "mni152"` applies FreeSurfer's published MNI305-to-MNI152
-#' transform on top. It moves a coordinate by roughly a millimetre.
-#'
-#' Only anatomical surfaces can be converted. An inflated or spherical
-#' surface has had every vertex moved, so a position on it does not
-#' correspond to a place in the brain, and asking is an error rather than a
-#' number that looks usable.
-#'
-#' @param x,y,z Numeric coordinates.
-#' @param hemisphere `"lh"` or `"rh"` -- which hemisphere's shift applies.
-#' @param surface The surface the coordinates belong to. One of `"white"`,
-#'   `"pial"`, `"midthickness"`, `"smoothwm"` or `"orig"`.
-#' @param space `"mni305"`, which fsaverage is, or `"mni152"`.
-#'
-#' @return A data.frame of `x`, `y` and `z`.
-#' @family brain modifiers
-#' @export
-#'
-#' @examples
-#' # where does a point in MNI space sit in the plot?
-#' mni_to_mesh(-42, -20, 55, hemisphere = "lh")
-#'
-#' # and back again
-#' mesh_to_mni(-43.2, -20, 55, hemisphere = "lh")
-mesh_to_mni <- function(
-  x,
-  y,
-  z,
-  hemisphere = c("lh", "rh"),
-  surface = "pial",
-  space = c("mni305", "mni152")
-) {
-  hemisphere <- match.arg(hemisphere)
-  space <- match.arg(space)
-  shift <- mesh_shift(hemisphere, surface)
-
-  out <- data.frame(
-    x = x - shift[["x"]],
-    y = y - shift[["y"]],
-    z = z - shift[["z"]]
-  )
-  if (identical(space, "mni152")) {
-    out <- apply_affine(out, mni305_to_mni152_matrix())
-  }
-  out
-}
-
-
-#' @rdname mesh_to_mni
-#' @export
-mni_to_mesh <- function(
-  x,
-  y,
-  z,
-  hemisphere = c("lh", "rh"),
-  surface = "pial",
-  space = c("mni305", "mni152")
-) {
-  hemisphere <- match.arg(hemisphere)
-  space <- match.arg(space)
-  shift <- mesh_shift(hemisphere, surface)
-
-  out <- data.frame(x = x, y = y, z = z)
-  if (identical(space, "mni152")) {
-    out <- apply_affine(out, solve(mni305_to_mni152_matrix()))
-  }
-  data.frame(
-    x = out$x + shift[["x"]],
-    y = out$y + shift[["y"]],
-    z = out$z + shift[["z"]]
-  )
 }
