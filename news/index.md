@@ -13,6 +13,26 @@
 
 ### New features
 
+- [`mesh_to_mni()`](https://ggsegverse.github.io/ggseg3d/reference/mesh_to_mni.md)
+  and
+  [`mni_to_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/mesh_to_mni.md)
+  convert between the coordinates a plot draws in and MNI305 or MNI152,
+  so a position can be looked up rather than guessed at. The surfaces
+  are fsaverage5, and so already MNI305 apart from the shift that moves
+  each hemisphere to the midline; the shift is read from the mesh rather
+  than assumed. Inflated and spherical surfaces are refused, since a
+  position on them corresponds to nowhere in the brain.
+
+- [`add_points()`](https://ggsegverse.github.io/ggseg3d/reference/add_points.md)
+  draws markers at coordinates of your own – electrode and sensor
+  positions, stimulation sites. This was done with plotly’s
+  `add_trace()` up to ggseg3d 1.6.5 and had no replacement after the
+  move off plotly (ggsegverse/ggseg3d#23).
+
+- [`add_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/add_atlas.md)
+  draws a second atlas into an existing plot, so a subcortical atlas can
+  sit inside a cortical one (ggsegverse/ggseg3d#25).
+
 - Parcel borders follow the parcellation rather than the mesh
   triangulation. Faces straddling a border are cut at the crossed edges’
   midpoints, removing the ~3 mm fringe along every border on an

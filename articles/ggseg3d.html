@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9010</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ggseg3d-walkthrough.html">ggseg3d walkthrough</a></li>
+    <li><a class="dropdown-item" href="../articles/point-placement.html">Placing points and combining atlases</a></li>
     <li><a class="dropdown-item" href="../articles/rayshader.html">Ray-traced brain renders with rayshader</a></li>
     <li><a class="dropdown-item" href="../articles/shiny.html">Using ggseg3d in Shiny</a></li>
   </ul>
@@ -170,6 +171,18 @@ regions visible in their default atlas colours.</div>
 <code>"left lateral"</code>, <code>"right medial"</code>,
 <code>"left superior"</code>, and so on. For anything else, pass a list
 with <code>eye</code> coordinates.</p>
+</div>
+<div class="section level2">
+<h2 id="beyond-parcellations">Beyond parcellations<a class="anchor" aria-label="anchor" href="#beyond-parcellations"></a>
+</h2>
+<p>To put your own coordinates on the brain — electrode positions,
+stimulation targets, cluster peaks — see <code><a href="../reference/add_points.html">add_points()</a></code>, and
+<code><a href="../reference/mesh_to_mni.html">mni_to_mesh()</a></code> for getting there from MNI.
+<code><a href="../reference/add_atlas.html">add_atlas()</a></code> draws a second atlas into the same scene. The
+<a href="https://ggsegverse.github.io/ggseg3d/articles/point-placement.html">“Placing
+points and combining atlases”</a> article covers both, and why the
+surface you plot on decides whether measured coordinates land where they
+should.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

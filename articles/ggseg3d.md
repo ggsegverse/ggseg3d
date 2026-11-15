@@ -109,3 +109,18 @@ default atlas colours.
 Camera presets cover the standard anatomical views: `"left lateral"`,
 `"right medial"`, `"left superior"`, and so on. For anything else, pass
 a list with `eye` coordinates.
+
+## Beyond parcellations
+
+To put your own coordinates on the brain — electrode positions,
+stimulation targets, cluster peaks — see
+[`add_points()`](https://ggsegverse.github.io/ggseg3d/reference/add_points.md),
+and
+[`mni_to_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/mesh_to_mni.md)
+for getting there from MNI.
+[`add_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/add_atlas.md)
+draws a second atlas into the same scene. The [“Placing points and
+combining
+atlases”](https://ggsegverse.github.io/ggseg3d/articles/point-placement.html)
+article covers both, and why the surface you plot on decides whether
+measured coordinates land where they should.

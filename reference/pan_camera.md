@@ -53,7 +53,9 @@ The input object (modified), for piping.
 ## See also
 
 Other brain modifiers:
+[`add_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/add_atlas.md),
 [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md),
+[`add_points()`](https://ggsegverse.github.io/ggseg3d/reference/add_points.md),
 [`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md),
 [`set_dimensions()`](https://ggsegverse.github.io/ggseg3d/reference/set_dimensions.md),
 [`set_edges()`](https://ggsegverse.github.io/ggseg3d/reference/set_edges.md),

@@ -13,8 +13,12 @@ Core 3D visualization function
 
 Pipe-friendly functions to modify the 3D widget
 
+- [`add_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/add_atlas.md)
+  : Add another atlas to a ggseg3d plot
 - [`add_glassbrain()`](https://ggsegverse.github.io/ggseg3d/reference/add_glassbrain.md)
   : Add glass brain to ggseg3d plot
+- [`add_points()`](https://ggsegverse.github.io/ggseg3d/reference/add_points.md)
+  : Add points to a ggseg3d plot
 - [`pan_camera()`](https://ggsegverse.github.io/ggseg3d/reference/pan_camera.md)
   : Pan camera position of ggseg3d plot
 - [`set_background()`](https://ggsegverse.github.io/ggseg3d/reference/set_background.md)
@@ -40,6 +44,14 @@ Work with brain surface meshes
 
 - [`resolve_brain_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/resolve_brain_mesh.md)
   : Resolve brain surface mesh
+
+## Coordinate Spaces
+
+Convert between plot coordinates and a standard space
+
+- [`mesh_to_mni()`](https://ggsegverse.github.io/ggseg3d/reference/mesh_to_mni.md)
+  [`mni_to_mesh()`](https://ggsegverse.github.io/ggseg3d/reference/mesh_to_mni.md)
+  : Convert between plot coordinates and a standard space
 
 ## Shiny
 
