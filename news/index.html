@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9009</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,12 +49,16 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="ggseg3d-development-version">ggseg3d (development version)<a class="anchor" aria-label="anchor" href="#ggseg3d-development-version"></a></h2>
 <div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>Requires <code>ggseg.formats (&gt;= 0.0.4.9025)</code>, the first version carrying the rebuilt <code>tracula</code>. The previous floor was satisfied by versions whose tracula was mirrored left-to-right, so an installed 0.0.4.9022 upgraded nothing and <code>ggseg3d(atlas = tracula(), hemisphere = "left")</code> drew the anatomical right hemisphere under the left label – while ggseg, floored higher, drew it correctly in the same session.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li><p>Parcel borders follow the parcellation rather than the mesh triangulation. Faces straddling a border are cut at the crossed edges’ midpoints, removing the ~3 mm fringe along every border on an fsaverage5 surface. Turn it off with <code>split_boundaries = FALSE</code> for a smaller widget (ggsegverse/ggseg3d#9).</p></li>
 <li><p>The read-only atlas accessors from <code>ggseg.formats</code> are re-exported, so <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_palette.html" class="external-link">atlas_palette()</a></code>, <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html" class="external-link">atlas_regions()</a></code>, <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_meshes.html" class="external-link">atlas_meshes()</a></code> and their siblings work after <code><a href="https://github.com/ggsegverse/ggseg3d" class="external-link">library(ggseg3d)</a></code> and an atlas package, without attaching <code>ggseg.formats</code>. Requires <code>ggseg.formats (&gt;= 0.0.4.9015)</code> (ggsegverse/ggseg#183).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-development-version-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version-1"></a></h3>
 <ul><li><p>An atlas whose vertex indices do not fit the mesh it is drawn on warns instead of rendering silently wrong. The warning names how many fall outside and says the 2D geometry is unaffected.</p></li>
 <li><p>Atlases whose colour table gives every region the same colour no longer render as a single indistinguishable brain. Region colours come from <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_plot_palette.html" class="external-link">ggseg.formats::atlas_plot_palette()</a></code>, which substitutes distinguishable colours and warns that the atlas colour table is what needs fixing.</p></li>
 <li><p><code>na_alpha</code> does what it documents: regions with no value fade per vertex on surfaces and per mesh on structures and tracts. It was accepted and ignored in every previous release. Values outside 0-1 are an error.</p></li>
