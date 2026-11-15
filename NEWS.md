@@ -2,11 +2,12 @@
 
 ## Bug fixes
 
-- Region boundary edges are drawn again. Splitting faces at parcel borders
-  (2.1.2.9009) left every face with a single region, which is what makes the
-  borders exact -- and left `find_boundary_edges()` with no face whose
-  vertices differ, so `set_edges()`, `edge_by` and the default edges all
-  silently produced nothing. Edges are now computed before the split.
+- Region boundary edges are drawn again, on both cortical and cerebellar
+  atlases. Splitting faces at parcel borders (2.1.2.9009) left every face with
+  a single region, which is what makes the borders exact -- and left
+  `find_boundary_edges()` with no face whose vertices differ, so `set_edges()`,
+  `edge_by` and the default edges all silently produced nothing. Edges are now
+  computed before the split.
 
 - `label_by` works on cortical and cerebellar atlases. It was validated
   against the data and then ignored, so `label_by = "label"` hovered region

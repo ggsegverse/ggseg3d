@@ -746,6 +746,42 @@ describe("label_by reaches the vertex-coloured paths", {
   })
 })
 
+describe("splitting boundary faces leaves the edges intact", {
+  # The regression this guards shipped in 2.1.2.9009 and survived two green CI
+  # runs: splitting faces at parcel borders leaves every face single-region, so
+  # find_boundary_edges() run afterwards returns nothing and every edge
+  # silently disappears. Both mesh paths had it; only the cortical one was
+  # caught. Asserting edges merely exist is not enough -- the split must not
+  # change them, and the indices must still address the original vertices.
+  it("finds the same cortical edges with the split on and off", {
+    on <- prepare_brain_meshes(ggseg.formats::dk(), split_boundaries = TRUE)
+    off <- prepare_brain_meshes(ggseg.formats::dk(), split_boundaries = FALSE)
+    edges <- function(p) p$meshes[[1]]$boundaryEdges
+    expect_gt(length(edges(on)), 0)
+    expect_identical(edges(on), edges(off))
+  })
+
+  it("finds the same cerebellar edges with the split on and off", {
+    on <- prepare_brain_meshes(ggseg.formats::suit(), split_boundaries = TRUE)
+    off <- prepare_brain_meshes(ggseg.formats::suit(), split_boundaries = FALSE)
+    edges <- function(p) p$meshes[[1]]$boundaryEdges
+    expect_gt(length(edges(on)), 0)
+    expect_identical(edges(on), edges(off))
+  })
+
+  it("keeps every edge index addressing a pre-split vertex", {
+    mesh <- as_one_based_mesh(ggseg.formats::get_cerebellar_mesh())
+    split <- prepare_brain_meshes(
+      ggseg.formats::suit(),
+      split_boundaries = TRUE
+    )
+    indices <- unlist(split$meshes[[1]]$boundaryEdges)
+    expect_gt(length(indices), 0)
+    expect_lte(max(indices), nrow(mesh$vertices))
+    expect_gte(min(indices), 1)
+  })
+})
+
 describe("edge_by reaches the boundary-edge computation", {
   it("groups edges by the column asked for, not by colour", {
     # Replacing the grouping with a constant used to pass the whole suite:

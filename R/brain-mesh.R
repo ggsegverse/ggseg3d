@@ -542,6 +542,12 @@ build_cerebellar_meshes <- function(
     vertices_to_text(atlas_data, n_vertices, text_by)
   }
 
+  # Before the split, for the same reason as the cortical path: splitting
+  # leaves every face with one region, so find_boundary_edges() sees no face
+  # whose vertices differ and returns nothing. Edges computed here stay valid
+  # because the split keeps every original vertex at its original index.
+  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
+
   if (split_boundaries) {
     split <- split_mesh_boundaries(
       mesh,
@@ -559,8 +565,6 @@ build_cerebellar_meshes <- function(
     vertex_alphas <- split$vectors$alphas
     vertex_texts <- split$vectors$texts
   }
-
-  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
 
   entry <- make_mesh_entry(
     name = "cerebellum",
