@@ -1,5 +1,14 @@
 # ggseg3d (development version)
 
+## Bug fixes
+
+- Requires `ggseg.formats (>= 0.0.4.9025)`, the first version carrying the
+  rebuilt `tracula`. The previous floor was satisfied by versions whose
+  tracula was mirrored left-to-right, so an installed 0.0.4.9022 upgraded
+  nothing and `ggseg3d(atlas = tracula(), hemisphere = "left")` drew the
+  anatomical right hemisphere under the left label -- while ggseg, floored
+  higher, drew it correctly in the same session.
+
 ## New features
 
 - `mesh_to_mni()` and `mni_to_mesh()` convert between the coordinates a plot
