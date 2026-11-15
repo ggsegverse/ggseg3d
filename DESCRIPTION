@@ -36,6 +36,8 @@ Imports:
     tidyr,
     webshot2
 Suggests:
+    freesurfer,
+    freesurferformats,
     ggseg.meshes,
     jsonlite,
     rgl,

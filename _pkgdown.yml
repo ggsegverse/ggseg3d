@@ -28,6 +28,12 @@ reference:
     contents:
       - resolve_brain_mesh
 
+  - title: Coordinate Spaces
+    desc: Convert between plot coordinates and a standard space
+    contents:
+      # tracks @family coordinate spaces
+      - has_concept("coordinate spaces")
+
   - title: Shiny
     desc: Shiny integration
     contents:

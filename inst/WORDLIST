@@ -1,4 +1,5 @@
 anisotropy
+aseg
 Athanasia
 caudate
 centerline
@@ -24,6 +25,7 @@ DTI
 fibre
 flatmap
 flatmaps
+FreeSurfer's
 fsaverage
 ggseg
 ggsegray
@@ -49,6 +51,8 @@ Lifecycle
 magick
 midline
 midthickness
+millimetre
+MNI
 normalises
 occipital
 Optimising
@@ -61,9 +65,11 @@ Piñeiro
 pkgdown
 plotly
 Plotly
+plotly's
 png
 Pre
 precentral
+putamen
 rayshader
 Rayshader
 rayshader's
