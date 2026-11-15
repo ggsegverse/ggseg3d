@@ -721,3 +721,42 @@ describe("warn_vertex_space_mismatch()", {
     expect_no_warning(invisible(prepare_brain_meshes(ggseg.formats::dk())))
   })
 })
+
+describe("label_by reaches the vertex-coloured paths", {
+  it("labels cortical vertices by the column asked for", {
+    # This read atlas_data$region unconditionally, so label_by validated
+    # against the data and then changed nothing: both calls produced region
+    # names. The only test asserted the result was a ggseg3d.
+    by_label <- ggseg3d(hemisphere = "left", label_by = "label")
+    by_region <- ggseg3d(hemisphere = "left", label_by = "region")
+    labels <- function(p) {
+      setdiff(unique(p$x$meshes[[1]]$vertexLabels), "")
+    }
+    expect_false(identical(labels(by_label), labels(by_region)))
+    expect_true(all(grepl("^lh_", labels(by_label))))
+    expect_false(any(grepl("^lh_", labels(by_region))))
+  })
+
+  it("labels cerebellar vertices by the column asked for", {
+    atlas <- make_test_cerebellar_atlas()
+    by_label <- prepare_brain_meshes(atlas, label_by = "label")
+    by_region <- prepare_brain_meshes(atlas, label_by = "region")
+    drawn <- function(p) setdiff(unique(p$meshes[[1]]$vertexLabels), "")
+    expect_false(identical(drawn(by_label), drawn(by_region)))
+  })
+})
+
+describe("edge_by reaches the boundary-edge computation", {
+  it("groups edges by the column asked for, not by colour", {
+    # Replacing the grouping with a constant used to pass the whole suite:
+    # the tests asserted only that edgeColor was non-NULL, and that is a
+    # literal set whenever edge_by is supplied.
+    with_edges <- ggseg3d(hemisphere = "left", edge_by = "lobe")
+    without <- ggseg3d(hemisphere = "left")
+    expect_gt(length(with_edges$x$meshes[[1]]$boundaryEdges), 0)
+    expect_false(identical(
+      with_edges$x$meshes[[1]]$boundaryEdges,
+      without$x$meshes[[1]]$boundaryEdges
+    ))
+  })
+})
