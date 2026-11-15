@@ -285,9 +285,15 @@ vertices_to_colors <- function(
 vertices_to_labels <- function(
   atlas_data,
   n_vertices,
-  na_label = NA_character_
+  na_label = NA_character_,
+  label_by = "region"
 ) {
-  map_vertex_values(atlas_data, n_vertices, atlas_data$region, na_label)
+  # Honour what the caller asked to label by. This read `atlas_data$region`
+  # unconditionally, so `label_by` validated against the data -- a typo
+  # errored -- and then changed nothing, on the two paths that colour by
+  # vertex. The subcortical and tract builders always honoured it.
+  values <- atlas_data[[label_by]] %||% atlas_data$region
+  map_vertex_values(atlas_data, n_vertices, values, na_label)
 }
 
 
@@ -435,7 +441,12 @@ build_cortical_meshes <- function(
     n_vertices <- nrow(mesh$vertices)
     warn_vertex_space_mismatch(hemi_data, n_vertices, surface)
     vertex_colors <- vertices_to_colors(hemi_data, n_vertices, na_colour)
-    vertex_labels <- vertices_to_labels(hemi_data, n_vertices, na_label = "")
+    vertex_labels <- vertices_to_labels(
+      hemi_data,
+      n_vertices,
+      na_label = "",
+      label_by = label_by
+    )
     vertex_alphas <- vertices_to_alphas(hemi_data, n_vertices, na_alpha)
 
     vertex_texts <- if (!is.null(text_by)) {
@@ -445,6 +456,16 @@ build_cortical_meshes <- function(
       vertices_to_groups(hemi_data, n_vertices, edge_by)
     }
 
+    # Before the split, not after. Splitting leaves every face with one
+    # region, which is the whole point -- and leaves find_boundary_edges()
+    # with no face whose vertices differ, so it returns nothing. Edges
+    # computed here stay valid because the split keeps every original vertex
+    # at its original index and only appends.
+    boundary <- find_boundary_edges(
+      mesh$faces,
+      if (!is.null(edge_by)) edge_groups else vertex_colors
+    )
+
     if (split_boundaries) {
       split <- split_mesh_boundaries(
         mesh,
@@ -453,8 +474,7 @@ build_cortical_meshes <- function(
           colors = vertex_colors,
           labels = vertex_labels,
           alphas = vertex_alphas,
-          texts = vertex_texts,
-          edges = edge_groups
+          texts = vertex_texts
         )
       )
       mesh <- split$mesh
@@ -462,13 +482,7 @@ build_cortical_meshes <- function(
       vertex_labels <- split$vectors$labels
       vertex_alphas <- split$vectors$alphas
       vertex_texts <- split$vectors$texts
-      edge_groups <- split$vectors$edges
     }
-
-    boundary <- find_boundary_edges(
-      mesh$faces,
-      if (!is.null(edge_by)) edge_groups else vertex_colors
-    )
 
     edge_color <- if (!is.null(edge_by)) "#000000" else NULL
 
@@ -526,13 +540,20 @@ build_cerebellar_meshes <- function(
   vertex_labels <- vertices_to_labels(
     atlas_data,
     n_vertices,
-    na_label = ""
+    na_label = "",
+    label_by = label_by
   )
   vertex_alphas <- vertices_to_alphas(atlas_data, n_vertices, na_alpha)
 
   vertex_texts <- if (!is.null(text_by)) {
     vertices_to_text(atlas_data, n_vertices, text_by)
   }
+
+  # Before the split, for the same reason as the cortical path: splitting
+  # leaves every face with one region, so find_boundary_edges() sees no face
+  # whose vertices differ and returns nothing. Edges computed here stay valid
+  # because the split keeps every original vertex at its original index.
+  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
 
   if (split_boundaries) {
     split <- split_mesh_boundaries(
@@ -551,8 +572,6 @@ build_cerebellar_meshes <- function(
     vertex_alphas <- split$vectors$alphas
     vertex_texts <- split$vectors$texts
   }
-
-  boundary <- find_boundary_edges(mesh$faces, vertex_colors)
 
   entry <- make_mesh_entry(
     name = "cerebellum",

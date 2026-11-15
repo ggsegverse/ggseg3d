@@ -721,3 +721,78 @@ describe("warn_vertex_space_mismatch()", {
     expect_no_warning(invisible(prepare_brain_meshes(ggseg.formats::dk())))
   })
 })
+
+describe("label_by reaches the vertex-coloured paths", {
+  it("labels cortical vertices by the column asked for", {
+    # This read atlas_data$region unconditionally, so label_by validated
+    # against the data and then changed nothing: both calls produced region
+    # names. The only test asserted the result was a ggseg3d.
+    by_label <- ggseg3d(hemisphere = "left", label_by = "label")
+    by_region <- ggseg3d(hemisphere = "left", label_by = "region")
+    labels <- function(p) {
+      setdiff(unique(p$x$meshes[[1]]$vertexLabels), "")
+    }
+    expect_false(identical(labels(by_label), labels(by_region)))
+    expect_true(all(grepl("^lh_", labels(by_label))))
+    expect_false(any(grepl("^lh_", labels(by_region))))
+  })
+
+  it("labels cerebellar vertices by the column asked for", {
+    atlas <- make_test_cerebellar_atlas()
+    by_label <- prepare_brain_meshes(atlas, label_by = "label")
+    by_region <- prepare_brain_meshes(atlas, label_by = "region")
+    drawn <- function(p) setdiff(unique(p$meshes[[1]]$vertexLabels), "")
+    expect_false(identical(drawn(by_label), drawn(by_region)))
+  })
+})
+
+describe("splitting boundary faces leaves the edges intact", {
+  # The regression this guards shipped in 2.1.2.9009 and survived two green CI
+  # runs: splitting faces at parcel borders leaves every face single-region, so
+  # find_boundary_edges() run afterwards returns nothing and every edge
+  # silently disappears. Both mesh paths had it; only the cortical one was
+  # caught. Asserting edges merely exist is not enough -- the split must not
+  # change them, and the indices must still address the original vertices.
+  it("finds the same cortical edges with the split on and off", {
+    on <- prepare_brain_meshes(ggseg.formats::dk(), split_boundaries = TRUE)
+    off <- prepare_brain_meshes(ggseg.formats::dk(), split_boundaries = FALSE)
+    edges <- function(p) p$meshes[[1]]$boundaryEdges
+    expect_gt(length(edges(on)), 0)
+    expect_identical(edges(on), edges(off))
+  })
+
+  it("finds the same cerebellar edges with the split on and off", {
+    on <- prepare_brain_meshes(ggseg.formats::suit(), split_boundaries = TRUE)
+    off <- prepare_brain_meshes(ggseg.formats::suit(), split_boundaries = FALSE)
+    edges <- function(p) p$meshes[[1]]$boundaryEdges
+    expect_gt(length(edges(on)), 0)
+    expect_identical(edges(on), edges(off))
+  })
+
+  it("keeps every edge index addressing a pre-split vertex", {
+    mesh <- as_one_based_mesh(ggseg.formats::get_cerebellar_mesh())
+    split <- prepare_brain_meshes(
+      ggseg.formats::suit(),
+      split_boundaries = TRUE
+    )
+    indices <- unlist(split$meshes[[1]]$boundaryEdges)
+    expect_gt(length(indices), 0)
+    expect_lte(max(indices), nrow(mesh$vertices))
+    expect_gte(min(indices), 1)
+  })
+})
+
+describe("edge_by reaches the boundary-edge computation", {
+  it("groups edges by the column asked for, not by colour", {
+    # Replacing the grouping with a constant used to pass the whole suite:
+    # the tests asserted only that edgeColor was non-NULL, and that is a
+    # literal set whenever edge_by is supplied.
+    with_edges <- ggseg3d(hemisphere = "left", edge_by = "lobe")
+    without <- ggseg3d(hemisphere = "left")
+    expect_gt(length(with_edges$x$meshes[[1]]$boundaryEdges), 0)
+    expect_false(identical(
+      with_edges$x$meshes[[1]]$boundaryEdges,
+      without$x$meshes[[1]]$boundaryEdges
+    ))
+  })
+})
