@@ -4,6 +4,20 @@
 
 ### Bug fixes
 
+- Region boundary edges are drawn again, on both cortical and cerebellar
+  atlases. Splitting faces at parcel borders (2.1.2.9009) left every
+  face with a single region, which is what makes the borders exact – and
+  left `find_boundary_edges()` with no face whose vertices differ, so
+  [`set_edges()`](https://ggsegverse.github.io/ggseg3d/reference/set_edges.md),
+  `edge_by` and the default edges all silently produced nothing. Edges
+  are now computed before the split.
+
+- `label_by` works on cortical and cerebellar atlases. It was validated
+  against the data and then ignored, so `label_by = "label"` hovered
+  region names. Subcortical and tract atlases always honoured it.
+
+### Bug fixes
+
 - Requires `ggseg.formats (>= 0.0.4.9025)`, the first version carrying
   the rebuilt `tracula`. The previous floor was satisfied by versions
   whose tracula was mirrored left-to-right, so an installed 0.0.4.9022

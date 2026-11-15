@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9011</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9012</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,11 @@
 <h2 class="pkg-version" data-toc-text="development version" id="ggseg3d-development-version">ggseg3d (development version)<a class="anchor" aria-label="anchor" href="#ggseg3d-development-version"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li><p>Region boundary edges are drawn again, on both cortical and cerebellar atlases. Splitting faces at parcel borders (2.1.2.9009) left every face with a single region, which is what makes the borders exact – and left <code>find_boundary_edges()</code> with no face whose vertices differ, so <code><a href="../reference/set_edges.html">set_edges()</a></code>, <code>edge_by</code> and the default edges all silently produced nothing. Edges are now computed before the split.</p></li>
+<li><p><code>label_by</code> works on cortical and cerebellar atlases. It was validated against the data and then ignored, so <code>label_by = "label"</code> hovered region names. Subcortical and tract atlases always honoured it.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version-1"></a></h3>
 <ul><li>Requires <code>ggseg.formats (&gt;= 0.0.4.9025)</code>, the first version carrying the rebuilt <code>tracula</code>. The previous floor was satisfied by versions whose tracula was mirrored left-to-right, so an installed 0.0.4.9022 upgraded nothing and <code>ggseg3d(atlas = tracula(), hemisphere = "left")</code> drew the anatomical right hemisphere under the left label – while ggseg, floored higher, drew it correctly in the same session.</li>
 </ul></div>
 <div class="section level3">
@@ -62,7 +67,7 @@
 <li><p>The read-only atlas accessors from <code>ggseg.formats</code> are re-exported, so <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_palette.html" class="external-link">atlas_palette()</a></code>, <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_regions.html" class="external-link">atlas_regions()</a></code>, <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_meshes.html" class="external-link">atlas_meshes()</a></code> and their siblings work after <code><a href="https://github.com/ggsegverse/ggseg3d" class="external-link">library(ggseg3d)</a></code> and an atlas package, without attaching <code>ggseg.formats</code>. Requires <code>ggseg.formats (&gt;= 0.0.4.9015)</code> (ggsegverse/ggseg#183).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version-1"></a></h3>
+<h3 id="bug-fixes-development-version-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version-2"></a></h3>
 <ul><li><p>An atlas whose vertex indices do not fit the mesh it is drawn on warns instead of rendering silently wrong. The warning names how many fall outside and says the 2D geometry is unaffected.</p></li>
 <li><p>Atlases whose colour table gives every region the same colour no longer render as a single indistinguishable brain. Region colours come from <code><a href="https://ggsegverse.github.io/ggseg.formats/reference/atlas_plot_palette.html" class="external-link">ggseg.formats::atlas_plot_palette()</a></code>, which substitutes distinguishable colours and warns that the atlas colour table is what needs fixing.</p></li>
 <li><p><code>na_alpha</code> does what it documents: regions with no value fade per vertex on surfaces and per mesh on structures and tracts. It was accepted and ignored in every previous release. Values outside 0-1 are an error.</p></li>
