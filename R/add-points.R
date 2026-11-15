@@ -86,63 +86,24 @@ add_points <- function(
   )
   text_values <- rlang::eval_tidy(rlang::enquo(text), data)
 
-  n <- nrow(data)
-  if (n == 0L) {
-    cli::cli_warn("{.arg data} has no rows; no points added.")
+  markers <- resolve_markers(
+    data = data,
+    coords = coords,
+    colour = colour,
+    size = size,
+    text = text_values
+  )
+  if (is.null(markers)) {
     return(p)
   }
 
-  # Recycled like every other per-marker argument. Left raw, a scalar
-  # coordinate made markers_mesh() build faces for one marker and vertices
-  # for all of them, so the rest were drawn with no faces -- invisible, and
-  # silent.
-  coords <- lapply(names(coords), function(nm) {
-    value <- recycle_markers(coords[[nm]], n, nm)
-    if (!is.numeric(value)) {
-      cli::cli_abort(c(
-        "{.arg {nm}} must be numeric, not {.cls {class(value)[[1]]}}.",
-        "i" = "Coordinates are positions in the surface's own space."
-      ))
-    }
-    value
-  })
-  names(coords) <- c("x", "y", "z")
-
-  colour <- recycle_markers(colour, n, "colour")
-  size <- recycle_markers(size, n, "size")
-  if (!is.null(text_values)) {
-    text_values <- as.character(recycle_markers(text_values, n, "text"))
-  }
-
-  # A marker with a missing coordinate would otherwise be drawn at the
-  # origin, which is inside the brain and indistinguishable from a real
-  # measurement.
-  keep <- stats::complete.cases(coords$x, coords$y, coords$z)
-  if (!all(keep)) {
-    dropped <- sum(!keep) # nolint: object_usage_linter
-    cli::cli_warn(
-      "Dropped {dropped} marker{?s} with missing coordinates."
-    )
-    coords <- lapply(coords, `[`, keep)
-    colour <- colour[keep]
-    size <- size[keep]
-    if (!is.null(text_values)) {
-      text_values <- text_values[keep]
-    }
-    if (length(coords$x) == 0L) {
-      return(p)
-    }
-  }
-
-  colour <- resolve_marker_colours(colour)
-
   markers <- markers_mesh(
-    x = coords$x,
-    y = coords$y,
-    z = coords$z,
-    radius = size,
-    colour = colour,
-    text = text_values
+    x = markers$x,
+    y = markers$y,
+    z = markers$z,
+    radius = markers$size,
+    colour = markers$colour,
+    text = markers$text
   )
 
   # The renderer reads vertexTexts only inside a vertexLabels branch, so a
@@ -219,27 +180,15 @@ add_atlas <- function(p, atlas, ...) {
     ))
   }
 
-  dots <- list(...)
-  if (!is_rgl && !"surface" %in% names(dots)) {
-    host <- host_surface(p)
-    if (!is.null(host)) {
-      dots$surface <- host
-    }
-  }
-  prepared <- do.call(prepare_brain_meshes, c(list(atlas), dots))
-  entries <- prepared$meshes %||% list()
+  entries <- added_atlas_meshes(p, atlas, is_rgl, ...)
   if (length(entries) == 0L) {
     cli::cli_warn("The atlas produced no meshes; nothing added.")
     return(p)
   }
-
-  flat <- function(meshes) {
-    any(vapply(meshes, function(m) isTRUE(m$isFlatmap), logical(1)))
-  }
   # The added atlas's own flatness needs no widget state, so it is checked
   # whichever renderer this is; only the host's does.
-  host_flat <- !is_rgl && flat(p$x$meshes %||% list())
-  if (flat(entries) || host_flat) {
+  host_flat <- !is_rgl && any_flatmap(p$x$meshes %||% list())
+  if (any_flatmap(entries) || host_flat) {
     cli::cli_warn(c(
       "Skipping atlas: one of the two is a flat (2D) surface.",
       "i" = "Flatmap surfaces share no coordinate frame with anatomical
@@ -324,6 +273,69 @@ markers_mesh <- function(x, y, z, radius, colour, text = NULL) {
 }
 
 
+#' Bring every per-marker argument to one validated value per marker
+#'
+#' Pulled out of `add_points()` because it is a distinct job: turn what the
+#' caller supplied into exactly `n` of everything, or say why not. Coordinates
+#' used to skip this, which let a scalar coordinate draw one marker and
+#' silently discard the rest.
+#'
+#' @param data The caller's data.frame; its row count is the marker count.
+#' @param coords List of evaluated `x`, `y` and `z`.
+#' @param colour,size,text Per-marker arguments, length 1 or `nrow(data)`.
+#' @return A list of equal-length `x`, `y`, `z`, `colour`, `size` and `text`,
+#'   or `NULL` when nothing is left to draw.
+#' @noRd
+resolve_markers <- function(data, coords, colour, size, text) {
+  n <- nrow(data)
+  if (n == 0L) {
+    cli::cli_warn("{.arg data} has no rows; no points added.")
+    return(NULL)
+  }
+
+  coords <- lapply(names(coords), function(nm) {
+    value <- recycle_markers(coords[[nm]], n, nm)
+    if (!is.numeric(value)) {
+      cli::cli_abort(c(
+        "{.arg {nm}} must be numeric, not {.cls {class(value)[[1]]}}.",
+        "i" = "Coordinates are positions in the surface's own space."
+      ))
+    }
+    value
+  })
+  names(coords) <- c("x", "y", "z")
+
+  out <- list(
+    x = coords$x,
+    y = coords$y,
+    z = coords$z,
+    colour = recycle_markers(colour, n, "colour"),
+    size = recycle_markers(size, n, "size"),
+    text = if (is.null(text)) {
+      NULL
+    } else {
+      as.character(recycle_markers(text, n, "text"))
+    }
+  )
+
+  # A marker with a missing coordinate would otherwise be drawn at the
+  # origin, which is inside the brain and indistinguishable from a real
+  # measurement.
+  keep <- stats::complete.cases(out$x, out$y, out$z)
+  if (!all(keep)) {
+    dropped <- sum(!keep) # nolint: object_usage_linter
+    cli::cli_warn("Dropped {dropped} marker{?s} with missing coordinates.")
+    out <- lapply(out, function(v) if (is.null(v)) NULL else v[keep])
+    if (length(out$x) == 0L) {
+      return(NULL)
+    }
+  }
+
+  out$colour <- resolve_marker_colours(out$colour)
+  out
+}
+
+
 #' Marker transparency has to be a fraction
 #' @noRd
 check_opacity <- function(opacity, call = rlang::caller_env()) {
@@ -400,6 +412,33 @@ recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
     )
   }
   value
+}
+
+
+#' Does any mesh entry carry a flatmap?
+#' @noRd
+any_flatmap <- function(meshes) {
+  any(vapply(meshes, function(m) isTRUE(m$isFlatmap), logical(1)))
+}
+
+
+#' Build the mesh entries for an atlas being added to an existing plot
+#'
+#' Separated from `add_atlas()` so the surface question has one home: left to
+#' its own defaults the pipeline draws an inflated atlas, which beside an
+#' anatomical one is the frame mismatch the flatmap guard refuses, in the
+#' form people will actually hit.
+#' @noRd
+added_atlas_meshes <- function(p, atlas, is_rgl, ...) {
+  dots <- list(...)
+  if (!is_rgl && !"surface" %in% names(dots)) {
+    host <- host_surface(p)
+    if (!is.null(host)) {
+      dots$surface <- host
+    }
+  }
+  prepared <- do.call(prepare_brain_meshes, c(list(atlas), dots))
+  prepared$meshes %||% list()
 }
 
 
