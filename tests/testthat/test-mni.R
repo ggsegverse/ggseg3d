@@ -1,4 +1,5 @@
 fsaverage5_surf <- function(hemi, surface) {
+  testthat::skip_if_not_installed("freesurferformats")
   fs <- tryCatch(freesurfer::fs_dir(), error = function(e) NA_character_)
   testthat::skip_if(is.na(fs), "FreeSurfer not available")
   f <- file.path(
@@ -13,6 +14,9 @@ fsaverage5_surf <- function(hemi, surface) {
 }
 
 describe("mesh_to_mni() / mni_to_mesh()", {
+  # Anatomical surfaces come from ggseg.meshes, which is a Suggests.
+  skip_if_not_installed("ggseg.meshes")
+
   it("round-trips exactly", {
     back <- mni_to_mesh(-42, -20, 55, hemisphere = "lh")
     fwd <- mesh_to_mni(back$x, back$y, back$z, hemisphere = "lh")
@@ -48,12 +52,14 @@ describe("mesh_to_mni() / mni_to_mesh()", {
     expect_identical(nrow(out), 2L)
   })
 
-  it("moves a coordinate by about a millimetre between the MNI spaces", {
+  it("moves a coordinate by two to three millimetres between the spaces", {
     a <- mesh_to_mni(-43, -20, 55, hemisphere = "lh")
     b <- mesh_to_mni(-43, -20, 55, hemisphere = "lh", space = "mni152")
     d <- sqrt((a$x - b$x)^2 + (a$y - b$y)^2 + (a$z - b$z)^2)
-    expect_gt(d, 0.1)
-    expect_lt(d, 5)
+    # Pinned tightly: measured across the brain the shift is 2-3 mm, and a
+    # loose bound let the docs claim "about a millimetre" uncontradicted.
+    expect_gt(d, 1.5)
+    expect_lt(d, 3.5)
   })
 
   it("refuses a surface whose coordinates mean nothing anatomically", {
@@ -97,6 +103,8 @@ describe("mesh_to_mni() / mni_to_mesh()", {
 })
 
 describe("the mesh records how it was positioned", {
+  skip_if_not_installed("ggseg.meshes")
+
   it("carries the shift that was applied to it", {
     for (h in c("lh", "rh")) {
       shift <- attr(resolve_brain_mesh(h, "pial"), "mni_shift")
@@ -112,6 +120,25 @@ describe("the mesh records how it was positioned", {
     }
   })
 
+  it("records a shift of the right sign and a plausible size", {
+    # The value is otherwise only checked against fsaverage5, which skips
+    # wherever FreeSurfer is absent -- including CI, so a sign flip rode
+    # through the whole suite.
+    lh <- attr(resolve_brain_mesh("lh", "pial"), "mni_shift")[["x"]]
+    rh <- attr(resolve_brain_mesh("rh", "pial"), "mni_shift")[["x"]]
+    expect_lt(lh, 0)
+    expect_gt(rh, 0)
+    expect_lt(abs(lh), 5)
+    expect_lt(abs(rh), 5)
+  })
+
+  it("reads the shift of the surface it was asked for", {
+    expect_false(isTRUE(all.equal(
+      mesh_to_mni(0, 0, 0, hemisphere = "lh", surface = "pial")$x,
+      mesh_to_mni(0, 0, 0, hemisphere = "lh", surface = "smoothwm")$x
+    )))
+  })
+
   it("agrees with the offset measured against fsaverage5", {
     src <- fsaverage5_surf("rh", "pial")
     drawn <- resolve_brain_mesh("rh", "pial")$vertices
@@ -121,5 +148,24 @@ describe("the mesh records how it was positioned", {
       measured,
       tolerance = 1e-6
     )
+  })
+})
+
+
+describe("mesh_shift() error paths", {
+  it("says so when no mesh exists for that surface", {
+    local_mocked_bindings(resolve_brain_mesh = function(...) NULL)
+    expect_error(mesh_to_mni(0, 0, 0, hemisphere = "lh"), "No .* mesh")
+  })
+
+  it("refuses a mesh that does not record how it was positioned", {
+    # Third-party meshes are not bound by the attribute contract, so this
+    # branch is the one most likely to fire outside the package.
+    local_mocked_bindings(
+      resolve_brain_mesh = function(...) {
+        list(vertices = data.frame(x = 0, y = 0, z = 0))
+      }
+    )
+    expect_error(mesh_to_mni(0, 0, 0, hemisphere = "lh"), "does not record")
   })
 })

@@ -11,15 +11,21 @@
 #' that is decides whether measured positions land where they should:
 #'
 #' \itemize{
-#'   \item `"white"` and `"pial"` are the anatomical surfaces, spanning about
-#'     x -67 to 67, y -103 to 69 and z -44 to 78. These are fsaverage surface
-#'     coordinates, so positions recorded in a standard space land roughly
-#'     where they belong without a transform.
+#'   \item `"pial"` and `"white"` are the anatomical surfaces. Pial spans
+#'     about x -70 to 70, y -105 to 69 and z -48 to 79; white sits a few
+#'     millimetres inside that. These are fsaverage surface coordinates, so
+#'     positions recorded in a standard space land roughly where they belong
+#'     without a transform.
 #'   \item `"inflated"`, which [ggseg3d()] draws by default, is not
-#'     anatomical. Inflation moves every vertex, leaving a rounder surface
-#'     spanning about x -83 to 82 and z -73 to 73. Measured positions do not
-#'     correspond to it, so plot them on `surface = "pial"` instead.
+#'     anatomical. Inflation moves every vertex outward, leaving a rounder
+#'     surface spanning about x -83 to 82 and z -73 to 73. Measured positions
+#'     do not correspond to it, so plot them on `surface = "pial"` instead.
 #' }
+#'
+#' A coordinate taken from a standard space is usually a point *inside* the
+#' grey matter rather than on its surface, so a marker drawn at one can be
+#' hidden by the cortex around it. Raise `size`, or draw the surface with
+#' [add_glassbrain()] over a subcortical atlas, if a marker does not appear.
 #'
 #' Markers are drawn as small spheres, so they shade and occlude like the
 #' rest of the scene rather than floating in front of it.
@@ -34,11 +40,11 @@
 #' @param text Column of `data` to show on hover, or `NULL` for none.
 #' @param opacity Numeric. Marker transparency (0-1).
 #'
-#' @return The input object (modified), for piping.
+#' @return The input object, for piping. A `ggsegray` is returned unchanged:
+#'   rgl draws to the open device rather than into the object.
 #' @family brain modifiers
 #' @export
-#'
-#' @examples
+#' @examplesIf rlang::is_installed("ggseg.meshes")
 #' sensors <- data.frame(
 #'   x = c(50, 45, 40),
 #'   y = c(22, -10, -40),
@@ -72,6 +78,7 @@ add_points <- function(
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a {.cls data.frame}.")
   }
+  check_opacity(opacity)
 
   coords <- lapply(
     list(x = rlang::enquo(x), y = rlang::enquo(y), z = rlang::enquo(z)),
@@ -85,26 +92,62 @@ add_points <- function(
     return(p)
   }
 
-  colour <- vapply(
-    recycle_markers(colour, n, "colour"),
-    function(one) if (grepl("^#", one)) one else col2hex(one),
-    character(1),
-    USE.NAMES = FALSE
-  )
+  # Recycled like every other per-marker argument. Left raw, a scalar
+  # coordinate made markers_mesh() build faces for one marker and vertices
+  # for all of them, so the rest were drawn with no faces -- invisible, and
+  # silent.
+  coords <- lapply(names(coords), function(nm) {
+    value <- recycle_markers(coords[[nm]], n, nm)
+    if (!is.numeric(value)) {
+      cli::cli_abort(c(
+        "{.arg {nm}} must be numeric, not {.cls {class(value)[[1]]}}.",
+        "i" = "Coordinates are positions in the surface's own space."
+      ))
+    }
+    value
+  })
+  names(coords) <- c("x", "y", "z")
+
+  colour <- recycle_markers(colour, n, "colour")
+  size <- recycle_markers(size, n, "size")
+  if (!is.null(text_values)) {
+    text_values <- as.character(recycle_markers(text_values, n, "text"))
+  }
+
+  # A marker with a missing coordinate would otherwise be drawn at the
+  # origin, which is inside the brain and indistinguishable from a real
+  # measurement.
+  keep <- stats::complete.cases(coords$x, coords$y, coords$z)
+  if (!all(keep)) {
+    dropped <- sum(!keep) # nolint: object_usage_linter
+    cli::cli_warn(
+      "Dropped {dropped} marker{?s} with missing coordinates."
+    )
+    coords <- lapply(coords, `[`, keep)
+    colour <- colour[keep]
+    size <- size[keep]
+    if (!is.null(text_values)) {
+      text_values <- text_values[keep]
+    }
+    if (length(coords$x) == 0L) {
+      return(p)
+    }
+  }
+
+  colour <- resolve_marker_colours(colour)
 
   markers <- markers_mesh(
     x = coords$x,
     y = coords$y,
     z = coords$z,
-    radius = recycle_markers(size, n, "size"),
+    radius = size,
     colour = colour,
-    text = if (is.null(text_values)) {
-      NULL
-    } else {
-      as.character(recycle_markers(text_values, n, "text"))
-    }
+    text = text_values
   )
 
+  # The renderer reads vertexTexts only inside a vertexLabels branch, so a
+  # marker with labels but no text shows nothing on hover. The label is what
+  # the tooltip titles itself with.
   entry <- make_mesh_entry(
     name = "points",
     vertices = markers$vertices,
@@ -112,7 +155,7 @@ add_points <- function(
     colors = markers$colours,
     color_mode = "vertexcolor",
     opacity = opacity,
-    vertex_texts = markers$texts
+    vertex_labels = markers$texts
   )
 
   if (is_rgl) {
@@ -146,7 +189,8 @@ add_points <- function(
 #' @param ... Passed to the atlas's mesh preparation, as in [ggseg3d()] --
 #'   `hemisphere` and `surface` for a cortical atlas, for instance.
 #'
-#' @return The input object (modified), for piping.
+#' @return The input object, for piping. A `ggsegray` is returned unchanged:
+#'   rgl draws to the open device rather than into the object.
 #' @family brain modifiers
 #' @export
 #'
@@ -175,7 +219,14 @@ add_atlas <- function(p, atlas, ...) {
     ))
   }
 
-  prepared <- prepare_brain_meshes(atlas, ...)
+  dots <- list(...)
+  if (!is_rgl && !"surface" %in% names(dots)) {
+    host <- host_surface(p)
+    if (!is.null(host)) {
+      dots$surface <- host
+    }
+  }
+  prepared <- do.call(prepare_brain_meshes, c(list(atlas), dots))
   entries <- prepared$meshes %||% list()
   if (length(entries) == 0L) {
     cli::cli_warn("The atlas produced no meshes; nothing added.")
@@ -185,7 +236,10 @@ add_atlas <- function(p, atlas, ...) {
   flat <- function(meshes) {
     any(vapply(meshes, function(m) isTRUE(m$isFlatmap), logical(1)))
   }
-  if (!is_rgl && (flat(entries) || flat(p$x$meshes %||% list()))) {
+  # The added atlas's own flatness needs no widget state, so it is checked
+  # whichever renderer this is; only the host's does.
+  host_flat <- !is_rgl && flat(p$x$meshes %||% list())
+  if (flat(entries) || host_flat) {
     cli::cli_warn(c(
       "Skipping atlas: one of the two is a flat (2D) surface.",
       "i" = "Flatmap surfaces share no coordinate frame with anatomical
@@ -270,6 +324,66 @@ markers_mesh <- function(x, y, z, radius, colour, text = NULL) {
 }
 
 
+#' Marker transparency has to be a fraction
+#' @noRd
+check_opacity <- function(opacity, call = rlang::caller_env()) {
+  if (
+    !is.numeric(opacity) ||
+      length(opacity) != 1L ||
+      is.na(opacity) ||
+      opacity < 0 ||
+      opacity > 1
+  ) {
+    cli::cli_abort(
+      c(
+        "{.arg opacity} must be a single number between 0 and 1.",
+        "x" = "Got {.val {opacity}}.",
+        "i" = "It is a fraction, not a percentage."
+      ),
+      call = call
+    )
+  }
+  invisible(opacity)
+}
+
+
+#' Turn marker colours into hex, refusing what is not a colour
+#'
+#' `col2rgb()` answers `NA` with white rather than an error, so a colour
+#' column with a gap would draw those markers white and say nothing.
+#' @noRd
+resolve_marker_colours <- function(colour, call = rlang::caller_env()) {
+  if (anyNA(colour)) {
+    cli::cli_abort(
+      c(
+        "{.arg colour} has {sum(is.na(colour))} missing value{?s}.",
+        "i" = "A missing colour would be drawn white, which reads as a
+               deliberate choice."
+      ),
+      call = call
+    )
+  }
+
+  vapply(
+    as.character(colour),
+    function(one) {
+      if (grepl("^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$", one)) {
+        return(one)
+      }
+      if (grepl("^#", one)) {
+        cli::cli_abort(
+          "{.val {one}} is not a valid hex colour.",
+          call = call
+        )
+      }
+      col2hex(one)
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
+}
+
+
 #' Recycle a per-marker argument to one value per marker
 #' @noRd
 recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
@@ -286,4 +400,34 @@ recycle_markers <- function(value, n, arg, call = rlang::caller_env()) {
     )
   }
   value
+}
+
+
+#' The surface an existing widget was drawn on
+#'
+#' `add_atlas()` re-enters the mesh pipeline, which would otherwise apply its
+#' own default and quietly put an inflated atlas beside an anatomical one --
+#' the same frame mismatch the flatmap guard refuses, in a form that is far
+#' likelier. Mesh entries are named `"<hemisphere> <surface>"`, which is the
+#' only record the widget keeps of what it was drawn on.
+#'
+#' @param p A `ggseg3d` widget.
+#' @return The surface name, or `NULL` when no entry names one.
+#' @noRd
+host_surface <- function(p) {
+  names <- vapply(
+    p$x$meshes %||% list(),
+    function(m) m$name %||% "",
+    character(1)
+  )
+  found <- sub(
+    "^(left|right) ",
+    "",
+    grep("^(left|right) ", names, value = TRUE)
+  )
+  found <- unique(found[nzchar(found)])
+  if (length(found) != 1L) {
+    return(NULL)
+  }
+  found
 }

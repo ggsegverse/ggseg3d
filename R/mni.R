@@ -13,7 +13,8 @@
 #' every point in the wrong place.
 #'
 #' `space = "mni152"` applies FreeSurfer's published MNI305-to-MNI152
-#' transform on top. It moves a coordinate by roughly a millimetre.
+#' transform on top. Across the brain that moves a coordinate by two to
+#' three millimetres.
 #'
 #' Only anatomical surfaces can be converted. An inflated or spherical
 #' surface has had every vertex moved, so a position on it does not
@@ -27,10 +28,9 @@
 #' @param space `"mni305"`, which fsaverage is, or `"mni152"`.
 #'
 #' @return A data.frame of `x`, `y` and `z`.
-#' @family brain modifiers
+#' @family coordinate spaces
 #' @export
-#'
-#' @examples
+#' @examplesIf rlang::is_installed("ggseg.meshes")
 #' # where does a point in MNI space sit in the plot?
 #' mni_to_mesh(-42, -20, 55, hemisphere = "lh")
 #'

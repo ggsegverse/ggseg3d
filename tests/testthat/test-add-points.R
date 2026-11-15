@@ -37,6 +37,81 @@ describe("add_points()", {
     added <- p$x$meshes[[length(p$x$meshes)]]
     expect_identical(added$name, "points")
     expect_length(added$vertices$x, 3L * sphere_vertices)
+    # Faces matter as much as vertices: a marker with vertices and no faces
+    # is invisible, and collapsing every index to 1 once passed this file.
+    expect_length(added$faces$i, 3L * nrow(unit_sphere()$faces))
+    expect_true(all(unlist(added$faces) < 3L * sphere_vertices))
+    expect_setequal(
+      unique(added$faces$i %/% sphere_vertices),
+      0:2
+    )
+  })
+
+  it("draws one sphere per row even when a coordinate is constant", {
+    # A scalar coordinate used to leave every marker but the first with no
+    # faces at all -- silently, with no warning.
+    p <- add_points(base(), sensors(3), x = 0, y = y, z = z)
+    added <- p$x$meshes[[length(p$x$meshes)]]
+    expect_length(added$faces$i, 3L * nrow(unit_sphere()$faces))
+    expect_length(added$colors, 3L * sphere_vertices)
+  })
+
+  it("colours every vertex it draws", {
+    # A short colour vector leaves trailing vertices black in the renderer.
+    p <- add_points(base(), sensors(3), x = x, y = y, z = z)
+    added <- p$x$meshes[[length(p$x$meshes)]]
+    expect_length(added$colors, length(added$vertices$x))
+  })
+
+  it("refuses a non-numeric coordinate", {
+    d <- sensors(2)
+    d$x <- factor(c("a", "b"))
+    expect_error(add_points(base(), d, x = x, y = y, z = z), "must be numeric")
+  })
+
+  it("drops markers with missing coordinates, and says so", {
+    d <- sensors(3)
+    d$x[2] <- NA
+    out <- NULL
+    expect_warning(
+      out <- add_points(base(), d, x = x, y = y, z = z),
+      "missing coordinates"
+    )
+    added <- out$x$meshes[[length(out$x$meshes)]]
+    expect_length(added$vertices$x, 2L * sphere_vertices)
+  })
+
+  it("rejects an opacity that is not a fraction", {
+    expect_error(
+      add_points(base(), sensors(1), x = x, y = y, z = z, opacity = 50),
+      "between 0 and 1"
+    )
+  })
+
+  it("carries opacity onto the entry", {
+    p <- add_points(base(), sensors(1), x = x, y = y, z = z, opacity = 0.5)
+    expect_equal(p$x$meshes[[length(p$x$meshes)]]$opacity, 0.5)
+  })
+
+  it("refuses a missing colour rather than drawing it white", {
+    expect_error(
+      add_points(
+        base(),
+        sensors(2),
+        x = x,
+        y = y,
+        z = z,
+        colour = c("red", NA)
+      ),
+      "missing value"
+    )
+  })
+
+  it("refuses a malformed hex colour", {
+    expect_error(
+      add_points(base(), sensors(1), x = x, y = y, z = z, colour = "#GGGGGG"),
+      "not a valid hex"
+    )
   })
 
   it("leaves the brain meshes in place", {
@@ -54,6 +129,11 @@ describe("add_points()", {
     midpoint <- function(v) mean(range(v))
     expect_equal(midpoint(v$x[first]), 10, tolerance = 1e-6)
     expect_equal(midpoint(v$y[first]), -5, tolerance = 1e-6)
+    expect_equal(midpoint(v$z[first]), 2, tolerance = 1e-6)
+
+    second <- sphere_vertices + first
+    expect_equal(midpoint(v$x[second]), 20, tolerance = 1e-6)
+    expect_equal(midpoint(v$z[second]), 4, tolerance = 1e-6)
   })
 
   it("scales a marker by size", {
@@ -96,15 +176,18 @@ describe("add_points()", {
     )
   })
 
-  it("carries hover text onto the marker's vertices", {
+  it("carries hover text on the field the renderer reads", {
+    # BrainMeshRenderer only reads vertexTexts inside a vertexLabels branch,
+    # so asserting vertexTexts alone passed while hover showed "points".
     p <- add_points(base(), sensors(2), x = x, y = y, z = z, text = name)
-    texts <- p$x$meshes[[length(p$x$meshes)]]$vertexTexts
-    expect_setequal(unique(texts), c("S1", "S2"))
+    added <- p$x$meshes[[length(p$x$meshes)]]
+    expect_setequal(unique(added$vertexLabels), c("S1", "S2"))
+    expect_length(added$vertexLabels, length(added$vertices$x))
   })
 
   it("adds no text when none is asked for", {
     p <- add_points(base(), sensors(2), x = x, y = y, z = z)
-    expect_null(p$x$meshes[[length(p$x$meshes)]]$vertexTexts)
+    expect_null(p$x$meshes[[length(p$x$meshes)]]$vertexLabels)
   })
 
   it("warns and changes nothing when data has no rows", {
@@ -125,7 +208,10 @@ describe("add_points()", {
   })
 
   it("rejects something that is not a ggseg3d plot", {
-    expect_error(add_points(list(), sensors(1), x = x, y = y, z = z))
+    expect_error(
+      add_points(list(), sensors(1), x = x, y = y, z = z),
+      "ggseg3d"
+    )
   })
 })
 
@@ -153,11 +239,61 @@ describe("add_atlas()", {
     expect_error(add_atlas(base(), list()), "ggseg_atlas")
   })
 
+  it("refuses a flat atlas being added to an anatomical plot", {
+    # The commoner direction, and the one the host-side test missed: it is
+    # the *added* atlas that is flat.
+    local_mocked_bindings(
+      prepare_brain_meshes = function(...) {
+        list(meshes = list(list(name = "flat", isFlatmap = TRUE)))
+      }
+    )
+    out <- NULL
+    expect_warning(out <- add_atlas(base(), aseg()), "flat")
+    expect_length(out$x$meshes, length(base()$x$meshes))
+  })
+
+  it("warns and changes nothing when the atlas produces no meshes", {
+    local_mocked_bindings(
+      prepare_brain_meshes = function(...) list(meshes = list())
+    )
+    out <- NULL
+    expect_warning(out <- add_atlas(base(), aseg()), "no meshes")
+    expect_length(out$x$meshes, length(base()$x$meshes))
+  })
+
+  it("draws the added atlas on the surface the plot already uses", {
+    # Left to its own default the added atlas arrives inflated, which is a
+    # different shape from the pial surface it would sit beside.
+    host <- ggseg3d(atlas = dk(), hemisphere = "left", surface = "pial")
+    out <- add_atlas(host, dk(), hemisphere = "left")
+    names <- vapply(out$x$meshes, function(m) m$name, character(1))
+    expect_true(all(grepl("pial$", names)))
+  })
+
   it("refuses to combine a flat surface with anatomical meshes", {
     p <- base()
     p$x$meshes[[1]]$isFlatmap <- TRUE
     out <- NULL
     expect_warning(out <- add_atlas(p, aseg()), "flat")
     expect_length(out$x$meshes, length(p$x$meshes))
+  })
+})
+
+
+describe("the rgl path", {
+  it("accepts points and leaves a ggsegray a ggsegray", {
+    skip_if_not_installed("rgl")
+    p <- ggsegray(hemisphere = "left", atlas = dk()) |>
+      add_points(sensors(2), x = x, y = y, z = z)
+    expect_s3_class(p, "ggsegray")
+    rgl::close3d()
+  })
+
+  it("accepts a second atlas", {
+    skip_if_not_installed("rgl")
+    p <- ggsegray(hemisphere = "left", atlas = dk()) |>
+      add_atlas(aseg())
+    expect_s3_class(p, "ggsegray")
+    rgl::close3d()
   })
 })

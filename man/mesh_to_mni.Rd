@@ -50,7 +50,8 @@ the mesh rather than assuming it, so a rebuilt mesh cannot silently put
 every point in the wrong place.
 
 \code{space = "mni152"} applies FreeSurfer's published MNI305-to-MNI152
-transform on top. It moves a coordinate by roughly a millimetre.
+transform on top. Across the brain that moves a coordinate by two to
+three millimetres.
 
 Only anatomical surfaces can be converted. An inflated or spherical
 surface has had every vertex moved, so a position on it does not
@@ -58,24 +59,12 @@ correspond to a place in the brain, and asking is an error rather than a
 number that looks usable.
 }
 \examples{
+\dontshow{if (rlang::is_installed("ggseg.meshes")) withAutoprint(\{ # examplesIf}
 # where does a point in MNI space sit in the plot?
 mni_to_mesh(-42, -20, 55, hemisphere = "lh")
 
 # and back again
 mesh_to_mni(-43.2, -20, 55, hemisphere = "lh")
+\dontshow{\}) # examplesIf}
 }
-\seealso{
-Other brain modifiers:
-\code{\link[=add_atlas]{add_atlas()}},
-\code{\link[=add_glassbrain]{add_glassbrain()}},
-\code{\link[=add_points]{add_points()}},
-\code{\link[=pan_camera]{pan_camera()}},
-\code{\link[=set_background]{set_background()}},
-\code{\link[=set_dimensions]{set_dimensions()}},
-\code{\link[=set_edges]{set_edges()}},
-\code{\link[=set_flat_shading]{set_flat_shading()}},
-\code{\link[=set_legend]{set_legend()}},
-\code{\link[=set_orthographic]{set_orthographic()}},
-\code{\link[=set_positioning]{set_positioning()}}
-}
-\concept{brain modifiers}
+\concept{coordinate spaces}

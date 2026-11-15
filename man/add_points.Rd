@@ -34,7 +34,8 @@ or one per row.}
 \item{opacity}{Numeric. Marker transparency (0-1).}
 }
 \value{
-The input object (modified), for piping.
+The input object, for piping. A \code{ggsegray} is returned unchanged:
+rgl draws to the open device rather than into the object.
 }
 \description{
 Draws markers at coordinates of your own -- electrode or sensor positions,
@@ -48,20 +49,27 @@ left-right, \code{y} posterior-anterior and \code{z} inferior-superior. Which su
 that is decides whether measured positions land where they should:
 
 \itemize{
-\item \code{"white"} and \code{"pial"} are the anatomical surfaces, spanning about
-x -67 to 67, y -103 to 69 and z -44 to 78. These are fsaverage surface
-coordinates, so positions recorded in a standard space land roughly
-where they belong without a transform.
+\item \code{"pial"} and \code{"white"} are the anatomical surfaces. Pial spans
+about x -70 to 70, y -105 to 69 and z -48 to 79; white sits a few
+millimetres inside that. These are fsaverage surface coordinates, so
+positions recorded in a standard space land roughly where they belong
+without a transform.
 \item \code{"inflated"}, which \code{\link[=ggseg3d]{ggseg3d()}} draws by default, is not
-anatomical. Inflation moves every vertex, leaving a rounder surface
-spanning about x -83 to 82 and z -73 to 73. Measured positions do not
-correspond to it, so plot them on \code{surface = "pial"} instead.
+anatomical. Inflation moves every vertex outward, leaving a rounder
+surface spanning about x -83 to 82 and z -73 to 73. Measured positions
+do not correspond to it, so plot them on \code{surface = "pial"} instead.
 }
+
+A coordinate taken from a standard space is usually a point \emph{inside} the
+grey matter rather than on its surface, so a marker drawn at one can be
+hidden by the cortex around it. Raise \code{size}, or draw the surface with
+\code{\link[=add_glassbrain]{add_glassbrain()}} over a subcortical atlas, if a marker does not appear.
 
 Markers are drawn as small spheres, so they shade and occlude like the
 rest of the scene rather than floating in front of it.
 }
 \examples{
+\dontshow{if (rlang::is_installed("ggseg.meshes")) withAutoprint(\{ # examplesIf}
 sensors <- data.frame(
   x = c(50, 45, 40),
   y = c(22, -10, -40),
@@ -74,12 +82,12 @@ sensors <- data.frame(
 ggseg3d(atlas = dk(), hemisphere = "right", surface = "pial") |>
   add_points(sensors, x = x, y = y, z = z, text = name)
 }
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other brain modifiers:
 \code{\link[=add_atlas]{add_atlas()}},
 \code{\link[=add_glassbrain]{add_glassbrain()}},
-\code{\link[=mesh_to_mni]{mesh_to_mni()}},
 \code{\link[=pan_camera]{pan_camera()}},
 \code{\link[=set_background]{set_background()}},
 \code{\link[=set_dimensions]{set_dimensions()}},

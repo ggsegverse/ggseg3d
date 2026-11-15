@@ -17,7 +17,7 @@ The part worth reading about is **which coordinates to give them**, because a pl
 
 ## Points need a surface that means something
 
-Every ggseg3d surface is fsaverage5, but they are not interchangeable.
+Every ggseg3d cortical surface is fsaverage5, but they are not interchangeable.
 `"white"` and `"pial"` keep the brain's own shape.
 `"inflated"` — what `ggseg3d()` draws by default — has had every vertex moved outward to smooth the folds away.
 
@@ -69,7 +69,7 @@ fsaverage is an MNI305 average, so its coordinates are MNI305; the only differen
 `mesh_to_mni()` undoes that.
 
 Pass `space = "mni152"` if your coordinates are MNI152 rather than MNI305.
-It is worth about a millimetre:
+Across the brain that is worth two to three millimetres:
 
 ```{r}
 #| label: pp-spaces
@@ -89,11 +89,10 @@ mesh_to_mni(-42, -20, 55, hemisphere = "lh", surface = "inflated")
 
 ### A worked example
 
-Three motor-cortex coordinates, converted and drawn.
-This one is live: drag to rotate, and hover a marker for its name.
+Three motor-cortex coordinates:
 
 ```{r}
-#| label: pp-worked
+#| label: pp-worked-coords
 targets <- data.frame(
   label = c("M1 hand", "M1 face", "SMA"),
   x = c(-38, -52, -4),
@@ -103,9 +102,39 @@ targets <- data.frame(
 
 placed <- mni_to_mesh(targets$x, targets$y, targets$z, hemisphere = "lh")
 placed$label <- targets$label
+placed
+```
 
+Draw those directly and you will see nothing at all, which is worth
+understanding rather than working around.
+A coordinate reported as a peak is a point in grey matter, a millimetre or two
+*beneath* the surface — so the marker is there, with the cortex in front of it.
+That is the opposite of the earlier failure: these are in exactly the right
+place, and still invisible.
+
+Either make the marker big enough to break the surface, or put it on the
+surface. Projecting to the nearest vertex is a few lines and keeps the
+position honest:
+
+```{r}
+#| label: pp-project
+pial <- resolve_brain_mesh("lh", "pial")$vertices
+
+on_surface <- do.call(rbind, lapply(seq_len(nrow(placed)), function(i) {
+  d2 <- (pial$x - placed$x[i])^2 +
+    (pial$y - placed$y[i])^2 +
+    (pial$z - placed$z[i])^2
+  pial[which.min(d2), ]
+}))
+on_surface$label <- placed$label
+```
+
+This one is live: drag to rotate, and hover a marker for its name.
+
+```{r}
+#| label: pp-worked
 ggseg3d(atlas = dk(), hemisphere = "left", surface = "pial") |>
-  add_points(placed, x = x, y = y, z = z, text = label,
+  add_points(on_surface, x = x, y = y, z = z, text = label,
              colour = "#D7191C", size = 4) |>
   pan_camera("left lateral")
 ```
@@ -164,4 +193,6 @@ ggseg3d(atlas = aseg()) |>
 
 - Measured coordinates belong on `"pial"` or `"white"`, never `"inflated"`.
 - `mni_to_mesh()` gets you there from MNI305 or MNI152.
+- A peak coordinate sits *inside* the cortex; project it to the surface, or
+  enlarge the marker, if you expect to see it.
 - `add_atlas()` composes atlases that already share a frame; it does not create one.

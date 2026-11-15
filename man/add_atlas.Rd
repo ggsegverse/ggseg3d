@@ -15,7 +15,8 @@ add_atlas(p, atlas, ...)
 \code{hemisphere} and \code{surface} for a cortical atlas, for instance.}
 }
 \value{
-The input object (modified), for piping.
+The input object, for piping. A \code{ggsegray} is returned unchanged:
+rgl draws to the open device rather than into the object.
 }
 \description{
 Draws a second atlas into an existing plot, so a subcortical atlas can sit
@@ -47,7 +48,6 @@ ggseg3d(atlas = dk(), hemisphere = "left") |>
 Other brain modifiers:
 \code{\link[=add_glassbrain]{add_glassbrain()}},
 \code{\link[=add_points]{add_points()}},
-\code{\link[=mesh_to_mni]{mesh_to_mni()}},
 \code{\link[=pan_camera]{pan_camera()}},
 \code{\link[=set_background]{set_background()}},
 \code{\link[=set_dimensions]{set_dimensions()}},
