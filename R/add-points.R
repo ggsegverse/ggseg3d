@@ -339,23 +339,24 @@ resolve_markers <- function(data, coords, colour, size, text) {
 #' Marker transparency has to be a fraction
 #' @noRd
 check_opacity <- function(opacity, call = rlang::caller_env()) {
-  if (
-    !is.numeric(opacity) ||
-      length(opacity) != 1L ||
-      is.na(opacity) ||
-      opacity < 0 ||
-      opacity > 1
-  ) {
-    cli::cli_abort(
-      c(
-        "{.arg opacity} must be a single number between 0 and 1.",
-        "x" = "Got {.val {opacity}}.",
-        "i" = "It is a fraction, not a percentage."
-      ),
-      call = call
-    )
+  # Split in two so the range test only sees something it can compare, and
+  # so the whole thing stays one short chain rather than five.
+  ok <- is.numeric(opacity) && length(opacity) == 1L
+  if (ok) {
+    ok <- isTRUE(opacity >= 0 && opacity <= 1)
   }
-  invisible(opacity)
+  if (ok) {
+    return(invisible(opacity))
+  }
+
+  cli::cli_abort(
+    c(
+      "{.arg opacity} must be a single number between 0 and 1.",
+      "x" = "Got {.val {opacity}}.",
+      "i" = "It is a fraction, not a percentage."
+    ),
+    call = call
+  )
 }
 
 
