@@ -1,5 +1,3 @@
-options(rgl.useNULL = TRUE)
-
 test_that("camera_preset_to_position returns correct vectors", {
   expect_identical(camera_preset_to_position("left lateral"), c(-350, 0, 0))
   expect_identical(camera_preset_to_position("right lateral"), c(350, 0, 0))
