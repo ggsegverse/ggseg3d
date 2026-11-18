@@ -9,9 +9,9 @@
   step with this package (ggsegverse/ggseg3d#83).
 
 - The test suite no longer opens an rgl window. `options(rgl.useNULL = TRUE)`
-  sat on line 1 of `test-rayshader.R`, but testthat runs `test-add-points.R`
+  sat on line 1 of `test-rayshader.R`, but `testthat` runs `test-add-points.R`
   first and that opens a device, so the window appeared before the option was
-  set. It is now in `setup.R`, which also makes the suite runnable headless.
+  set. It is now in `setup.R`, which also lets the suite run headless.
 
 - Region boundary edges are drawn again, on both cortical and cerebellar
   atlases. Splitting faces at parcel borders (2.1.2.9009) left every face with
