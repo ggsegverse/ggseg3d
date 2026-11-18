@@ -54,6 +54,8 @@ str(mesh, max.level = 1)
 #>  $ vertices:'data.frame':    10242 obs. of  3 variables:
 #>  $ faces   :'data.frame':    20480 obs. of  3 variables:
 #>  - attr(*, "face_index_base")= int 1
+#>  - attr(*, "mesh_space")=List of 8
+#>   ..- attr(*, "class")= chr "mesh_space"
 #>  - attr(*, "mni_shift")= Named num [1:3] -41.5 0 0
 #>   ..- attr(*, "names")= chr [1:3] "x" "y" "z"
 ```

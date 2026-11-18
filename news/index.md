@@ -4,6 +4,19 @@
 
 ### Bug fixes
 
+- Cortical surfaces are oriented from what the mesh records rather than
+  from which package it came from. A surface carrying a `mesh_space()`
+  is taken at its word; one without falls back to the historical
+  rotation, so an old and a new `ggseg.meshes` both render correctly and
+  neither has to be installed in step with this package
+  (ggsegverse/ggseg3d#83).
+
+- The test suite no longer opens an rgl window.
+  `options(rgl.useNULL = TRUE)` sat on line 1 of `test-rayshader.R`, but
+  `testthat` runs `test-add-points.R` first and that opens a device, so
+  the window appeared before the option was set. It is now in `setup.R`,
+  which also lets the suite run headless.
+
 - Region boundary edges are drawn again, on both cortical and cerebellar
   atlases. Splitting faces at parcel borders (2.1.2.9009) left every
   face with a single region, which is what makes the borders exact – and
