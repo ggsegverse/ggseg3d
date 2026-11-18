@@ -796,3 +796,83 @@ describe("edge_by reaches the boundary-edge computation", {
     ))
   })
 })
+
+describe("needs_legacy_rotation()", {
+  # ggseg.meshes used to store cortical surfaces rotated 90 degrees from
+  # FreeSurfer's native axes, and this package rotated them back -- a round
+  # trip to identity. The meshes now record their own frame and are stored in
+  # native axes. Keying off the record rather than the package version is what
+  # lets an old and a new ggseg.meshes both render correctly, so the two do
+  # not have to be installed in step.
+  bare_mesh <- function() {
+    list(
+      vertices = data.frame(x = c(0, 1, 0), y = c(0, 0, 1), z = c(0, 0, 0)),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  }
+
+  it("rotates a ggseg.meshes surface that records nothing", {
+    expect_true(needs_legacy_rotation(bare_mesh(), from_ggseg_meshes = TRUE))
+  })
+
+  it("leaves a surface that records its frame alone", {
+    mesh <- ggseg.formats::set_mesh_space(
+      bare_mesh(),
+      ggseg.formats::mesh_space("fsaverage5", "left", anatomical = FALSE)
+    )
+    expect_false(needs_legacy_rotation(mesh, from_ggseg_meshes = TRUE))
+  })
+
+  it("never rotates a mesh from anywhere else", {
+    # ggseg.formats inflated surfaces and user-supplied meshes are already in
+    # native axes and always were.
+    expect_false(needs_legacy_rotation(bare_mesh(), from_ggseg_meshes = FALSE))
+    mesh <- ggseg.formats::set_mesh_space(
+      bare_mesh(),
+      ggseg.formats::mesh_space("fsaverage5", "left", anatomical = FALSE)
+    )
+    expect_false(needs_legacy_rotation(mesh, from_ggseg_meshes = FALSE))
+  })
+})
+
+describe("orientation survives either ggseg.meshes vintage", {
+  # The property that matters is not which branch ran but that the drawn
+  # surface comes out in the same place either way. A rotation applied twice,
+  # or not at all, still renders a convincing brain.
+  it("puts a recorded-frame mesh where the rotated one was", {
+    skip_if_not_installed("ggseg.meshes")
+
+    legacy <- resolve_brain_mesh("lh", "pial")
+
+    # The same surface as it will be published: native axes, recorded frame.
+    raw <- ggseg.meshes::get_cortical_mesh("lh", "pial")
+    native <- raw
+    native$vertices <- data.frame(
+      x = -raw$vertices$y,
+      y = raw$vertices$x,
+      z = raw$vertices$z
+    )
+    native <- ggseg.formats::set_mesh_space(
+      native,
+      ggseg.formats::mesh_space(
+        "fsaverage5",
+        "left",
+        anatomical = TRUE,
+        to_mni305 = diag(4),
+        surface = "pial"
+      )
+    )
+    rebuilt <- normalize_cortical_mesh(
+      as_one_based_mesh(native),
+      "lh",
+      rotate_axes = needs_legacy_rotation(native, from_ggseg_meshes = TRUE)
+    )
+
+    expect_equal(rebuilt$vertices, legacy$vertices, tolerance = 1e-6)
+    expect_equal(
+      attr(rebuilt, "mni_shift"),
+      attr(legacy, "mni_shift"),
+      tolerance = 1e-6
+    )
+  })
+})

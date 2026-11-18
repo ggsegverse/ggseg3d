@@ -55,7 +55,11 @@ resolve_brain_mesh <- function(
 
   mesh <- as_one_based_mesh(mesh)
 
-  normalize_cortical_mesh(mesh, hemisphere, from_ggseg_meshes)
+  normalize_cortical_mesh(
+    mesh,
+    hemisphere,
+    rotate_axes = needs_legacy_rotation(mesh, from_ggseg_meshes)
+  )
 }
 
 
@@ -149,13 +153,37 @@ check_ggseg_meshes <- function(surface) {
 }
 
 
-# ggseg.meshes surfaces are stored rotated 90 deg CCW relative to FreeSurfer
-# native axes (see ggseg.meshes/data-raw/make_cortical_meshes.R): stored
-# `x` = AP, stored `y` = -LR, stored `z` = SI. ggseg.formats inflated and
-# subcortical/cerebellar meshes already use native axes (x = LR, y = AP,
-# z = SI). After axis alignment we shift each hemisphere so medial edges sit
-# at x = 0 — LH occupies x <= 0, RH occupies x >= 0 — so both hemispheres
-# display side-by-side without overlap regardless of surface choice.
+# After axis alignment we shift each hemisphere so medial edges sit at x = 0
+# — LH occupies x <= 0, RH occupies x >= 0 — so both hemispheres display
+# side-by-side without overlap regardless of surface choice.
+#' Whether a mesh needs the historical axis rotation
+#'
+#' `ggseg.meshes` used to store cortical surfaces rotated 90 degrees from
+#' FreeSurfer's native axes -- stored `x` = AP, stored `y` = -LR -- which this
+#' package then rotated back, so the pair was a round trip to identity. The
+#' meshes now record what their coordinates mean, and are stored in native
+#' axes.
+#'
+#' A mesh carrying a `mesh_space` is therefore taken at its word and left
+#' alone. Only a mesh with no record falls back to the rotation, which is what
+#' every surface published before the change looks like. Keying off the record
+#' rather than the package version is what lets an old and a new
+#' `ggseg.meshes` both render correctly, so neither has to be installed in
+#' step with this one.
+#'
+#' This is therefore transitional: once every published surface records a
+#' frame and this package floors on that version, the fallback is dead code
+#' and goes, along with `rotate_axes` and the `from_ggseg_meshes` flag that
+#' decides geometry from provenance (ggsegverse/ggseg3d#83).
+#' @noRd
+needs_legacy_rotation <- function(mesh, from_ggseg_meshes) {
+  if (!from_ggseg_meshes) {
+    return(FALSE)
+  }
+  is.null(ggseg.formats::get_mesh_space(mesh))
+}
+
+
 normalize_cortical_mesh <- function(mesh, hemisphere, rotate_axes) {
   if (rotate_axes) {
     v <- mesh$vertices
