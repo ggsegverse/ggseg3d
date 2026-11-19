@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9014</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="ggseg3d-development-version">ggseg3d (development version)<a class="anchor" aria-label="anchor" href="#ggseg3d-development-version"></a></h2>
+<div class="section level3">
+<h3 id="internal-development-version">Internal<a class="anchor" aria-label="anchor" href="#internal-development-version"></a></h3>
+<ul><li>The legacy axis rotation is gone. <code>ggseg.meshes</code> surfaces record their own frame from 0.0.1.9002, which is now the floor, so nothing reaches the fallback that kept the earlier meshes rendering correctly (ggsegverse/ggseg3d#83).</li>
+</ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p>Cortical surfaces are oriented from what the mesh records rather than from which package it came from. A surface carrying a <code>mesh_space()</code> is taken at its word; one without falls back to the historical rotation, so an old and a new <code>ggseg.meshes</code> both render correctly and neither has to be installed in step with this package (ggsegverse/ggseg3d#83).</p></li>
@@ -94,7 +98,7 @@
 <li><p>The error raised for a non-atlas input points at <code>ggseg.extra::create_cortical_from_labels()</code>; the function it named before does not exist.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="internal-development-version">Internal<a class="anchor" aria-label="anchor" href="#internal-development-version"></a></h3>
+<h3 id="internal-development-version-1">Internal<a class="anchor" aria-label="anchor" href="#internal-development-version-1"></a></h3>
 <ul><li><p>All atlas reads go through the <code>ggseg.formats</code> accessors rather than reaching into <code>atlas$core</code>, <code>atlas$palette</code> and <code>atlas$data</code>. This requires a newer <code>ggseg.formats</code>; <code>DESCRIPTION</code> carries the floor.</p></li>
 <li><p>Atlas objects predating the unified <code>ggseg_atlas</code> layout are rejected up front rather than failing deeper in rendering. No released atlas package ships that layout.</p></li>
 <li><p><code>png</code> and <code>rayshader</code> moved from <code>Suggests</code> to <code>Config/Needs/website</code>.</p></li>
