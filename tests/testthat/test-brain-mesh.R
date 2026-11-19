@@ -836,22 +836,40 @@ describe("needs_legacy_rotation()", {
 })
 
 describe("orientation survives either ggseg.meshes vintage", {
-  # The property that matters is not which branch ran but that the drawn
-  # surface comes out in the same place either way. A rotation applied twice,
-  # or not at all, still renders a convincing brain.
-  it("puts a recorded-frame mesh where the rotated one was", {
+  # The property: a mesh in native axes that records its frame, and the same
+  # surface in the old rotated frame with no record, must be drawn in exactly
+  # the same place. Both vintages are derived from whatever ggseg.meshes is
+  # installed rather than assuming which one it is -- an earlier version of
+  # this test built the native mesh by rotating the installed one, and broke
+  # the moment the rebuilt meshes arrived, which is the dependency it was
+  # supposed to prove absent.
+  it("puts a recorded-frame mesh where the rotated one goes", {
     skip_if_not_installed("ggseg.meshes")
+    skip_if_not_installed("ggseg.formats")
 
-    legacy <- resolve_brain_mesh("lh", "pial")
+    installed <- ggseg.meshes::get_cortical_mesh("lh", "pial")
+    recorded <- ggseg.formats::get_mesh_space(installed)
 
-    # The same surface as it will be published: native axes, recorded frame.
-    raw <- ggseg.meshes::get_cortical_mesh("lh", "pial")
-    native <- raw
-    native$vertices <- data.frame(
-      x = -raw$vertices$y,
-      y = raw$vertices$x,
-      z = raw$vertices$z
-    )
+    rotate_forward <- function(mesh) {
+      v <- mesh$vertices
+      mesh$vertices <- data.frame(x = v$y, y = -v$x, z = v$z)
+      mesh
+    }
+    rotate_back <- function(mesh) {
+      v <- mesh$vertices
+      mesh$vertices <- data.frame(x = -v$y, y = v$x, z = v$z)
+      mesh
+    }
+
+    if (is.null(recorded)) {
+      legacy <- installed
+      native <- rotate_back(installed)
+    } else {
+      native <- installed
+      legacy <- rotate_forward(installed)
+      attr(legacy, "mesh_space") <- NULL
+    }
+
     native <- ggseg.formats::set_mesh_space(
       native,
       ggseg.formats::mesh_space(
@@ -862,16 +880,24 @@ describe("orientation survives either ggseg.meshes vintage", {
         surface = "pial"
       )
     )
-    rebuilt <- normalize_cortical_mesh(
-      as_one_based_mesh(native),
-      "lh",
-      rotate_axes = needs_legacy_rotation(native, from_ggseg_meshes = TRUE)
-    )
 
-    expect_equal(rebuilt$vertices, legacy$vertices, tolerance = 1e-6)
+    expect_true(needs_legacy_rotation(legacy, from_ggseg_meshes = TRUE))
+    expect_false(needs_legacy_rotation(native, from_ggseg_meshes = TRUE))
+
+    drawn <- function(mesh) {
+      normalize_cortical_mesh(
+        as_one_based_mesh(mesh),
+        "lh",
+        rotate_axes = needs_legacy_rotation(mesh, from_ggseg_meshes = TRUE)
+      )
+    }
+    from_native <- drawn(native)
+    from_legacy <- drawn(legacy)
+
+    expect_equal(from_native$vertices, from_legacy$vertices, tolerance = 1e-6)
     expect_equal(
-      attr(rebuilt, "mni_shift"),
-      attr(legacy, "mni_shift"),
+      attr(from_native, "mni_shift"),
+      attr(from_legacy, "mni_shift"),
       tolerance = 1e-6
     )
   })
