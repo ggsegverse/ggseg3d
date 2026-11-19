@@ -1,5 +1,12 @@
 # ggseg3d (development version)
 
+## Internal
+
+- The legacy axis rotation is gone. `ggseg.meshes` surfaces record their own
+  frame from 0.0.1.9002, which is now the floor, so nothing reaches the
+  fallback that kept the earlier meshes rendering correctly
+  (ggsegverse/ggseg3d#83).
+
 ## Bug fixes
 
 - Cortical surfaces are oriented from what the mesh records rather than from
