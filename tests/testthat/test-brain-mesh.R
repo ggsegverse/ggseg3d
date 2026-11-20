@@ -202,17 +202,28 @@ test_that("is_unified_atlas rejects pre-unification atlas objects", {
   expect_false(is_unified_atlas(atlas))
 })
 
-test_that("atlas_3d_components reports the geometry each atlas carries", {
+test_that("the formats predicates report the geometry each atlas carries", {
+  # ggseg3d used to carry its own `atlas_3d_components()`, which read the
+  # payload list directly because ggseg.formats had no way to ask. It has one
+  # now, so this pins the answers rather than the local implementation.
+  components <- function(atlas) {
+    c(
+      vertices = ggseg.formats::has_atlas_vertices(atlas),
+      meshes = ggseg.formats::has_atlas_meshes(atlas),
+      centerlines = ggseg.formats::has_atlas_centerlines(atlas)
+    )
+  }
+
   expect_identical(
-    atlas_3d_components(dk()),
+    components(dk()),
     c(vertices = TRUE, meshes = FALSE, centerlines = FALSE)
   )
   expect_identical(
-    atlas_3d_components(aseg()),
+    components(aseg()),
     c(vertices = FALSE, meshes = TRUE, centerlines = FALSE)
   )
   expect_identical(
-    atlas_3d_components(tracula()),
+    components(tracula()),
     c(vertices = FALSE, meshes = FALSE, centerlines = TRUE)
   )
 })

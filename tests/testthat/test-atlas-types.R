@@ -154,7 +154,7 @@ test_that("ggseg3d() says what is actually wrong with a stale atlas", {
   atlas <- make_duplicate_label_atlas()
 
   expect_error(ggseg3d(atlas = atlas), "duplicat")
-  expect_true(any(atlas_3d_components(atlas)))
+  expect_true(ggseg.formats::has_atlas_3d(atlas))
 })
 
 test_that("unique atlas labels pass through untouched", {

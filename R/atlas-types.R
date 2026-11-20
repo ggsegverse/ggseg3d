@@ -4,47 +4,19 @@
 #' geometry `ggseg3d` can render in 3D: cortical or cerebellar vertices,
 #' subcortical meshes, or tract centerlines.
 #'
+#' This used to reach into the list [ggseg.formats::atlas_data()] returns,
+#' because the geometry accessors abort rather than answer when a component is
+#' absent and there was no way to ask. [ggseg.formats::has_atlas_3d()] is that
+#' way, so nothing in `ggseg3d` inspects an atlas's structure any more.
+#'
 #' @param atlas An atlas object to check
 #'
 #' @return Logical indicating if this is a renderable unified ggseg_atlas
 #' @noRd
 #' @keywords internal
 is_unified_atlas <- function(atlas) {
-  ggseg.formats::is_ggseg_atlas(atlas) && any(atlas_3d_components(atlas))
-}
-
-
-#' Which 3D geometry components an atlas carries
-#'
-#' ggseg.formats exposes no predicate for which geometry an atlas holds, and
-#' its geometry accessors abort rather than return `NULL` when a component is
-#' absent, so presence is read off the list [ggseg.formats::atlas_data()]
-#' returns. This is the only place in `ggseg3d` that asks what an atlas
-#' contains rather than for the geometry itself; every read of the geometry
-#' goes through the matching ggseg.formats accessor.
-#'
-#' @inheritParams prepare_brain_meshes
-#'
-#' @return Named logical vector with `vertices`, `meshes` and `centerlines`
-#' @keywords internal
-#' @noRd
-atlas_3d_components <- function(atlas) {
-  data <- ggseg.formats::atlas_data(atlas)
-  c(
-    vertices = !is.null(data$vertices),
-    meshes = !is.null(data$meshes),
-    centerlines = !is.null(data$centerlines)
-  )
-}
-
-#' @noRd
-has_atlas_meshes <- function(atlas) {
-  atlas_3d_components(atlas)[["meshes"]]
-}
-
-#' @noRd
-has_atlas_centerlines <- function(atlas) {
-  atlas_3d_components(atlas)[["centerlines"]]
+  ggseg.formats::is_ggseg_atlas(atlas) &&
+    ggseg.formats::has_atlas_3d(atlas)
 }
 
 
@@ -143,7 +115,7 @@ prepare_atlas_data <- function(atlas, .data) {
 #' @keywords internal
 #' @noRd
 prepare_mesh_atlas_data <- function(atlas, .data) {
-  base_data <- if (has_atlas_centerlines(atlas)) {
+  base_data <- if (ggseg.formats::has_atlas_centerlines(atlas)) {
     centerline_metadata(atlas)
   } else {
     ggseg.formats::atlas_meshes(atlas)

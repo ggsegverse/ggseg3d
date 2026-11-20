@@ -255,7 +255,7 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   split_boundaries = TRUE,
   ...
 ) {
-  has_deep <- has_atlas_meshes(atlas)
+  has_deep <- ggseg.formats::has_atlas_meshes(atlas)
   surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
 
   atlas_data <- prepare_atlas_data(atlas, .data)
@@ -457,7 +457,7 @@ build_centerline_data <- function(
   tube_radius = NULL,
   tube_segments = NULL
 ) {
-  if (!has_atlas_centerlines(atlas)) {
+  if (!ggseg.formats::has_atlas_centerlines(atlas)) {
     return(NULL)
   }
 
