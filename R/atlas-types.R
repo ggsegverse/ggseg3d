@@ -17,10 +17,11 @@ is_unified_atlas <- function(atlas) {
 #' Which 3D geometry components an atlas carries
 #'
 #' ggseg.formats exposes no predicate for which geometry an atlas holds, and
-#' its accessors abort rather than return `NULL` when a component is absent,
-#' so presence has to be read off the data slot. This is the only place in
-#' `ggseg3d` that inspects atlas structure directly; every read of the
-#' geometry itself goes through the ggseg.formats accessors.
+#' its geometry accessors abort rather than return `NULL` when a component is
+#' absent, so presence is read off the list [ggseg.formats::atlas_data()]
+#' returns. This is the only place in `ggseg3d` that asks what an atlas
+#' contains rather than for the geometry itself; every read of the geometry
+#' goes through the matching ggseg.formats accessor.
 #'
 #' @inheritParams prepare_brain_meshes
 #'
@@ -28,7 +29,7 @@ is_unified_atlas <- function(atlas) {
 #' @keywords internal
 #' @noRd
 atlas_3d_components <- function(atlas) {
-  data <- atlas$data
+  data <- ggseg.formats::atlas_data(atlas)
   c(
     vertices = !is.null(data$vertices),
     meshes = !is.null(data$meshes),
@@ -51,8 +52,8 @@ has_atlas_centerlines <- function(atlas) {
 #'
 #' Overwrites the `colour` column with [ggseg.formats::atlas_plot_palette()],
 #' which substitutes distinguishable colours when the atlas palette gives
-#' every region the same colour. Reading `atlas$palette` instead renders such
-#' atlases as a single indistinguishable silhouette.
+#' every region the same colour. Reading [ggseg.formats::atlas_palette()]
+#' instead renders such atlases as a single indistinguishable silhouette.
 #'
 #' @inheritParams prepare_brain_meshes
 #' @param atlas_data Data frame with a `label` column

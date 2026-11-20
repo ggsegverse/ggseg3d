@@ -1,6 +1,15 @@
 # ggseg3d (development version)
 
+## New features
+
+- `atlas_name()`, `atlas_core()` and `atlas_data()` are re-exported from
+  `ggseg.formats`. An atlas is an S7 object there now, so `$` no longer
+  reaches its slots and these are the only way to read them.
+
 ## Internal
+
+- Atlas structure is read through `ggseg.formats::atlas_data()` rather than
+  `atlas$data`.
 
 - The legacy axis rotation is gone. `ggseg.meshes` surfaces record their own
   frame from 0.0.1.9002, which is now the floor, so nothing reaches the

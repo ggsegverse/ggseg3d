@@ -1,4 +1,5 @@
-#' @importFrom ggseg.formats dk aseg tracula atlas_regions atlas_labels
+#' @importFrom ggseg.formats dk aseg tracula atlas_name atlas_core atlas_data
+#'   atlas_regions atlas_labels
 #'   atlas_hemi atlas_display atlas_type atlas_views atlas_context
 #'   atlas_undrawn atlas_views_empty atlas_region_semantics atlas_palette
 #'   atlas_plot_palette
@@ -15,6 +16,15 @@ ggseg.formats::aseg
 
 #' @export
 ggseg.formats::tracula
+
+#' @export
+ggseg.formats::atlas_name
+
+#' @export
+ggseg.formats::atlas_core
+
+#' @export
+ggseg.formats::atlas_data
 
 #' @export
 ggseg.formats::atlas_regions
