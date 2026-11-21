@@ -99,7 +99,7 @@ ggseg3d <- function(
   # an older `core` schema is a structural problem -- blaming its 3D data
   # sends the reader looking at geometry that is in fact there. Raises the
   # same conditions `assert_ggseg_atlas()` did.
-  atlas <- ggseg.formats::atlas_input(atlas)
+  atlas <- ggseg.formats::as_ggseg_atlas(atlas)
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(

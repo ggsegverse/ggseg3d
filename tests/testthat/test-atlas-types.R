@@ -130,30 +130,26 @@ test_that("duplicated atlas labels are dropped once, with a warning", {
   expect_identical(sort(atlas_data$label), c("Left-Caudate", "Right-Caudate"))
 })
 
-# This used to assert that ggseg3d() warned and drew one mesh. Since
-# ggseg.formats made a unique core label a construction-time invariant, the
-# class predicate rejects a duplicated-label atlas before the renderer sees
-# it, so the de-duplication below ggseg3d() is no longer reachable from here.
-# prepare_mesh_atlas_data() still de-duplicates, and the test above still
-# covers it. Refusing the object outright is the stricter behaviour; if the
-# renderer should instead tolerate a malformed atlas, this is the test to
-# change back.
-test_that("ggseg3d() refuses an atlas with a duplicated label", {
+# Changed back deliberately. For a while the boundary refused a duplicated
+# core label outright, which is the stricter behaviour -- but a published 2.x
+# atlas is exactly where duplicates come from, and refusing them stopped such
+# atlases drawing at all. The boundary now collapses the duplicate and says
+# which label it collapsed.
+test_that("ggseg3d() collapses a duplicated label with a warning", {
   atlas <- make_duplicate_label_atlas()
 
-  expect_error(
-    ggseg3d(atlas = atlas),
-    class = "ggseg.formats_invalid_atlas"
-  )
+  expect_warning(result <- ggseg3d(atlas = atlas), "Left-Caudate")
+
+  expect_s3_class(result, "ggseg3d")
 })
 
-# The structural complaint has to come before the 3D one. This atlas carries
-# meshes; what is wrong with it is its core, and reporting "no 3D data" sends
-# the reader looking at geometry that is in fact there.
-test_that("ggseg3d() says what is actually wrong with a stale atlas", {
+# The complaint has to name the label. This atlas carries meshes; saying
+# "no 3D data" would send the reader looking at geometry that is in fact
+# there.
+test_that("ggseg3d() says which label it collapsed", {
   atlas <- make_duplicate_label_atlas()
 
-  expect_error(ggseg3d(atlas = atlas), "duplicat")
+  expect_warning(ggseg3d(atlas = atlas), "duplicat")
   expect_true(ggseg.formats::has_atlas_3d(atlas))
 })
 

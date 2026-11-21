@@ -9,7 +9,7 @@
 ## Internal
 
 - `ggseg3d()`, `ggsegray()` and `add_atlas()` upgrade the atlas they are given
-  through `ggseg.formats::atlas_input()`, so a pre-3.0.0 tagged list or an
+  through `ggseg.formats::as_ggseg_atlas()`, so a pre-3.0.0 tagged list or an
   older-schema atlas renders as its current form does. `ggsegray()` now
   reports a structurally broken atlas as such rather than as missing 3D data.
 

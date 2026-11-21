@@ -176,7 +176,7 @@ add_atlas <- function(p, atlas, ...) {
   # A second atlas arrives from the user exactly as the first one does, so it
   # gets the same door: a pre-3.0.0 tagged list or an older-schema atlas is
   # upgraded here rather than reaching the mesh preparation unconverted.
-  atlas <- ggseg.formats::atlas_input(atlas)
+  atlas <- ggseg.formats::as_ggseg_atlas(atlas)
 
   entries <- added_atlas_meshes(p, atlas, is_rgl, ...)
   if (length(entries) == 0L) {

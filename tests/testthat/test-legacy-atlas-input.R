@@ -34,9 +34,12 @@ describe("ggseg3d() accepts a legacy list atlas", {
   })
 
   it("still reports a non-atlas and a structurally broken atlas", {
+    broken <- as_legacy_list_atlas(aseg())
+    broken$core$label <- NULL
+
     expect_error(ggseg3d(atlas = list()), class = "ggseg.formats_not_atlas")
     expect_error(
-      ggseg3d(atlas = make_duplicate_label_atlas()),
+      ggseg3d(atlas = broken),
       class = "ggseg.formats_invalid_atlas"
     )
   })

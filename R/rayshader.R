@@ -85,7 +85,7 @@ ggsegray <- function(
   # Upgraded before the 3D question is asked, so a pre-3.0.0 tagged list or an
   # older-schema atlas reaches the renderer in the current representation, and
   # a structurally broken one is named as such rather than as missing 3D data.
-  atlas <- ggseg.formats::atlas_input(atlas)
+  atlas <- ggseg.formats::as_ggseg_atlas(atlas)
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
