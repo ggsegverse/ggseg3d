@@ -82,12 +82,10 @@ ggsegray <- function(
   }
   rlang::check_installed("rgl", reason = "to render 3D brain scenes with rgl")
 
-  if (!inherits(atlas, "ggseg_atlas") && !inherits(atlas, "brain_atlas")) {
-    cli::cli_abort(
-      "{.arg atlas} must be a {.cls ggseg_atlas} object,
-      not {.obj_type_friendly {atlas}}."
-    )
-  }
+  # Upgraded before the 3D question is asked, so a pre-3.0.0 tagged list or an
+  # older-schema atlas reaches the renderer in the current representation, and
+  # a structurally broken one is named as such rather than as missing 3D data.
+  atlas <- ggseg.formats::atlas_input(atlas)
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(

@@ -252,7 +252,10 @@ make_duplicate_label_atlas <- function() {
 # ggseg.formats accessors, and tagged with the classes
 # `prepare_brain_meshes()` dispatches on, so the result still flows through
 # the whole renderer.
-as_legacy_list_atlas <- function(atlas, type = "subcortical_atlas") {
+as_legacy_list_atlas <- function(
+  atlas,
+  type = paste0(ggseg.formats::atlas_type(atlas), "_atlas")
+) {
   structure(
     list(
       atlas = ggseg.formats::atlas_name(atlas),

@@ -94,10 +94,12 @@ ggseg3d <- function(
     atlas
   }
 
-  # Asserted before the 3D question is asked: an atlas built against an older
-  # `core` schema is a structural problem, and blaming its 3D data sends the
-  # reader looking at geometry that is in fact there.
-  ggseg.formats::assert_ggseg_atlas(atlas)
+  # Upgraded before the 3D question is asked, for two reasons: every atlas
+  # package still ships the pre-3.0.0 tagged list, and an atlas built against
+  # an older `core` schema is a structural problem -- blaming its 3D data
+  # sends the reader looking at geometry that is in fact there. Raises the
+  # same conditions `assert_ggseg_atlas()` did.
+  atlas <- ggseg.formats::atlas_input(atlas)
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
