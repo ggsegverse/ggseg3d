@@ -15,3 +15,4 @@ docs/
 /Meta/
 vignettes/**/figure/
 vignettes/articles/**/img/
+.claude/
