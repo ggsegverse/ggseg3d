@@ -31,6 +31,15 @@ describe("ggseg3d() accepts a legacy list atlas", {
 
   it("upgrades without printing anything", {
     expect_silent(ggseg3d(atlas = as_legacy_list_atlas(aseg())))
+    # The only warning the upgrade can emit is a lifecycle deprecation, which
+    # expect_silent() cannot see. `class = "lifecycle_warning_deprecated"`
+    # does see it, but lifecycle throttles a warning raised from another
+    # package to once per session, so whichever test ran first absorbs it.
+    # Escalating to an error is unthrottled, so this fires whatever the test
+    # order.
+    old <- options(lifecycle_verbosity = "error")
+    on.exit(options(old), add = TRUE)
+    expect_no_error(ggseg3d(atlas = as_legacy_list_atlas(aseg())))
   })
 
   it("still reports a non-atlas and a structurally broken atlas", {

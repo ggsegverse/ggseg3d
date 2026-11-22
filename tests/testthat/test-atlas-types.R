@@ -138,7 +138,17 @@ test_that("duplicated atlas labels are dropped once, with a warning", {
 test_that("ggseg3d() collapses a duplicated label with a warning", {
   atlas <- make_duplicate_label_atlas()
 
-  expect_warning(result <- ggseg3d(atlas = atlas), "Left-Caudate")
+  # Two distinct things fire, and both are load-bearing: the boundary
+  # collapses the duplicated `core` row, and this package's own de-duplication
+  # collapses the duplicated payload row the boundary leaves behind. Catching
+  # only one of them leaks the other into the suite's warnings.
+  expect_warning(
+    expect_warning(
+      result <- ggseg3d(atlas = atlas),
+      "Collapsed"
+    ),
+    "Dropping"
+  )
 
   expect_s3_class(result, "ggseg3d")
 })
@@ -149,7 +159,12 @@ test_that("ggseg3d() collapses a duplicated label with a warning", {
 test_that("ggseg3d() says which label it collapsed", {
   atlas <- make_duplicate_label_atlas()
 
-  expect_warning(ggseg3d(atlas = atlas), "duplicat")
+  # "Collapsed" is the boundary's word; matching "duplicat" would pass on this
+  # package's own warning even if the boundary stopped warning entirely.
+  expect_warning(
+    expect_warning(ggseg3d(atlas = atlas), "Collapsed"),
+    "Dropping"
+  )
   expect_true(ggseg.formats::has_atlas_3d(atlas))
 })
 

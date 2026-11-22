@@ -2,6 +2,9 @@
 
 ## New features
 
+- Requires R >= 4.2, which is the floor of `S7`, and so of `ggseg.formats`.
+  The package advertised an older R than its own dependency could install on.
+
 - `atlas_name()`, `atlas_core()` and `atlas_data()` are re-exported from
   `ggseg.formats`. An atlas is an S7 object there now, so `$` no longer
   reaches its slots and these are the only way to read them.
@@ -9,8 +12,8 @@
 ## Internal
 
 - `ggseg3d()`, `ggsegray()` and `add_atlas()` upgrade the atlas they are given
-  through `ggseg.formats::as_ggseg_atlas()`, so a pre-3.0.0 tagged list or an
-  older-schema atlas renders as its current form does. `ggsegray()` now
+  through `ggseg.formats::as_ggseg_atlas()`, so a tagged list built before
+  3.0.0, or an older-schema atlas, renders as its current form does. `ggsegray()` now
   reports a structurally broken atlas as such rather than as missing 3D data.
 
 - Atlas structure is read through `ggseg.formats::atlas_data()` rather than
