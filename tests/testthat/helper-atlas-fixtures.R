@@ -68,6 +68,23 @@ subcortical_atlas_fixture <- function(
   )
 }
 
+# `wm` is a subclass of `subcortical`, so it carries both class tags and must
+# reach `prepare_brain_meshes.subcortical_atlas()` by inheritance.
+wm_atlas_fixture <- function(
+  core,
+  meshes,
+  palette,
+  atlas = "test_wm"
+) {
+  ggseg.formats::ggseg_atlas(
+    atlas = atlas,
+    type = "wm",
+    core = core_with_display(core),
+    data = ggseg.formats::ggseg_data_wm(meshes = meshes),
+    palette = palette
+  )
+}
+
 tract_atlas_fixture <- function(
   core,
   centerlines = NULL,
@@ -181,14 +198,13 @@ make_uniform_palette_atlas <- function(colour = "#000000") {
 }
 
 # Subcortical atlas carrying the same `label` twice, the shape that used to
-# draw a region once per duplicate row. ggseg.formats warns about this at
-# construction, which is not what the ggseg3d tests are checking.
-# ggseg.formats forbids a duplicated core label at construction, so this
-# cannot be built through the constructor any more. The duplicate is injected
-# afterwards instead, which is a truer fixture for what these tests cover:
-# not an atlas the constructor would accept, but a malformed one -- hand-built,
-# legacy or third-party -- reaching the renderer, which must still refuse to
-# draw the same mesh twice.
+# draw a region once per duplicate row.
+#
+# The fixture is a legacy tagged list rather than a `ggseg_atlas` object: an
+# S7 atlas cannot be constructed in this state, because its validator rejects
+# a duplicated core label. De-duplication in the renderer exists for exactly
+# these legacy objects -- hand-built, restored from an old `.rda`, or shipped
+# by a third-party atlas package -- which still reach the plot unvalidated.
 make_duplicate_label_atlas <- function() {
   triangle <- function(offset) {
     list(
@@ -205,7 +221,7 @@ make_duplicate_label_atlas <- function() {
   meshes <- data.frame(label = labels, stringsAsFactors = FALSE)
   meshes$mesh <- list(triangle(0), triangle(10))
 
-  atlas <- suppressWarnings(subcortical_atlas_fixture(
+  atlas <- subcortical_atlas_fixture(
     core = data.frame(
       label = labels,
       region = c("caudate", "caudate"),
@@ -214,14 +230,41 @@ make_duplicate_label_atlas <- function() {
     ),
     meshes = meshes,
     palette = c("Left-Caudate" = "#123456", "Right-Caudate" = "#654321")
-  ))
+  )
 
-  duplicated_row <- atlas$core[atlas$core$label == "Left-Caudate", ]
-  atlas$core <- rbind(atlas$core, duplicated_row)
-  duplicated_mesh <- atlas$data$meshes[
-    atlas$data$meshes$label == "Left-Caudate",
+  legacy <- as_legacy_list_atlas(atlas)
+
+  legacy$core <- rbind(
+    legacy$core,
+    legacy$core[legacy$core$label == "Left-Caudate", ]
+  )
+  duplicated_mesh <- legacy$data$meshes[
+    legacy$data$meshes$label == "Left-Caudate",
   ]
   duplicated_mesh$mesh <- list(triangle(20))
-  atlas$data$meshes <- rbind(atlas$data$meshes, duplicated_mesh)
-  atlas
+  legacy$data$meshes <- rbind(legacy$data$meshes, duplicated_mesh)
+
+  legacy
+}
+
+# Degrade a valid `ggseg_atlas` to the legacy tagged list it used to be, so a
+# fixture can carry state the S7 validator forbids. Built entirely from the
+# ggseg.formats accessors, and tagged with the classes
+# `prepare_brain_meshes()` dispatches on, so the result still flows through
+# the whole renderer.
+as_legacy_list_atlas <- function(
+  atlas,
+  type = paste0(ggseg.formats::atlas_type(atlas), "_atlas")
+) {
+  structure(
+    list(
+      atlas = ggseg.formats::atlas_name(atlas),
+      type = ggseg.formats::atlas_type(atlas),
+      core = ggseg.formats::atlas_core(atlas),
+      palette = ggseg.formats::atlas_palette(atlas),
+      data = ggseg.formats::atlas_data(atlas),
+      provenance = ggseg.formats::atlas_provenance(atlas)
+    ),
+    class = c(type, "ggseg_atlas", "list")
+  )
 }

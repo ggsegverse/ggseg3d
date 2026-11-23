@@ -210,7 +210,7 @@ test_that("prepare_brain_meshes handles atlas with centerlines", {
   expect_gt(length(prepared$meshes), 0)
 })
 
-test_that("prepare_brain_meshes handles atlas$data$meshes path", {
+test_that("prepare_brain_meshes handles the atlas_meshes() path", {
   meshes_data <- data.frame(
     label = "Left-Caudate",
     stringsAsFactors = FALSE
@@ -237,6 +237,41 @@ test_that("prepare_brain_meshes handles atlas$data$meshes path", {
 
   expect_type(prepared, "list")
   expect_gt(length(prepared$meshes), 0)
+})
+
+test_that("prepare_brain_meshes renders a wm atlas as subcortical", {
+  meshes_data <- data.frame(
+    label = "Left-Corticospinal",
+    stringsAsFactors = FALSE
+  )
+  meshes_data$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
+
+  atlas <- wm_atlas_fixture(
+    core = data.frame(
+      label = "Left-Corticospinal",
+      region = "corticospinal",
+      hemi = "left",
+      stringsAsFactors = FALSE
+    ),
+    meshes = meshes_data,
+    palette = c("Left-Corticospinal" = "#FF0000")
+  )
+
+  expect_true(ggseg.formats::is_wm_atlas(atlas))
+  expect_true(is_unified_atlas(atlas))
+
+  prepared <- prepare_brain_meshes(atlas)
+
+  expect_identical(
+    prepared,
+    prepare_brain_meshes.subcortical_atlas(atlas)
+  )
+  expect_length(prepared$meshes, 1L)
 })
 
 test_that("prepare_brain_meshes uses orientation coloring for tracts", {

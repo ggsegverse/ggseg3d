@@ -13,18 +13,24 @@ export(add_points)
 export(aseg)
 export(atlas_centerlines)
 export(atlas_context)
+export(atlas_core)
+export(atlas_data)
 export(atlas_display)
 export(atlas_geom)
 export(atlas_geometry_type)
 export(atlas_hemi)
 export(atlas_labels)
 export(atlas_meshes)
+export(atlas_name)
 export(atlas_palette)
 export(atlas_plot_palette)
 export(atlas_polygons)
 export(atlas_provenance)
 export(atlas_region_semantics)
 export(atlas_regions)
+export(atlas_schema)
+export(atlas_schema_is_current)
+export(atlas_schema_version)
 export(atlas_sf)
 export(atlas_type)
 export(atlas_undrawn)
@@ -35,6 +41,11 @@ export(dk)
 export(ggseg3d)
 export(ggseg3dOutput)
 export(ggsegray)
+export(has_atlas_3d)
+export(has_atlas_centerlines)
+export(has_atlas_geom)
+export(has_atlas_meshes)
+export(has_atlas_vertices)
 export(is_atlas_polygon)
 export(is_atlas_sf)
 export(legacy_region_map)
@@ -67,18 +78,24 @@ importFrom(ggseg.formats,
   aseg,
   atlas_centerlines,
   atlas_context,
+  atlas_core,
+  atlas_data,
   atlas_display,
   atlas_geom,
   atlas_geometry_type,
   atlas_hemi,
   atlas_labels,
   atlas_meshes,
+  atlas_name,
   atlas_palette,
   atlas_plot_palette,
   atlas_polygons,
   atlas_provenance,
   atlas_region_semantics,
   atlas_regions,
+  atlas_schema,
+  atlas_schema_is_current,
+  atlas_schema_version,
   atlas_sf,
   atlas_type,
   atlas_undrawn,
@@ -86,6 +103,11 @@ importFrom(ggseg.formats,
   atlas_views,
   atlas_views_empty,
   dk,
+  has_atlas_3d,
+  has_atlas_centerlines,
+  has_atlas_geom,
+  has_atlas_meshes,
+  has_atlas_vertices,
   is_atlas_polygon,
   is_atlas_sf,
   legacy_region_map,

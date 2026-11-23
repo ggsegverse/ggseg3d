@@ -23,11 +23,11 @@ URL: https://github.com/ggsegverse/ggseg3d,
     https://ggsegverse.github.io/ggseg3d/
 BugReports: https://github.com/ggsegverse/ggseg3d/issues
 Depends:
-    R (>= 4.1)
+    R (>= 4.2.0)
 Imports:
     cli,
     dplyr,
-    ggseg.formats (>= 0.0.4.9025),
+    ggseg.formats (>= 0.0.4.9032),
     htmlwidgets,
     knitr,
     lifecycle,

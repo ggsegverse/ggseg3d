@@ -94,10 +94,12 @@ ggseg3d <- function(
     atlas
   }
 
-  # Asserted before the 3D question is asked: an atlas built against an older
-  # `core` schema is a structural problem, and blaming its 3D data sends the
-  # reader looking at geometry that is in fact there.
-  ggseg.formats::assert_ggseg_atlas(atlas)
+  # Upgraded before the 3D question is asked, for two reasons: every atlas
+  # package still ships the pre-3.0.0 tagged list, and an atlas built against
+  # an older `core` schema is a structural problem -- blaming its 3D data
+  # sends the reader looking at geometry that is in fact there. Raises the
+  # same conditions `assert_ggseg_atlas()` did.
+  atlas <- ggseg.formats::as_ggseg_atlas(atlas)
 
   if (!is_unified_atlas(atlas)) {
     cli::cli_abort(c(
@@ -255,7 +257,7 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   split_boundaries = TRUE,
   ...
 ) {
-  has_deep <- has_atlas_meshes(atlas)
+  has_deep <- ggseg.formats::has_atlas_meshes(atlas)
   surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
 
   atlas_data <- prepare_atlas_data(atlas, .data)
@@ -457,7 +459,7 @@ build_centerline_data <- function(
   tube_radius = NULL,
   tube_segments = NULL
 ) {
-  if (!has_atlas_centerlines(atlas)) {
+  if (!ggseg.formats::has_atlas_centerlines(atlas)) {
     return(NULL)
   }
 

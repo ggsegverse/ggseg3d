@@ -280,7 +280,17 @@ test_that("check_ggsegray rejects non-ggsegray objects", {
 test_that("ggsegray errors on non-unified atlas", {
   skip_if_not_installed("rgl")
 
-  fake_atlas <- structure(
+  expect_error(ggsegray(atlas = make_test_2d_only_atlas()), "no 3D data")
+})
+
+# This used to be asserted with a hand-built list carrying only `core` and an
+# empty `data`, and it reported "no 3D data" -- which is not what is wrong
+# with it. Now that the atlas is upgraded at the door, the structural
+# complaint comes first, as it already did in `ggseg3d()`.
+test_that("ggsegray names a structurally broken atlas as such", {
+  skip_if_not_installed("rgl")
+
+  broken <- structure(
     list(
       core = data.frame(label = "a", region = "r", hemi = "left"),
       data = structure(list(), class = "ggseg_atlas_data")
@@ -288,7 +298,10 @@ test_that("ggsegray errors on non-unified atlas", {
     class = "ggseg_atlas"
   )
 
-  expect_error(ggsegray(atlas = fake_atlas), "no 3D data")
+  expect_error(
+    ggsegray(atlas = broken),
+    class = "ggseg.formats_invalid_atlas"
+  )
 })
 
 test_that("pan_camera rejects bad type for ggsegray", {
