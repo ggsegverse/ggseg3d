@@ -179,7 +179,7 @@
       "@type": "SoftwareApplication",
       "identifier": "R",
       "name": "R",
-      "version": ">= 4.1"
+      "version": ">= 4.2.0"
     },
     "2": {
       "@type": "SoftwareApplication",
@@ -209,7 +209,7 @@
       "@type": "SoftwareApplication",
       "identifier": "ggseg.formats",
       "name": "ggseg.formats",
-      "version": ">= 0.0.4.9025",
+      "version": ">= 0.0.4.9032",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -304,7 +304,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "1706.85KB",
+  "fileSize": "1717.803KB",
   "citation": [
     {
       "@type": "CreativeWork",
