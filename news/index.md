@@ -2,7 +2,37 @@
 
 ## ggseg3d (development version)
 
+### New features
+
+- Requires R \>= 4.2, which is the floor of `S7`, and so of
+  `ggseg.formats`. The package advertised an older R than its own
+  dependency could install on.
+
+- [`atlas_name()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_name.html),
+  [`atlas_core()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_core.html)
+  and
+  [`atlas_data()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_data.html)
+  are re-exported from `ggseg.formats`. An atlas is an S7 object there
+  now, so `$` no longer reaches its slots and these are the only way to
+  read them.
+
 ### Internal
+
+- [`ggseg3d()`](https://ggsegverse.github.io/ggseg3d/reference/ggseg3d.md),
+  [`ggsegray()`](https://ggsegverse.github.io/ggseg3d/reference/ggsegray.md)
+  and
+  [`add_atlas()`](https://ggsegverse.github.io/ggseg3d/reference/add_atlas.md)
+  upgrade the atlas they are given through
+  [`ggseg.formats::as_ggseg_atlas()`](https://ggsegverse.github.io/ggseg.formats/reference/as_ggseg_atlas.html),
+  so a tagged list built before 3.0.0, or an older-schema atlas, renders
+  as its current form does.
+  [`ggsegray()`](https://ggsegverse.github.io/ggseg3d/reference/ggsegray.md)
+  now reports a structurally broken atlas as such rather than as missing
+  3D data.
+
+- Atlas structure is read through
+  [`ggseg.formats::atlas_data()`](https://ggsegverse.github.io/ggseg.formats/reference/atlas_data.html)
+  rather than `atlas$data`.
 
 - The legacy axis rotation is gone. `ggseg.meshes` surfaces record their
   own frame from 0.0.1.9002, which is now the floor, so nothing reaches
