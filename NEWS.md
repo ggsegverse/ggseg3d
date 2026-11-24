@@ -42,7 +42,7 @@
   outside it. They are drawn in `na_colour`, like a region with no data.
 
 - `ggseg.meshes (>= 0.0.1.9002)` is checked, not just its presence: the floor
-  sits in `Suggests`, which `install.packages()` never resolves, so CRAN's
+  sits in `Suggests`, which `install.packages()` never resolves, so the CRAN
   0.0.1 rendered the cortex rotated 90 degrees. Reading the orientation from a
   `mesh_space()` the mesh records, claimed in an earlier note, never existed.
 
