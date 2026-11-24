@@ -270,12 +270,6 @@ get_palette <- function(palette) {
     )
   }
 
-  pal_colours$hex <- gradient_n_pal(
-    colours = pal_colours$orig,
-    values = pal_colours$values,
-    space = "Lab"
-  )(pal_colours$values)
-
   pal_colours
 }
 

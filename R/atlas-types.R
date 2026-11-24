@@ -172,19 +172,17 @@ data_merge_mesh <- function(.data, atlas_data) {
 }
 
 
-#' Merge legend data from surface and deep cerebellar components
+#' Atlas rows without their geometry
+#'
+#' Colouring reads the metadata columns only, so the surface and nuclei rows
+#' of a cerebellar atlas can be stacked into one frame -- and so share one
+#' colour scale -- once the geometry each carries is set aside.
+#'
+#' @param atlas_data Prepared atlas data frame, or `NULL`
+#'
+#' @return `atlas_data` without its `vertices` or `mesh` column
+#' @keywords internal
 #' @noRd
-merge_legend_data <- function(surface_legend, deep_legend) {
-  if (is.null(surface_legend) && is.null(deep_legend)) {
-    return(NULL)
-  }
-  if (is.null(surface_legend)) {
-    return(deep_legend)
-  }
-  if (is.null(deep_legend)) {
-    return(surface_legend)
-  }
-
-  combined <- rbind(surface_legend, deep_legend)
-  combined[!duplicated(combined$label), , drop = FALSE]
+mesh_metadata <- function(atlas_data) {
+  atlas_data[setdiff(names(atlas_data), c("vertices", "mesh"))]
 }

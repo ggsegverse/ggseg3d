@@ -36,7 +36,6 @@
 #'   background colour, [set_legend()] for legend visibility
 #'
 #' @importFrom dplyr filter full_join select distinct summarise mutate
-#' @importFrom scales colour_ramp brewer_pal rescale gradient_n_pal
 #' @importFrom tidyr unite
 #' @importFrom htmlwidgets createWidget sizingPolicy
 #' @importFrom lifecycle deprecate_warn deprecated
@@ -261,8 +260,14 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   surface_opacity <- surface_opacity %||% if (has_deep) 0.3 else 1
 
   atlas_data <- prepare_atlas_data(atlas, .data)
+  deep_data <- if (has_deep) prepare_mesh_atlas_data(atlas, .data)
+
+  # One pass over surface and nuclei rows together. Colouring each separately
+  # gave each its own min/max, so a lobule and a nucleus holding different
+  # values came out the same colour, under two legends that then cancelled
+  # each other out.
   result <- apply_colours_and_legend(
-    atlas_data,
+    dplyr::bind_rows(mesh_metadata(atlas_data), mesh_metadata(deep_data)),
     colour_by,
     palette,
     na_colour,
@@ -270,8 +275,12 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     na_alpha,
     text_by = text_by
   )
-  surface_meshes <- build_cerebellar_meshes(
-    result$atlas_data,
+  coloured <- result$atlas_data
+  surface_rows <- seq_len(nrow(atlas_data))
+  atlas_data[names(coloured)] <- coloured[surface_rows, ]
+
+  meshes <- build_cerebellar_meshes(
+    atlas_data,
     na_colour,
     text_by = text_by,
     label_by = label_by,
@@ -281,33 +290,19 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   )
 
   if (has_deep) {
-    deep_data <- prepare_mesh_atlas_data(atlas, .data)
-    deep_result <- apply_colours_and_legend(
-      deep_data,
-      colour_by,
-      palette,
-      na_colour,
-      label_by,
-      na_alpha,
-      text_by = text_by
+    deep_data[names(coloured)] <- coloured[-surface_rows, ]
+    meshes <- c(
+      meshes,
+      build_subcortical_meshes(
+        deep_data,
+        na_colour,
+        text_by = text_by,
+        label_by = label_by
+      )
     )
-    deep_meshes <- build_subcortical_meshes(
-      deep_result$atlas_data,
-      na_colour,
-      text_by = text_by,
-      label_by = label_by
-    )
-    all_meshes <- c(surface_meshes, deep_meshes)
-    legend_data <- merge_legend_data(
-      result$legend_data,
-      deep_result$legend_data
-    )
-  } else {
-    all_meshes <- surface_meshes
-    legend_data <- result$legend_data
   }
 
-  list(meshes = all_meshes, legend_data = legend_data)
+  list(meshes = meshes, legend_data = result$legend_data)
 }
 
 #' @method prepare_brain_meshes tract_atlas

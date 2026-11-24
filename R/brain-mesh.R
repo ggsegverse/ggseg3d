@@ -139,13 +139,16 @@ as_one_based_mesh <- function(mesh) {
 }
 
 
+# The version matters, not just the presence: ggseg.meshes un-rotated its
+# cortical vertex axes in 0.0.1.9002 and this package dropped the matching
+# rotation, so an older ggseg.meshes renders the cortex rotated. The floor
+# lives in Suggests, which install.packages() never resolves.
 check_ggseg_meshes <- function(surface) {
-  if (!requireNamespace("ggseg.meshes", quietly = TRUE)) {
-    cli::cli_abort(c(
-      "{.pkg ggseg.meshes} is required for {.val {surface}}.",
-      "i" = "Install with: {.run install.packages('ggseg.meshes')}"
-    ))
-  }
+  rlang::check_installed(
+    "ggseg.meshes",
+    version = "0.0.1.9002",
+    reason = paste0("for the \"", surface, "\" surface.")
+  )
 }
 
 
@@ -256,7 +259,12 @@ vertices_to_colors <- function(
   n_vertices,
   na_colour = "#CCCCCC"
 ) {
-  map_vertex_values(atlas_data, n_vertices, atlas_data$colour, na_colour)
+  map_vertex_values(
+    atlas_data,
+    n_vertices,
+    atlas_data$colour,
+    col2hex(na_colour)
+  )
 }
 
 
@@ -634,12 +642,10 @@ build_subcortical_meshes <- function(
     if (is.null(mesh_data)) {
       return(NULL)
     }
+    mesh_data <- as_one_based_mesh(mesh_data)
 
     colour <- atlas_data$colour[i]
-    if (is.na(colour)) {
-      colour <- na_colour
-    }
-    colour <- unname(ifelse(grepl("^#", colour), colour, col2hex(colour)))
+    colour <- col2hex(if (is.na(colour)) na_colour else colour)
 
     region_name <- if (label_by %in% names(atlas_data)) {
       atlas_data[[label_by]][i]
@@ -707,6 +713,9 @@ build_tract_meshes <- function(
 
     if (is.null(mesh_data)) {
       return(NULL)
+    }
+    if (!has_centerlines) {
+      mesh_data <- as_one_based_mesh(mesh_data)
     }
 
     tract_name <- if (label_by %in% names(atlas_data)) {

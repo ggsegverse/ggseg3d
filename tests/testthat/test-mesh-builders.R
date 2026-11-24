@@ -97,6 +97,34 @@ test_that("build_subcortical_meshes creates mesh entries for each region", {
   expect_identical(meshes[[1]]$colorMode, "facecolor")
 })
 
+test_that("a 0-based subcortical mesh keeps every face index in range", {
+  # Third-party atlases ship 0-based faces and carry no face_index_base
+  # attribute. The payload is 0-based too, so a mesh that was never shifted
+  # to 1-based leaves with -1, which the Uint32 index buffer reads as
+  # 4294967295. Bundled aseg is 1-based, which is why this stayed hidden.
+  atlas_data <- data.frame(
+    label = "Left-Caudate",
+    colour = "#FF0000",
+    stringsAsFactors = FALSE
+  )
+  atlas_data$mesh <- list(
+    list(
+      vertices = data.frame(
+        x = c(0, 1, 0, 1),
+        y = c(0, 0, 1, 1),
+        z = c(0, 0, 0, 0)
+      ),
+      faces = data.frame(i = c(0L, 1L), j = c(1L, 2L), k = c(2L, 3L))
+    )
+  )
+
+  faces <- build_subcortical_meshes(atlas_data, "#CCCCCC")[[1]]$faces
+
+  expect_identical(faces$i, c(0L, 1L))
+  expect_identical(faces$j, c(1L, 2L))
+  expect_identical(faces$k, c(2L, 3L))
+})
+
 test_that("build_subcortical_meshes handles NA colours", {
   atlas_data <- data.frame(
     label = "region_a",

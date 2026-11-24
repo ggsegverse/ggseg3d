@@ -462,6 +462,32 @@ test_that("build_tract_meshes with mesh data (no centerlines)", {
   expect_identical(meshes[[1]]$colors, rep("#FF0000", 3))
 })
 
+test_that("a 0-based legacy tract mesh keeps every face index in range", {
+  # Same defect as the subcortical builder: the legacy mesh column was never
+  # normalised, so a 0-based mesh left with -1 in the index buffer.
+  atlas_data <- data.frame(
+    label = "tract_a",
+    colour = "#FF0000",
+    stringsAsFactors = FALSE
+  )
+  atlas_data$mesh <- list(
+    list(
+      vertices = data.frame(
+        x = c(0, 1, 0, 1),
+        y = c(0, 0, 1, 1),
+        z = c(0, 0, 0, 0)
+      ),
+      faces = data.frame(i = c(0L, 1L), j = c(1L, 2L), k = c(2L, 3L))
+    )
+  )
+
+  faces <- build_tract_meshes(atlas_data, "#CCCCCC")[[1]]$faces
+
+  expect_identical(faces$i, c(0L, 1L))
+  expect_identical(faces$j, c(1L, 2L))
+  expect_identical(faces$k, c(2L, 3L))
+})
+
 test_that("build_tract_meshes skips NULL mesh entries", {
   atlas_data <- data.frame(
     label = c("tract_a", "tract_b"),

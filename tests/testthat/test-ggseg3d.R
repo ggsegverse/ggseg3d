@@ -372,7 +372,7 @@ test_that("cerebellar atlas colors correct vertices", {
 
   expect_identical(colors[1:5], rep("#FF0000", 5))
   expect_identical(colors[101:105], rep("#00FF00", 5))
-  expect_identical(colors[50], "darkgrey")
+  expect_identical(colors[50], col2hex("darkgrey"))
 })
 
 test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
@@ -460,15 +460,55 @@ test_that("cerebellar surface_opacity can be overridden", {
   expect_equal(prepared$meshes[[1]]$opacity, 0.5)
 })
 
-test_that("merge_legend_data handles NULL inputs", {
-  legend <- data.frame(label = "a", colour = "#FF0000")
+test_that("deep nuclei share the surface colour scale and legend", {
+  vertices_data <- data.frame(label = "left_I-IV", stringsAsFactors = FALSE)
+  vertices_data$vertices <- list(0L:4L)
 
-  expect_null(merge_legend_data(NULL, NULL))
-  expect_identical(merge_legend_data(NULL, legend), legend)
-  expect_identical(merge_legend_data(legend, NULL), legend)
+  deep_meshes <- data.frame(label = "Left-Dentate", stringsAsFactors = FALSE)
+  deep_meshes$mesh <- list(
+    list(
+      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      faces = data.frame(i = 1L, j = 2L, k = 3L)
+    )
+  )
 
-  combined <- merge_legend_data(legend, legend)
-  expect_identical(nrow(combined), 1L)
+  atlas <- cerebellar_atlas_fixture(
+    atlas = "suit_deep",
+    core = data.frame(
+      label = c("left_I-IV", "Left-Dentate"),
+      region = c("I-IV", "Dentate"),
+      hemi = c("left", "left"),
+      stringsAsFactors = FALSE
+    ),
+    vertices = vertices_data,
+    meshes = deep_meshes,
+    palette = c("left_I-IV" = "#FF0000", "Left-Dentate" = "#0000FF")
+  )
+
+  # The surface merge reports the nuclei labels as unmatched, which it should
+  # not: the nuclei are in the atlas, just in the other geometry slot.
+  prepared <- suppressWarnings(prepare_brain_meshes(
+    atlas,
+    .data = data.frame(
+      label = c("left_I-IV", "Left-Dentate"),
+      p = c(1, 5),
+      stringsAsFactors = FALSE
+    ),
+    colour_by = "p"
+  ))
+
+  # One scale over both: the lobule holds the minimum and the nucleus the
+  # maximum, so they take the two ends of the palette rather than both
+  # taking its first colour.
+  expect_identical(
+    setdiff(unique(prepared$meshes[[1]]$colors), col2hex("darkgrey")),
+    "#440154"
+  )
+  expect_identical(unique(prepared$meshes[[2]]$colors), "#FDE725")
+
+  expect_identical(prepared$legend_data$type, "continuous")
+  expect_identical(prepared$legend_data$min, 1)
+  expect_identical(prepared$legend_data$max, 5)
 })
 
 test_that("build_cerebellar_meshes errors when mesh unavailable", {
@@ -509,12 +549,23 @@ test_that("build_cerebellar_meshes flags flatmap meshes", {
   expect_true(isTRUE(meshes[[1]]$isFlatmap))
 })
 
-test_that("check_ggseg_meshes errors when package missing", {
+test_that("check_ggseg_meshes requires the version, not just the package", {
+  # ggseg.meshes un-rotated its cortical axes in 0.0.1.9002 and this package
+  # dropped the matching rotation, so an older one renders the cortex rotated
+  # 90 degrees. The floor sits in Suggests, which install.packages() never
+  # resolves, so nothing else checks it.
   local_mocked_bindings(
-    requireNamespace = function(...) FALSE,
-    .package = "base"
+    check_installed = function(pkg, reason = NULL, ..., version = NULL) {
+      cli::cli_abort("{pkg} {version} {reason}")
+    },
+    .package = "rlang"
   )
-  expect_error(check_ggseg_meshes("pial"), "ggseg.meshes")
+
+  expect_error(
+    check_ggseg_meshes("pial"),
+    "ggseg.meshes 0.0.1.9002",
+    fixed = TRUE
+  )
 })
 
 test_that("cerebellar atlas with text_by populates vertex texts", {
@@ -619,9 +670,25 @@ test_that("one matched region does not paint the rest of the hemisphere", {
 
   colours <- table(p$x$meshes[[1]]$colors)
 
-  expect_gt(colours[["darkgrey"]], colours[["#440154"]])
+  expect_gt(colours[["#A9A9A9"]], colours[["#440154"]])
   expect_identical(p$x$colorbar$type, "discrete")
   expect_identical(as.character(p$x$colorbar$labels), "0.5")
+})
+
+test_that("na_colour reaches the widget as hex, not an R colour name", {
+  # three.js knows the CSS keywords only, so "grey90" is left white there --
+  # invisible on a white page. 453 of R's 657 colour names are this form.
+  p <- ggseg3d(
+    .data = data.frame(region = "precentral", p = 0.5),
+    hemisphere = "left",
+    colour_by = "p",
+    na_colour = "grey90"
+  )
+
+  colours <- unique(p$x$meshes[[1]]$colors)
+
+  expect_false("grey90" %in% colours)
+  expect_true("#E5E5E5" %in% colours)
 })
 
 test_that("na_alpha fades unmatched cortical regions per vertex", {
