@@ -276,6 +276,9 @@ prepare_brain_meshes.cerebellar_atlas <- function(
     text_by = text_by
   )
   coloured <- result$atlas_data
+  # Index the two blocks forwards. `coloured[-surface_rows, ]` selects NOTHING
+  # when there are no surface rows, because negating integer(0) is the empty
+  # selection rather than "everything".
   surface_rows <- seq_len(nrow(atlas_data))
   atlas_data[names(coloured)] <- coloured[surface_rows, ]
 
@@ -290,7 +293,9 @@ prepare_brain_meshes.cerebellar_atlas <- function(
   )
 
   if (has_deep) {
-    deep_data[names(coloured)] <- coloured[-surface_rows, ]
+    deep_data[names(coloured)] <- coloured[
+      nrow(atlas_data) + seq_len(nrow(deep_data)),
+    ]
     meshes <- c(
       meshes,
       build_subcortical_meshes(

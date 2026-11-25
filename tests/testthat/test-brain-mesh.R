@@ -674,7 +674,12 @@ test_that("the inferred base uses the whole index span, not just column i", {
     faces = data.frame(i = 1L, j = 2L, k = 3L)
   )
 
-  expect_identical(infer_face_index_base(zero_based), 0L)
+  # The span is consistent with either base, so the guess is reported rather
+  # than applied silently -- it shifts every face if it is wrong.
+  expect_warning(
+    expect_identical(infer_face_index_base(zero_based), 0L),
+    class = "ggseg3d_guessed_face_base"
+  )
 
   one_based <- list(
     vertices = data.frame(x = 0:2, y = 0:2, z = 0:2),

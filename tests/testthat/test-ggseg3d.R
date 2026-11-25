@@ -388,7 +388,10 @@ test_that("cerebellar atlas with deep nuclei renders mixed surface + meshes", {
   )
   deep_meshes$mesh <- list(
     list(
-      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      # Three vertices, all referenced: max index == vertex count, so the
+      # face base is decisive and these fixtures do not quietly exercise the
+      # ambiguous-base guess while testing something else.
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
       faces = data.frame(i = 1L, j = 2L, k = 3L)
     )
   )
@@ -435,7 +438,10 @@ test_that("cerebellar surface_opacity can be overridden", {
   )
   deep_meshes$mesh <- list(
     list(
-      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      # Three vertices, all referenced: max index == vertex count, so the
+      # face base is decisive and these fixtures do not quietly exercise the
+      # ambiguous-base guess while testing something else.
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
       faces = data.frame(i = 1L, j = 2L, k = 3L)
     )
   )
@@ -467,7 +473,10 @@ test_that("deep nuclei share the surface colour scale and legend", {
   deep_meshes <- data.frame(label = "Left-Dentate", stringsAsFactors = FALSE)
   deep_meshes$mesh <- list(
     list(
-      vertices = data.frame(x = 1:4, y = 1:4, z = 1:4),
+      # Three vertices, all referenced: max index == vertex count, so the
+      # face base is decisive and these fixtures do not quietly exercise the
+      # ambiguous-base guess while testing something else.
+      vertices = data.frame(x = 1:3, y = 1:3, z = 1:3),
       faces = data.frame(i = 1L, j = 2L, k = 3L)
     )
   )
@@ -486,16 +495,21 @@ test_that("deep nuclei share the surface colour scale and legend", {
   )
 
   # The surface merge reports the nuclei labels as unmatched, which it should
-  # not: the nuclei are in the atlas, just in the other geometry slot.
-  prepared <- suppressWarnings(prepare_brain_meshes(
-    atlas,
-    .data = data.frame(
-      label = c("left_I-IV", "Left-Dentate"),
-      p = c(1, 5),
-      stringsAsFactors = FALSE
+  # not: the nuclei are in the atlas, just in the other geometry slot. Pinned
+  # rather than suppressed, so fixing it is visible here and so an unrelated
+  # warning on this path is not swallowed with it.
+  expect_warning(
+    prepared <- prepare_brain_meshes(
+      atlas,
+      .data = data.frame(
+        label = c("left_I-IV", "Left-Dentate"),
+        p = c(1, 5),
+        stringsAsFactors = FALSE
+      ),
+      colour_by = "p"
     ),
-    colour_by = "p"
-  ))
+    "did not match atlas regions"
+  )
 
   # One scale over both: the lobule holds the minimum and the nucleus the
   # maximum, so they take the two ends of the palette rather than both
@@ -688,6 +702,9 @@ test_that("na_colour reaches the widget as hex, not an R colour name", {
   colours <- unique(p$x$meshes[[1]]$colors)
 
   expect_false("grey90" %in% colours)
+  # Generalises past this one name: 453 of R's 657 colour names are not CSS
+  # keywords, and any of them left raw renders white.
+  expect_true(all(grepl("^#", colours)))
   expect_true("#E5E5E5" %in% colours)
 })
 

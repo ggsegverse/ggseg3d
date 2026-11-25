@@ -77,7 +77,7 @@ resolve_brain_mesh <- function(
 #' @return `0L` or `1L`
 #' @keywords internal
 #' @noRd
-face_index_base <- function(mesh) {
+face_index_base <- function(mesh, label = NULL) {
   base <- attr(mesh, "face_index_base")
 
   if (!is.null(base)) {
@@ -90,7 +90,7 @@ face_index_base <- function(mesh) {
     return(base)
   }
 
-  infer_face_index_base(mesh)
+  infer_face_index_base(mesh, label)
 }
 
 
@@ -99,8 +99,11 @@ face_index_base <- function(mesh) {
 # neither is decisive, a span that ends one short of the vertex count is
 # 0-based. Anything still ambiguous (a mesh whose highest vertices are unused)
 # is read as 1-based, which is what ggseg3d works in.
-infer_face_index_base <- function(mesh) {
+infer_face_index_base <- function(mesh, label = NULL) {
   indices <- c(mesh$faces$i, mesh$faces$j, mesh$faces$k)
+  if (length(indices) == 0L) {
+    return(1L)
+  }
   n_vertices <- nrow(mesh$vertices)
 
   if (min(indices) == 0L) {
@@ -109,7 +112,24 @@ infer_face_index_base <- function(mesh) {
   if (max(indices) == n_vertices) {
     return(1L)
   }
+
+  # Defaulting to 1-based leaves the indices alone, so a wrong guess there
+  # changes nothing a warning could help with. A span ending one short of the
+  # vertex count makes us SHIFT every face, and a 1-based mesh with one
+  # unreferenced trailing vertex looks exactly like a 0-based one -- so say so
+  # before re-pointing its geometry.
   if (max(indices) == n_vertices - 1L) {
+    cli::cli_warn(
+      c(
+        "Guessing 0-based faces for {.field {label %||% 'a mesh'}}, and
+          shifting them.",
+        "i" = "Its indices span {min(indices)}-{max(indices)} over
+          {n_vertices} vertices, which a 1-based mesh with an unused last
+          vertex also does.",
+        "i" = "Publish a {.field face_index_base} attribute to be exact."
+      ),
+      class = "ggseg3d_guessed_face_base"
+    )
     return(0L)
   }
 
@@ -127,8 +147,8 @@ infer_face_index_base <- function(mesh) {
 #' @return `mesh` with 1-based faces and `face_index_base` set to `1L`
 #' @keywords internal
 #' @noRd
-as_one_based_mesh <- function(mesh) {
-  if (face_index_base(mesh) == 0L) {
+as_one_based_mesh <- function(mesh, label = NULL) {
+  if (face_index_base(mesh, label) == 0L) {
     mesh$faces$i <- mesh$faces$i + 1L
     mesh$faces$j <- mesh$faces$j + 1L
     mesh$faces$k <- mesh$faces$k + 1L
@@ -642,7 +662,7 @@ build_subcortical_meshes <- function(
     if (is.null(mesh_data)) {
       return(NULL)
     }
-    mesh_data <- as_one_based_mesh(mesh_data)
+    mesh_data <- as_one_based_mesh(mesh_data, atlas_data$label[i])
 
     colour <- atlas_data$colour[i]
     colour <- col2hex(if (is.na(colour)) na_colour else colour)

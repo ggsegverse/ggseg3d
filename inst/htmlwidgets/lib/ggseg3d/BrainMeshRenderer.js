@@ -393,6 +393,12 @@
     }
 
     resize(width, height) {
+      // A hidden container reports height 0, and the orthographic branch below
+      // divides by it: Infinity in the frustum leaves the widget permanently
+      // blank, with no later resize to recover from it.
+      if (!width || !height) {
+        return;
+      }
       // An orthographic camera has no aspect: its frustum bounds are the
       // only thing that tracks the viewport, so setting aspect left the
       // brain stretched after every resize.
