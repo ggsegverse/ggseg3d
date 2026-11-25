@@ -1,6 +1,7 @@
 anisotropy
 aseg
 Athanasia
+cancelled
 caudate
 centerline
 centerlines
@@ -53,6 +54,7 @@ midline
 midthickness
 millimetre
 MNI
+normalised
 normalises
 occipital
 Optimising

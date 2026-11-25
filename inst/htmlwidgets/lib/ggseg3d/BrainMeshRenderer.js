@@ -117,11 +117,7 @@
     }
 
     _onResize() {
-      const width = this.container.clientWidth;
-      const height = this.container.clientHeight;
-      this.camera.aspect = width / height;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(width, height);
+      this.resize(this.container.clientWidth, this.container.clientHeight);
     }
 
     addMesh(meshData) {
@@ -341,32 +337,6 @@
       this.controls.update();
     }
 
-    fitToMeshes(padding = 1.1) {
-      this.centerOnMeshes();
-      if (this.meshes.length === 0) return;
-
-      const box = new THREE.Box3();
-      for (const mesh of this.meshes) {
-        box.expandByObject(mesh);
-      }
-
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      const maxDim = Math.max(size.x, size.y, size.z) * padding;
-
-      if (this.camera.isOrthographicCamera) {
-        const width = this.container.clientWidth || 400;
-        const height = this.container.clientHeight || 400;
-        const aspect = width / height;
-
-        this.camera.left = -maxDim * aspect / 2;
-        this.camera.right = maxDim * aspect / 2;
-        this.camera.top = maxDim / 2;
-        this.camera.bottom = -maxDim / 2;
-        this.camera.updateProjectionMatrix();
-      }
-    }
-
     clearMeshes() {
       for (const mesh of this.meshes) {
         this.scene.remove(mesh);
@@ -423,7 +393,23 @@
     }
 
     resize(width, height) {
-      this.camera.aspect = width / height;
+      // A hidden container reports height 0, and the orthographic branch below
+      // divides by it: Infinity in the frustum leaves the widget permanently
+      // blank, with no later resize to recover from it.
+      if (!width || !height) {
+        return;
+      }
+      // An orthographic camera has no aspect: its frustum bounds are the
+      // only thing that tracks the viewport, so setting aspect left the
+      // brain stretched after every resize.
+      if (this.camera.isOrthographicCamera) {
+        const halfHeight = (this.camera.top - this.camera.bottom) / 2;
+        const halfWidth = halfHeight * (width / height);
+        this.camera.left = -halfWidth;
+        this.camera.right = halfWidth;
+      } else {
+        this.camera.aspect = width / height;
+      }
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
     }

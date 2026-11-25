@@ -135,11 +135,5 @@ importFrom(rlang,
   "%||%",
   .data
 )
-importFrom(scales,
-  brewer_pal,
-  colour_ramp,
-  gradient_n_pal,
-  rescale
-)
 importFrom(tidyr,unite)
 importFrom(webshot2,webshot)

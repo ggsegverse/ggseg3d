@@ -5,7 +5,6 @@ test_that("get_palette works", {
       values = c(0, 1),
       norm = c(0, 1),
       orig = "blue",
-      hex = "#0000FF",
       stringsAsFactors = FALSE
     )
   )
@@ -16,7 +15,6 @@ test_that("get_palette works", {
       values = c(1, 2),
       norm = c(0, 1),
       orig = "blue",
-      hex = "#0000FF",
       stringsAsFactors = FALSE
     )
   )
@@ -27,8 +25,7 @@ test_that("get_palette works", {
       list(
         values = c(0, 0.5, 1),
         norm = c(0, 0.5, 1),
-        orig = c("#440154", "#21918c", "#fde725"),
-        hex = c("#440154", "#21918C", "#FDE725")
+        orig = c("#440154", "#21918c", "#fde725")
       ),
       row.names = c(NA, -3L),
       class = "data.frame"
@@ -41,8 +38,7 @@ test_that("get_palette works", {
       list(
         values = c(0, 0.5, 1),
         norm = c(0, 0.5, 1),
-        orig = c("firebrick", "white", "goldenrod"),
-        hex = c("#B22222", "#FFFFFF", "#DAA520")
+        orig = c("firebrick", "white", "goldenrod")
       ),
       row.names = c(NA, -3L),
       class = "data.frame"
@@ -55,8 +51,7 @@ test_that("get_palette works", {
       list(
         values = c(0, 0.5, 1),
         norm = c(0, 0.5, 1),
-        orig = c("#ffffff", "#d3d3d3", "#32f303"),
-        hex = c("#FFFFFF", "#D3D3D3", "#32F303")
+        orig = c("#ffffff", "#d3d3d3", "#32f303")
       ),
       row.names = c(NA, -3L),
       class = "data.frame"
@@ -69,8 +64,7 @@ test_that("get_palette works", {
       list(
         values = c(0, 1, 2),
         norm = c(0, 0.5, 1),
-        orig = c("#ffffff", "#d3d3d3", "#32f303"),
-        hex = c("#FFFFFF", "#D3D3D3", "#32F303")
+        orig = c("#ffffff", "#d3d3d3", "#32f303")
       ),
       row.names = c(NA, -3L),
       class = "data.frame"

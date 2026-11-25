@@ -68,10 +68,6 @@ HTMLWidgets.widget({
           renderer.setCamera(options.camera);
         }
 
-        if (options.orthographic && options.autoFit) {
-          renderer.fitToMeshes();
-        }
-
         tooltip = new TooltipManager(container);
 
         container.addEventListener('mousemove', function(event) {

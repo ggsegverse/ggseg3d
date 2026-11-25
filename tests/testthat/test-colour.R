@@ -127,3 +127,41 @@ test_that("apply_colour_palette rejects an out-of-range na_alpha", {
     "between 0 and 1"
   )
 })
+
+test_that("legitimately missing values do not read as outside the palette", {
+  # The normal case: a few regions carry data and the rest of the atlas is NA.
+  # Counting those NAs as out-of-range warned on every ordinary plot.
+  atlas_data <- data.frame(
+    label = c("a", "b", "c"),
+    value = c(0.5, 2, NA),
+    stringsAsFactors = FALSE
+  )
+
+  expect_no_warning(
+    apply_colour_palette(atlas_data, "value", NULL, "darkgrey")
+  )
+})
+
+
+test_that("a named palette narrower than the data warns", {
+  # Two out-of-range values, so the plural inflection is exercised too.
+  atlas_data <- data.frame(
+    label = c("a", "b", "c"),
+    value = c(0.5, 9, 12),
+    stringsAsFactors = FALSE
+  )
+
+  expect_warning(
+    result <- apply_colour_palette(
+      atlas_data,
+      "value",
+      c("#ff0000" = 0, "#0000ff" = 1),
+      "darkgrey"
+    ),
+    "values fall outside the palette range"
+  )
+
+  # The out-of-range value is drawn in na_colour, which is why it has to be
+  # said: nothing else distinguishes it from a region with no data.
+  expect_identical(result$data$colour[2], col2hex("darkgrey"))
+})

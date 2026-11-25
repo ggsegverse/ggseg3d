@@ -130,6 +130,13 @@ normalize_hemisphere <- function(hemisphere, call = rlang::caller_env()) {
 
 
 col2hex <- function(colour) {
+  # `col2rgb(NA)` is white, so an NA here would paint every unmatched region
+  # the colour of the page it is drawn on.
+  if (length(colour) != 1L || is.na(colour)) {
+    cli::cli_abort(
+      "{.arg na_colour} must be a single colour, not {.val {colour}}."
+    )
+  }
   col <- grDevices::col2rgb(colour)
   grDevices::rgb(
     red = col[1, ] / 255,
@@ -269,12 +276,6 @@ get_palette <- function(palette) {
       stringsAsFactors = FALSE
     )
   }
-
-  pal_colours$hex <- gradient_n_pal(
-    colours = pal_colours$orig,
-    values = pal_colours$values,
-    space = "Lab"
-  )(pal_colours$values)
 
   pal_colours
 }
