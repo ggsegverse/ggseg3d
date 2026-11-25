@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggseg3d</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9016</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,12 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
-<ul><li><p>Cortical surfaces are oriented from what the mesh records rather than from which package it came from. A surface carrying a <code>mesh_space()</code> is taken at its word; one without falls back to the historical rotation, so an old and a new <code>ggseg.meshes</code> both render correctly and neither has to be installed in step with this package (ggsegverse/ggseg3d#83).</p></li>
+<ul><li><p>A cerebellar atlas with deep nuclei is coloured once, over surface and nuclei rows together. Each pass scaled against its own values, so different values came out the same colour – and the two legends cancelled out.</p></li>
+<li><p>Subcortical and legacy tract meshes with 0-based faces are normalised like every other mesh. They left one index short, so a third-party atlas sent <code>-1</code> into a <code>Uint32</code> index buffer.</p></li>
+<li><p><code>na_colour</code> is converted to hex on every path, not just the subcortical one. <code>na_colour = "grey90"</code> – any R colour name that is not a CSS keyword – rendered white.</p></li>
+<li><p>A named palette narrower than the data warns, naming how many values fell outside it. They are drawn in <code>na_colour</code>, like a region with no data.</p></li>
+<li><p><code>ggseg.meshes (&gt;= 0.0.1.9002)</code> is checked, not just its presence: the floor sits in <code>Suggests</code>, which <code><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages()</a></code> never resolves, so the CRAN 0.0.1 rendered the cortex rotated 90 degrees. Reading the orientation from a <code>mesh_space()</code> the mesh records, claimed in an earlier note, never existed.</p></li>
+<li><p>Orthographic widgets no longer stretch on resize. Both handlers set <code>camera.aspect</code>, which <code>THREE.OrthographicCamera</code> does not have.</p></li>
 <li><p>The test suite no longer opens an rgl window. <code>options(rgl.useNULL = TRUE)</code> sat on line 1 of <code>test-rayshader.R</code>, but <code>testthat</code> runs <code>test-add-points.R</code> first and that opens a device, so the window appeared before the option was set. It is now in <code>setup.R</code>, which also lets the suite run headless.</p></li>
 <li><p>Region boundary edges are drawn again, on both cortical and cerebellar atlases. Splitting faces at parcel borders (2.1.2.9009) left every face with a single region, which is what makes the borders exact – and left <code>find_boundary_edges()</code> with no face whose vertices differ, so <code><a href="../reference/set_edges.html">set_edges()</a></code>, <code>edge_by</code> and the default edges all silently produced nothing. Edges are now computed before the split.</p></li>
 <li><p><code>label_by</code> works on cortical and cerebellar atlases. It was validated against the data and then ignored, so <code>label_by = "label"</code> hovered region names. Subcortical and tract atlases always honoured it.</p></li>

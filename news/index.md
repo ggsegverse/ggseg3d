@@ -41,12 +41,32 @@
 
 ### Bug fixes
 
-- Cortical surfaces are oriented from what the mesh records rather than
-  from which package it came from. A surface carrying a `mesh_space()`
-  is taken at its word; one without falls back to the historical
-  rotation, so an old and a new `ggseg.meshes` both render correctly and
-  neither has to be installed in step with this package
-  (ggsegverse/ggseg3d#83).
+- A cerebellar atlas with deep nuclei is coloured once, over surface and
+  nuclei rows together. Each pass scaled against its own values, so
+  different values came out the same colour – and the two legends
+  cancelled out.
+
+- Subcortical and legacy tract meshes with 0-based faces are normalised
+  like every other mesh. They left one index short, so a third-party
+  atlas sent `-1` into a `Uint32` index buffer.
+
+- `na_colour` is converted to hex on every path, not just the
+  subcortical one. `na_colour = "grey90"` – any R colour name that is
+  not a CSS keyword – rendered white.
+
+- A named palette narrower than the data warns, naming how many values
+  fell outside it. They are drawn in `na_colour`, like a region with no
+  data.
+
+- `ggseg.meshes (>= 0.0.1.9002)` is checked, not just its presence: the
+  floor sits in `Suggests`, which
+  [`install.packages()`](https://rdrr.io/r/utils/install.packages.html)
+  never resolves, so the CRAN 0.0.1 rendered the cortex rotated 90
+  degrees. Reading the orientation from a `mesh_space()` the mesh
+  records, claimed in an earlier note, never existed.
+
+- Orthographic widgets no longer stretch on resize. Both handlers set
+  `camera.aspect`, which `THREE.OrthographicCamera` does not have.
 
 - The test suite no longer opens an rgl window.
   `options(rgl.useNULL = TRUE)` sat on line 1 of `test-rayshader.R`, but
