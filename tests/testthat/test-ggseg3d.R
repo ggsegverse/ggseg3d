@@ -251,7 +251,7 @@ test_that("prepare_brain_meshes renders a wm atlas as subcortical", {
     )
   )
 
-  atlas <- wm_atlas_fixture(
+  atlas <- white_matter_atlas_fixture(
     core = data.frame(
       label = "Left-Corticospinal",
       region = "corticospinal",
@@ -262,7 +262,7 @@ test_that("prepare_brain_meshes renders a wm atlas as subcortical", {
     palette = c("Left-Corticospinal" = "#FF0000")
   )
 
-  expect_true(ggseg.formats::is_wm_atlas(atlas))
+  expect_true(ggseg.formats::is_white_matter_atlas(atlas))
   expect_true(is_unified_atlas(atlas))
 
   prepared <- prepare_brain_meshes(atlas)

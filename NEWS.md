@@ -1,5 +1,8 @@
 # ggseg3d (development version)
 
+- Follows ggseg.formats in renaming the atlas type `wm` to `white_matter`.
+  No production code referenced the old spelling; only the test fixtures did.
+
 ## New features
 
 - Requires R >= 4.2, which is the floor of `S7`, and so of `ggseg.formats`.

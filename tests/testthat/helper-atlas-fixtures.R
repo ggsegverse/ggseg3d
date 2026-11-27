@@ -70,17 +70,17 @@ subcortical_atlas_fixture <- function(
 
 # `wm` is a subclass of `subcortical`, so it carries both class tags and must
 # reach `prepare_brain_meshes.subcortical_atlas()` by inheritance.
-wm_atlas_fixture <- function(
+white_matter_atlas_fixture <- function(
   core,
   meshes,
   palette,
-  atlas = "test_wm"
+  atlas = "test_white_matter"
 ) {
   ggseg.formats::ggseg_atlas(
     atlas = atlas,
-    type = "wm",
+    type = "white_matter",
     core = core_with_display(core),
-    data = ggseg.formats::ggseg_data_wm(meshes = meshes),
+    data = ggseg.formats::ggseg_data_white_matter(meshes = meshes),
     palette = palette
   )
 }
